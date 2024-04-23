@@ -13,11 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
-## Unreleased
+## [2.15.5] - 2024-04-18
 
 ### Fixed
 
-- invalid seed usage in the HDKey ([#377](https://github.com/casper-ecosystem/casper-js-sdk/pull/377))
+- invalid seed usage in the HDKey ([#410](https://github.com/casper-ecosystem/casper-js-sdk/issues/410))
 
 ## [2.15.4] - 2024-02-12
 

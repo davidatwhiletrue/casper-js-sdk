@@ -9,7 +9,6 @@ export abstract class CasperHDKey<AsymmetricKey> {
   // Registered at https://github.com/satoshilabs/slips/blob/master/slip-0044.md
   static readonly bip44Index = 506;
 
-  // TODO: Check if seed can be public
   constructor(
     public seed: Uint8Array,
     public signatureAlgorithm: SignatureAlgorithm
