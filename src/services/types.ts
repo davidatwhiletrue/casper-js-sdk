@@ -22,7 +22,7 @@ export interface GetPeersResult extends RpcResult {
 }
 
 /** Interface for information on the most recently appended block on the network */
-interface LastAddedBlockInfo {
+export interface LastAddedBlockInfo {
   hash: string;
   timestamp: string;
   era_id: number;
@@ -31,12 +31,12 @@ interface LastAddedBlockInfo {
   creator: string;
 }
 
-interface NextUpgrade {
+export interface NextUpgrade {
   activation_point: number | string;
   protocol_version: string;
 }
 
-type ReactorState =
+export type ReactorState =
   | 'Initialize'
   | 'CatchUp'
   | 'Upgrading'
@@ -45,7 +45,7 @@ type ReactorState =
   | 'ShutdownForUpgrade';
 
 /** The status of syncing an individual block. */
-interface BlockSyncStatus {
+export interface BlockSyncStatus {
   /** The block hash. */
   block_hash: string;
   /** The height of the block, if known. */
@@ -55,7 +55,7 @@ interface BlockSyncStatus {
 }
 
 /** The status of the block synchronizer. */
-interface BlockSynchronizerStatus {
+export interface BlockSynchronizerStatus {
   historical: BlockSyncStatus;
   forward: BlockSyncStatus;
 }
@@ -148,8 +148,28 @@ export type AddKey = {
   name: string;
 };
 
+export type ISeigniorageAllocation =
+  | {
+      Validator: {
+        validator_public_key: string;
+        amount: string;
+      };
+    }
+  | {
+      Delegator: {
+        delegator_public_key: string;
+        validator_public_key: string;
+        amount: string;
+      };
+    };
+
+export interface EraInfo {
+  seigniorage_allocations: ISeigniorageAllocation[];
+}
+
 export type TransformValue =
   | 'Identity'
+  | { WriteAccount: string }
   | 'WriteContractWasm'
   | 'WriteContract'
   | 'WriteContractPackage'
@@ -158,20 +178,43 @@ export type TransformValue =
     }
   | { WriteDeployInfo: WriteDeployInfo }
   | { WriteTransfer: WriteTransfer }
+  | { AddInt32: number }
+  | { AddUInt64: number }
+  | { AddUInt128: string }
+  | { AddUInt256: string }
   | { AddUInt512: string }
-  | { AddKeys: AddKey[] };
+  | { AddKeys: AddKey[] }
+  | { WriteEraInfo: EraInfo }
+  | { WriteBid: any } //TODO fill this definition
+  | { WriteWithdraw: any[] } //TODO fill this definition
+  | { Failure: string }
+  | { WriteUnbonding: any[] }; //TODO fill this definition
 
-interface Transform {
+export interface Transform {
   key: string;
   transform: TransformValue;
 }
 
-interface Effect {
+export enum OpKind {
+  Read = 'Read',
+  Write = 'Write',
+  Add = 'Add',
+  NoOp = 'NoOp',
+  Prune = 'Prune'
+}
+
+export interface Operation {
+  key: string;
+  kind: OpKind;
+}
+
+export interface Effect {
+  operations: Operation[];
   transforms: Transform[];
 }
 
 /** Result interface for an execution result body */
-interface ExecutionResultBody {
+export interface ExecutionResultBody {
   cost: number;
   error_message?: string | null;
   transfers: string[];
@@ -226,7 +269,7 @@ export interface JsonSystemTransaction {
 }
 
 /** JSON deploy header interface that acts as a schema for JSON deploy headers */
-interface JsonDeployHeader {
+export interface JsonDeployHeader {
   account: string;
   timestamp: string;
   ttl: number;
@@ -236,31 +279,34 @@ interface JsonDeployHeader {
   chain_name: string;
 }
 
-interface JsonBasicExecutionDeployItemInternal {
+export interface JsonBasicExecutionDeployItemInternal {
   args: Map<string, CLValue>;
 }
 
-interface JsonModuleBytes extends JsonBasicExecutionDeployItemInternal {
+export interface JsonModuleBytes extends JsonBasicExecutionDeployItemInternal {
   module_bytes: string;
 }
 
-interface JsonStoredContract extends JsonBasicExecutionDeployItemInternal {
+export interface JsonStoredContract
+  extends JsonBasicExecutionDeployItemInternal {
   entry_point: string;
 }
 
-interface JsonStoredContractByHash extends JsonStoredContract {
+export interface JsonStoredContractByHash extends JsonStoredContract {
   hash: string;
 }
 
-interface JsonStoredContractByName extends JsonStoredContract {
+export interface JsonStoredContractByName extends JsonStoredContract {
   name: string;
 }
 
-interface JsonStoredVersionedContractByName extends JsonStoredContractByName {
+export interface JsonStoredVersionedContractByName
+  extends JsonStoredContractByName {
   version: number | null;
 }
 
-interface JsonStoredVersionedContractByHash extends JsonStoredContractByHash {
+export interface JsonStoredVersionedContractByHash
+  extends JsonStoredContractByHash {
   version: number | null;
 }
 
