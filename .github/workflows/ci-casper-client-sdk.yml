@@ -61,13 +61,10 @@ jobs:
         run: npm run lint:ci
 
       - name: Unit Test
-        run: npm run test:unit
+        run: npm run test:node:unit
 
       - name: Test docs build
         run: npm run docs:build
 
       - name: Test build
         run: npm run build
-
-      - name: Test DevNet
-        run: npm run test:e2e

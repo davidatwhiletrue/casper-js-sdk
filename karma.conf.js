@@ -19,7 +19,7 @@ module.exports = function(config) {
     files: ['src/index.ts', 'src/**/*.test.ts'],
     preprocessors: {
       'src/index.ts': ['webpack', 'sourcemap'],
-      'src/{lib,services}/**/*.ts': ['webpack', 'sourcemap']
+      'src/{rpc,sse,types}/**/*.ts': ['webpack', 'sourcemap']
     },
 
     reporters: ['spec'],

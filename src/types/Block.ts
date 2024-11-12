@@ -71,7 +71,6 @@ export class Block {
   public proofs: Proof[];
 
   public originBlockV1?: BlockV1;
-
   public originBlockV2?: BlockV2;
 
   constructor(
