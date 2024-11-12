@@ -561,7 +561,7 @@ export class Key {
     source: string,
     prefixes: Map<PrefixName, TypeID>
   ): PrefixName | undefined {
-    for (const [prefix, _] of prefixes) {
+    for (const [prefix] of prefixes) {
       if (source.startsWith(prefix)) {
         if (
           prefix === PrefixName.EraId &&
