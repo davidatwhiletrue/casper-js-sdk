@@ -1,0 +1,84 @@
+import { concat } from '@ethersproject/bytes';
+
+import { CLTypeTuple2 } from './cltype';
+import { CLValue, IResultWithBytes } from './CLValue';
+import { CLValueParser } from './Parser';
+
+/**
+ * Represents a tuple of two CLValues in the CasperLabs type system.
+ */
+export class CLValueTuple2 {
+  public innerType: CLTypeTuple2;
+  public inner1: CLValue;
+  public inner2: CLValue;
+
+  /**
+   * Constructs a new CLValueTuple2 instance.
+   * @param innerType - The CLTypeTuple2 representing the type of the tuple.
+   * @param inner1 - The first CLValue in the tuple.
+   * @param inner2 - The second CLValue in the tuple.
+   */
+  constructor(innerType: CLTypeTuple2, inner1: CLValue, inner2: CLValue) {
+    this.innerType = innerType;
+    this.inner1 = inner1;
+    this.inner2 = inner2;
+  }
+
+  /**
+   * Returns the byte representation of the tuple.
+   * @returns A Uint8Array representing the concatenated bytes of both inner CLValues.
+   */
+  public bytes(): Uint8Array {
+    const inner1Bytes = this.inner1.bytes();
+    const inner2Bytes = this.inner2.bytes();
+    return concat([inner1Bytes, inner2Bytes]);
+  }
+
+  /**
+   * Returns a string representation of the tuple.
+   * @returns A string representation of the tuple in the format "(value1, value2)".
+   */
+  public toString(): string {
+    return `(${this.inner1.toString()}, ${this.inner2.toString()})`;
+  }
+
+  /**
+   * Returns the values of the tuple as an array of CLValues.
+   * @returns An array containing the two CLValues of the tuple.
+   */
+  public value(): [CLValue, CLValue] {
+    return [this.inner1, this.inner2];
+  }
+
+  /**
+   * Creates a new CLValue instance with a Tuple2 value.
+   * @param val1 - The first CLValue in the tuple.
+   * @param val2 - The second CLValue in the tuple.
+   * @returns A new CLValue instance with CLTypeTuple2 and a CLValueTuple2.
+   */
+  public static newCLTuple2(val1: CLValue, val2: CLValue): CLValue {
+    const tupleType = new CLTypeTuple2(val1.type, val2.type);
+    const clValue = new CLValue(tupleType);
+    clValue.tuple2 = new CLValueTuple2(tupleType, val1, val2);
+    return clValue;
+  }
+
+  /**
+   * Creates a CLValueTuple2 instance from a Uint8Array.
+   * @param source - The Uint8Array containing the byte representation of the Tuple2 value.
+   * @param clType - The CLTypeTuple2 representing the type of the tuple.
+   * @returns A new CLValueTuple2 instance.
+   */
+  public static fromBytes(
+    source: Uint8Array,
+    clType: CLTypeTuple2
+  ): IResultWithBytes<CLValueTuple2> {
+    const inner1 = CLValueParser.fromBytesByType(source, clType.inner1);
+    const inner2 = CLValueParser.fromBytesByType(inner1.bytes, clType.inner2);
+
+    return {
+      result: new CLValueTuple2(clType, inner1?.result, inner2?.result),
+      bytes: inner2?.bytes
+    };
+  }
+}
