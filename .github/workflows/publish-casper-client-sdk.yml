@@ -21,8 +21,8 @@ jobs:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b #v3.0.2
       - name: Set release tag
         run: |
-          if [ ${{ github.event.release.target_commitish }} == 'condor' ]; then
-            echo "release_tag=condor" >> $GITHUB_ENV
+          if [ ${{ github.event.release.target_commitish }} == 'feat/5.0.0' ]; then
+            echo "release_tag=5.0.0-rc1" >> $GITHUB_ENV
           else
             echo "release_tag=latest" >> $GITHUB_ENV
           fi

@@ -13,6 +13,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+## 5.0.0
+
+### Changed
+
+- Caution! This release contains rewritten CLValue from scratch, there are some breaking changes so consider it before upgrading.
+- Removed `CLTypedAndToBytesHelper` to have consistent way of creating new CLValues by using `new CLBool(true)` or `CLValueBuilder.bool(true)`
+- Removed `CLTypeHelper` have consistent way of creating new CLValues by using `new CLBoolType()` or `CLTypeBuilder.bool()`
+- `CLValue` static methods now are moved to `CLValueBuilder` eg. `CLValueBuilder.u512`
+- Every class inheriting from `CLValue` is now named with `CL` prefix, bigger naming changes:
+  - `StringValue` -> `CLString`
+  - `KeyValue` -> `CLKey`
+  - `MapValue` -> `CLMap`
+  - `Option` -> `CLOption`
+
 ## [2.15.6] - 2024-04-18
 
 ### Fixed
