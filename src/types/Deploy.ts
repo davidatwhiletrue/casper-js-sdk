@@ -174,6 +174,7 @@ export class Deploy {
   /**
    * Sets already generated signature
    *
+   * @param deploy the Deploy instance
    * @param signature the Ed25519 or Secp256K1 signature
    * @param publicKey the public key used to generate the signature
    */

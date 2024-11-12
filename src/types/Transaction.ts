@@ -265,14 +265,19 @@ export class TransactionV1 {
   /**
    * Sets already generated signature
    *
+   * @param transaction the TransactionV1 instance
    * @param signature the Ed25519 or Secp256K1 signature
    * @param publicKey the public key used to generate the signature
    */
-  public async setSignature(
+  static setSignature(
+    transaction: TransactionV1,
     signature: Uint8Array,
     publicKey: PublicKey
-  ): Promise<void> {
-    this.approvals.push(new Approval(publicKey, new HexBytes(signature)));
+  ): TransactionV1 {
+    const hex = new HexBytes(signature);
+    transaction.approvals.push(new Approval(publicKey, hex));
+
+    return transaction;
   }
 
   static newTransactionV1(
