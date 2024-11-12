@@ -1,4 +1,6 @@
 import { jsonObject, jsonMember } from 'typedjson';
+import { concat } from '@ethersproject/bytes';
+
 import { CLValueString } from './clvalue';
 
 export enum TransactionEntryPointEnum {
@@ -98,12 +100,11 @@ export class TransactionEntryPoint {
     return TransactionEntryPointTag.Custom;
   }
 
-  // Convert entry point to bytes, adding custom entry data if present
   bytes(): Uint8Array {
     let result = new Uint8Array([this.tag()]);
     if (this.custom) {
       const customBytes = new CLValueString(this.custom).bytes();
-      result = new Uint8Array([...result, ...customBytes]);
+      result = concat([result, customBytes]);
     }
     return result;
   }

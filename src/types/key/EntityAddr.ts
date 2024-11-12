@@ -1,4 +1,6 @@
 import { jsonObject, jsonMember } from 'typedjson';
+import { concat } from '@ethersproject/bytes';
+
 import { Hash } from './Hash';
 import { IResultWithBytes } from '../clvalue';
 
@@ -109,7 +111,7 @@ export class EntityAddr {
       throw new Error('Unexpected EntityAddr type');
     }
 
-    return new Uint8Array([prefix, ...bytes]);
+    return concat([Uint8Array.from([prefix]), bytes]);
   }
 
   /**

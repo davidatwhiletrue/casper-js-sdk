@@ -44,7 +44,7 @@ export class RpcRequest {
   @jsonMember({ constructor: String })
   version: string;
 
-  @jsonMember({ isRequired: false, constructor: IDValue })
+  @jsonMember(() => ({ constructor: IDValue, isRequired: false }))
   id?: IDValue;
 
   @jsonMember({ constructor: String })
@@ -137,7 +137,7 @@ export class ParamQueryGlobalStateID {
 
 @jsonObject
 export class ParamTransactionHash {
-  @jsonMember({ isRequired: false, constructor: TransactionHash })
+  @jsonMember(() => ({ constructor: TransactionHash, isRequired: false }))
   transactionHash?: TransactionHash;
 
   @jsonMember({ isRequired: false, constructor: Boolean })
@@ -199,10 +199,10 @@ export class ParamGetStateEntity {
 
 @jsonObject
 export class AccountIdentifier {
-  @jsonMember({ isRequired: false, constructor: AccountHash })
+  @jsonMember(() => ({ constructor: AccountHash, isRequired: false }))
   accountHash?: AccountHash;
 
-  @jsonMember({ isRequired: false, constructor: PublicKey })
+  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
   publicKey?: PublicKey;
 
   constructor(accountHash?: AccountHash, publicKey?: PublicKey) {
@@ -213,13 +213,13 @@ export class AccountIdentifier {
 
 @jsonObject
 export class EntityIdentifier {
-  @jsonMember({ isRequired: false, constructor: AccountHash })
+  @jsonMember(() => ({ constructor: AccountHash, isRequired: false }))
   accountHash?: AccountHash;
 
-  @jsonMember({ isRequired: false, constructor: PublicKey })
+  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
   publicKey?: PublicKey;
 
-  @jsonMember({ isRequired: false, constructor: EntityAddr })
+  @jsonMember(() => ({ constructor: EntityAddr, isRequired: false }))
   entityAddr?: EntityAddr;
 
   constructor(
@@ -247,7 +247,7 @@ export class EntityIdentifier {
 
 @jsonObject
 export class PutDeployRequest {
-  @jsonMember({ constructor: Deploy })
+  @jsonMember(() => ({ constructor: Deploy }))
   deploy: Deploy;
 
   constructor(deploy: Deploy) {
@@ -257,7 +257,7 @@ export class PutDeployRequest {
 
 @jsonObject
 export class PutTransactionRequest {
-  @jsonMember({ constructor: TransactionWrapper })
+  @jsonMember(() => ({ constructor: TransactionWrapper }))
   transaction: TransactionWrapper;
 
   constructor(transaction: TransactionWrapper) {
@@ -414,7 +414,7 @@ export class ParamDictionaryIdentifierURef {
 
 @jsonObject
 export class SpeculativeExecParams {
-  @jsonMember({ constructor: Deploy })
+  @jsonMember(() => ({ constructor: Deploy }))
   deploy: Deploy;
 
   @jsonMember({ isRequired: false, constructor: BlockIdentifier })
@@ -428,16 +428,16 @@ export class SpeculativeExecParams {
 
 @jsonObject
 export class PurseIdentifier {
-  @jsonMember({ isRequired: false, constructor: PublicKey })
+  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
   mainPurseUnderPublicKey?: PublicKey;
 
-  @jsonMember({ isRequired: false, constructor: AccountHash })
+  @jsonMember(() => ({ constructor: AccountHash, isRequired: false }))
   mainPurseUnderAccountHash?: AccountHash;
 
-  @jsonMember({ isRequired: false, constructor: EntityAddr })
+  @jsonMember(() => ({ constructor: EntityAddr, isRequired: false }))
   mainPurseUnderEntityAddr?: EntityAddr;
 
-  @jsonMember({ isRequired: false, constructor: URef })
+  @jsonMember(() => ({ constructor: URef, isRequired: false }))
   purseUref?: URef;
 
   constructor(
@@ -505,7 +505,7 @@ export class QueryBalanceDetailsRequest {
 
 @jsonObject
 export class InfoGetRewardRequest {
-  @jsonMember({ constructor: PublicKey })
+  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
   validator: PublicKey;
 
   @jsonMember({ isRequired: false, constructor: PublicKey })

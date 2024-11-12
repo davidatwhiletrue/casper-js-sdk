@@ -1,3 +1,5 @@
+import { concat } from '@ethersproject/bytes';
+
 import { CLTypeString } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 import { CLValueUInt32 } from './Uint32';
@@ -24,7 +26,7 @@ export class CLValueString {
   public bytes(): Uint8Array {
     const sizeBytes = this.sizeToBytes(this.value.length);
     const valueBytes = new TextEncoder().encode(this.value);
-    return new Uint8Array([...sizeBytes, ...valueBytes]);
+    return concat([sizeBytes, valueBytes]);
   }
 
   private sizeToBytes(size: number): Uint8Array {

@@ -1,3 +1,5 @@
+import { concat } from '@ethersproject/bytes';
+
 import { jsonObject, jsonMember } from 'typedjson';
 import { Hash } from './key';
 import { CLValueUInt64 } from './clvalue';
@@ -44,21 +46,40 @@ export class PricingMode {
   reserved?: ReservedMode;
 
   toBytes(): Uint8Array {
-    const result: number[] = [];
+    let result: Uint8Array;
+
     if (this.classic) {
-      result.push(PricingModeTag.Classic);
-      result.push(
-        ...new CLValueUInt64(BigInt(this.classic.paymentAmount)).bytes()
-      );
-      result.push(this.classic.gasPriceTolerance);
-      result.push(this.classic.standardPayment ? 1 : 0);
+      const classicPaymentBytes = new CLValueUInt64(
+        BigInt(this.classic.paymentAmount)
+      ).bytes();
+      const gasPriceToleranceByte = new Uint8Array([
+        this.classic.gasPriceTolerance
+      ]);
+      const standardPaymentByte = new Uint8Array([
+        this.classic.standardPayment ? 1 : 0
+      ]);
+
+      result = concat([
+        Uint8Array.of(PricingModeTag.Classic),
+        classicPaymentBytes,
+        gasPriceToleranceByte,
+        standardPaymentByte
+      ]);
     } else if (this.fixed) {
-      result.push(PricingModeTag.Fixed);
-      result.push(this.fixed.gasPriceTolerance);
+      const gasPriceToleranceByte = new Uint8Array([
+        this.fixed.gasPriceTolerance
+      ]);
+      result = concat([
+        Uint8Array.of(PricingModeTag.Fixed),
+        gasPriceToleranceByte
+      ]);
     } else if (this.reserved) {
-      result.push(PricingModeTag.Reserved);
-      result.push(...this.reserved.receipt.toBytes());
+      const receiptBytes = this.reserved.receipt.toBytes();
+      result = concat([Uint8Array.of(PricingModeTag.Reserved), receiptBytes]);
+    } else {
+      result = new Uint8Array(0); // empty array if none of the conditions match
     }
-    return new Uint8Array(result);
+
+    return result;
   }
 }

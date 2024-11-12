@@ -1,12 +1,13 @@
 import { jsonObject, jsonMember } from 'typedjson';
-import { blake2b } from '@noble/hashes/blake2b';
 import { Buffer } from 'buffer';
+import { concat } from '@ethersproject/bytes';
 
 import { PublicKey as Ed25519PublicKey } from './ed25519/PublicKey';
 import { PublicKey as Secp256k1PublicKey } from './secp256k1/PublicKey';
 import { Hash, AccountHash } from '../key';
 import { Conversions } from '../Conversions';
 import { IResultWithBytes } from '../clvalue';
+import { byteHash } from '../ByteConverters';
 
 /** Error thrown when the signature is empty. */
 const ErrEmptySignature = new Error('empty signature');
@@ -51,7 +52,7 @@ interface PublicKeyInternal {
 @jsonObject
 export class PublicKey {
   /** The cryptographic algorithm used for the key. */
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: Number })
   cryptoAlg: KeyAlgorithm;
 
   /** The key data associated with the public key. */
@@ -75,7 +76,11 @@ export class PublicKey {
     if (!this.key) {
       return new Uint8Array();
     }
-    return new Uint8Array([this.cryptoAlg, ...this.key.bytes()]);
+
+    const cryptoAlgBytes = new Uint8Array([this.cryptoAlg]);
+    const keyBytes = this.key.bytes();
+
+    return concat([cryptoAlgBytes, keyBytes]);
   }
 
   /**
@@ -158,13 +163,13 @@ export class PublicKey {
     }
 
     const algString = KeyAlgorithm[this.cryptoAlg].toLowerCase();
-    const bytesToHash = new Uint8Array([
-      ...new TextEncoder().encode(algString),
-      0,
-      ...this.key.bytes()
-    ]);
+    const algBytes = new TextEncoder().encode(algString);
+    const separatorByte = new Uint8Array([0]);
+    const keyBytes = this.key.bytes();
 
-    const blakeHash = blake2b(bytesToHash, { dkLen: 32 });
+    const bytesToHash = concat([algBytes, separatorByte, keyBytes]);
+
+    const blakeHash = byteHash(bytesToHash);
     const hash = Hash.fromBuffer(Buffer.from(blakeHash));
     return new AccountHash(hash, 'account-hash');
   }

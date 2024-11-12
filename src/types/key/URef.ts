@@ -1,6 +1,7 @@
 import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
 import { IResultWithBytes } from '../clvalue';
 import { Conversions } from '../Conversions';
+import { concat } from '@ethersproject/bytes';
 
 /**
  * Enum representing the access permissions of a URef.
@@ -62,7 +63,8 @@ export class URef {
    * @returns A Uint8Array representing the URef.
    */
   bytes(): Uint8Array {
-    return Uint8Array.from([...this.data, this.access]);
+    const accessBytes = new Uint8Array([this.access]);
+    return concat([this.data, accessBytes]);
   }
 
   /**

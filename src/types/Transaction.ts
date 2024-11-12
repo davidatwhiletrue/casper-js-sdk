@@ -1,5 +1,5 @@
 import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
-import { blake2b } from '@noble/hashes/blake2b';
+import { concat } from '@ethersproject/bytes';
 
 import { Hash } from './key';
 import { Deploy } from './Deploy';
@@ -15,6 +15,7 @@ import { PrivateKey } from './keypair/PrivateKey';
 import { CLValueString, CLValueUInt64 } from './clvalue';
 import { Args } from './Args';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
+import { byteHash } from './ByteConverters';
 
 export class TransactionError extends Error {}
 export const ErrInvalidBodyHash = new TransactionError('invalid body hash');
@@ -100,29 +101,26 @@ export class TransactionV1Header {
   }
 
   public toBytes(): Uint8Array {
-    const result = [];
-
     const chainNameBytes = CLValueString.newCLString(this.chainName).bytes();
-    result.push(...chainNameBytes);
-
     const timestampMillis = this.timestamp.toMilliseconds();
     const timestampBytes = CLValueUInt64.newCLUint64(
       BigInt(timestampMillis)
     ).bytes();
-    result.push(...timestampBytes);
-
     const ttlBytes = CLValueUInt64.newCLUint64(
       BigInt(this.ttl.toMilliseconds())
     ).bytes();
-    result.push(...ttlBytes);
+    const bodyHashBytes = this.bodyHash.toBytes();
+    const pricingModeBytes = this.pricingMode.toBytes();
+    const initiatorAddrBytes = this.initiatorAddr.toBytes();
 
-    result.push(...this.bodyHash.toBytes());
-
-    result.push(...this.pricingMode.toBytes());
-
-    result.push(...this.initiatorAddr.toBytes());
-
-    return new Uint8Array(result);
+    return concat([
+      chainNameBytes,
+      timestampBytes,
+      ttlBytes,
+      bodyHashBytes,
+      pricingModeBytes,
+      initiatorAddrBytes
+    ]);
   }
 }
 
@@ -171,23 +169,19 @@ export class TransactionV1Body {
   }
 
   toBytes(): Uint8Array {
-    const result = [];
-
-    const argsBytes = this.args?.toBytes();
-    result.push(...argsBytes);
-
+    const argsBytes = this.args?.toBytes() || new Uint8Array();
     const targetBytes = this.target.toBytes();
-    result.push(...targetBytes);
-
     const entryPointBytes = this.entryPoint.bytes();
-    result.push(...entryPointBytes);
-
-    result.push(this.category);
-
+    const categoryBytes = new Uint8Array([this.category]);
     const schedulingBytes = this.scheduling.bytes();
-    result.push(...schedulingBytes);
 
-    return new Uint8Array(result);
+    return concat([
+      argsBytes,
+      targetBytes,
+      entryPointBytes,
+      categoryBytes,
+      schedulingBytes
+    ]);
   }
 }
 
@@ -220,12 +214,12 @@ export class TransactionV1 {
   public validate(): void {
     const bodyBytes = this.body.toBytes();
 
-    if (!this.arrayEquals(blake2b(bodyBytes), this.header.bodyHash.toBytes()))
+    if (!this.arrayEquals(byteHash(bodyBytes), this.header.bodyHash.toBytes()))
       throw ErrInvalidBodyHash;
 
     const headerBytes = this.header.toBytes();
 
-    if (!this.arrayEquals(blake2b(headerBytes), this.hash.toBytes()))
+    if (!this.arrayEquals(byteHash(headerBytes), this.hash.toBytes()))
       throw ErrInvalidTransactionHash;
 
     for (const approval of this.approvals) {
@@ -294,14 +288,10 @@ export class TransactionV1 {
     transactionBody: TransactionV1Body
   ): TransactionV1 {
     const bodyBytes = transactionBody.toBytes();
-    transactionHeader.bodyHash = new Hash(
-      new Uint8Array(blake2b(bodyBytes, { dkLen: 32 }))
-    );
+    transactionHeader.bodyHash = new Hash(new Uint8Array(byteHash(bodyBytes)));
 
     const headerBytes = transactionHeader.toBytes();
-    const transactionHash = new Hash(
-      new Uint8Array(blake2b(headerBytes, { dkLen: 32 }))
-    );
+    const transactionHash = new Hash(new Uint8Array(byteHash(headerBytes)));
     return new TransactionV1(
       transactionHash,
       transactionHeader,
@@ -353,7 +343,7 @@ export class TransactionV1 {
   public static toJson = (transaction: TransactionV1) => {
     const serializer = new TypedJSON(TransactionV1);
 
-    return serializer.toPlainJson(transaction);
+    return { transaction: serializer.toPlainJson(transaction) };
   };
 }
 

@@ -41,13 +41,13 @@ export class RpcResponse {
   @jsonMember({ name: 'jsonrpc', constructor: String })
   version: string;
 
-  @jsonMember({ name: 'id', constructor: IDValue })
+  @jsonMember(() => ({ constructor: IDValue, name: 'id' }))
   id?: IDValue;
 
   @jsonMember({ name: 'result', constructor: String })
   result: string;
 
-  @jsonMember({ name: 'error', constructor: RpcError })
+  @jsonMember(() => ({ name: 'error', constructor: RpcError }))
   error?: RpcError;
 }
 
@@ -56,7 +56,7 @@ export class StateGetAuctionInfoResult {
   @jsonMember({ name: 'api_version', constructor: String })
   version: string;
 
-  @jsonMember({ name: 'auction_state', constructor: AuctionState })
+  @jsonMember(() => ({ name: 'auction_state', constructor: AuctionState }))
   auctionState: AuctionState;
 
   rawJSON?: string;
@@ -67,7 +67,7 @@ export class StateGetBalanceResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember({ name: 'balance_value', constructor: CLValueUInt512 })
+  @jsonMember(() => ({ name: 'balance_value', constructor: CLValueUInt512 }))
   balanceValue: CLValueUInt512;
 
   public rawJSON: string;

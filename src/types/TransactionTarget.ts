@@ -1,4 +1,5 @@
 import isNull from 'lodash/isNull';
+import { concat } from '@ethersproject/bytes';
 
 import { jsonMember, jsonObject } from 'typedjson';
 import { getRuntimeTag, TransactionRuntime } from './AddressableEntity';
@@ -106,55 +107,77 @@ export class TransactionTarget {
   }
 
   toBytes(): Uint8Array {
-    const result: number[] = [];
+    let result: Uint8Array = new Uint8Array();
 
     if (this.native !== undefined) {
-      result.push(TransactionTargetType.Native);
+      result = concat([result, Uint8Array.of(TransactionTargetType.Native)]);
     } else if (this.stored !== undefined) {
-      result.push(TransactionTargetType.Stored);
+      result = concat([result, Uint8Array.of(TransactionTargetType.Stored)]);
+
       if (this.stored.id.byHash !== undefined) {
-        result.push(InvocationTargetTag.ByHash);
-        result.push(...this.stored.id.byHash.toBytes());
+        result = concat([
+          result,
+          Uint8Array.of(InvocationTargetTag.ByHash),
+          this.stored.id.byHash.toBytes()
+        ]);
       } else if (this.stored.id.byName !== undefined) {
-        result.push(InvocationTargetTag.ByName);
-        result.push(...new CLValueString(this.stored.id.byName).bytes());
+        const nameBytes = new CLValueString(this.stored.id.byName).bytes();
+        result = concat([
+          result,
+          Uint8Array.of(InvocationTargetTag.ByName),
+          nameBytes
+        ]);
       } else if (this.stored.id.byPackageHash !== undefined) {
-        result.push(InvocationTargetTag.ByPackageHash);
-        result.push(...this.stored.id.byPackageHash.addr.toBytes());
+        result = concat([
+          result,
+          Uint8Array.of(InvocationTargetTag.ByPackageHash),
+          this.stored.id.byPackageHash.addr.toBytes()
+        ]);
+
         if (this.stored.id.byPackageHash.version !== undefined) {
-          result.push(1);
-          result.push(
-            ...this.uint32ToBytes(this.stored.id.byPackageHash.version)
+          const versionBytes = this.uint32ToBytes(
+            this.stored.id.byPackageHash.version
           );
+          result = concat([result, Uint8Array.of(1), versionBytes]);
         } else {
-          result.push(0);
+          result = concat([result, Uint8Array.of(0)]);
         }
       } else if (this.stored.id.byPackageName !== undefined) {
-        result.push(InvocationTargetTag.ByPackageName);
-        result.push(
-          ...new CLValueString(this.stored.id.byPackageName.name).bytes()
-        );
+        const nameBytes = new CLValueString(
+          this.stored.id.byPackageName.name
+        ).bytes();
+        result = concat([
+          result,
+          Uint8Array.of(InvocationTargetTag.ByPackageName),
+          nameBytes
+        ]);
+
         if (this.stored.id.byPackageName.version !== undefined) {
-          result.push(1);
-          result.push(
-            ...this.uint32ToBytes(this.stored.id.byPackageName.version)
+          const versionBytes = this.uint32ToBytes(
+            this.stored.id.byPackageName.version
           );
+          result = concat([result, Uint8Array.of(1), versionBytes]);
         } else {
-          result.push(0);
+          result = concat([result, Uint8Array.of(0)]);
         }
       }
-      result.push(getRuntimeTag(this.stored.runtime));
+
+      const runtimeTag = getRuntimeTag(this.stored.runtime);
+      result = concat([result, Uint8Array.of(runtimeTag)]);
     } else if (this.session !== undefined) {
-      result.push(TransactionTargetType.Session);
+      result = concat([result, Uint8Array.of(TransactionTargetType.Session)]);
 
       const moduleBytes = this.session.moduleBytes
         ? this.hexStringToBytes(this.session.moduleBytes)
         : new Uint8Array([0]);
-      result.push(...this.uint32ToBytes(moduleBytes.length), ...moduleBytes);
-      result.push(getRuntimeTag(this.session.runtime));
+      const moduleLengthBytes = this.uint32ToBytes(moduleBytes.length);
+      result = concat([result, moduleLengthBytes, moduleBytes]);
+
+      const runtimeTag = getRuntimeTag(this.session.runtime);
+      result = concat([result, Uint8Array.of(runtimeTag)]);
     }
 
-    return new Uint8Array(result);
+    return result;
   }
 
   static fromJSON(json: string): TransactionTarget {

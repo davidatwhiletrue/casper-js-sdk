@@ -561,30 +561,33 @@ export class Key {
     source: string,
     prefixes: Map<PrefixName, TypeID>
   ): PrefixName | undefined {
-    for (const [prefix] of prefixes) {
+    let result: PrefixName | undefined = undefined;
+
+    prefixes.forEach((_, prefix) => {
       if (source.startsWith(prefix)) {
         if (
           prefix === PrefixName.EraId &&
           source.startsWith(PrefixName.EraSummary)
         ) {
-          return PrefixName.EraSummary;
-        }
-        if (
+          result = PrefixName.EraSummary;
+        } else if (
           prefix === PrefixName.Bid &&
           source.startsWith(PrefixName.BidAddr)
         ) {
-          return PrefixName.BidAddr;
-        }
-        if (
+          result = PrefixName.BidAddr;
+        } else if (
           prefix === PrefixName.Balance &&
           source.startsWith(PrefixName.BalanceHold)
         ) {
-          return PrefixName.BalanceHold;
+          result = PrefixName.BalanceHold;
+        } else {
+          result = prefix;
         }
-        return prefix;
+        return; // Exit early from forEach if a match is found
       }
-    }
-    return undefined;
+    });
+
+    return result;
   }
 
   /**

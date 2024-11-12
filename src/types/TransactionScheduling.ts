@@ -1,4 +1,6 @@
 import { jsonObject, jsonMember } from 'typedjson';
+import { concat } from '@ethersproject/bytes';
+
 import { Timestamp } from './Time';
 import { CLValueUInt64 } from './clvalue';
 
@@ -60,18 +62,19 @@ export class TransactionScheduling {
   }
 
   bytes(): Uint8Array {
-    const result = [this.tag()];
+    const tagBytes = Uint8Array.of(this.tag());
 
     if (this.futureEra) {
-      result.push(...new CLValueUInt64(BigInt(this.futureEra.eraID)).bytes());
+      const eraBytes = new CLValueUInt64(BigInt(this.futureEra.eraID)).bytes();
+      return concat([tagBytes, eraBytes]);
     } else if (this.futureTimestamp) {
       const timestampBytes = new CLValueUInt64(
         BigInt(this.futureTimestamp.timestamp.toMilliseconds())
       ).bytes();
-      result.push(...timestampBytes);
+      return concat([tagBytes, timestampBytes]);
     }
 
-    return new Uint8Array(result);
+    return tagBytes;
   }
 
   static fromJSON(json: string): TransactionScheduling {

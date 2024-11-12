@@ -1,4 +1,6 @@
 import { jsonObject, jsonMember } from 'typedjson';
+import { concat } from '@ethersproject/bytes';
+
 import { PublicKey } from './keypair';
 import { AccountHash } from './key';
 
@@ -16,17 +18,20 @@ export class InitiatorAddr {
   }
 
   public toBytes(): Uint8Array {
-    const result: number[] = [];
+    let result: Uint8Array;
 
     if (this.accountHash) {
-      result.push(1);
-      result.push(...this.accountHash.toBytes());
+      const prefix = new Uint8Array([1]);
+      result = concat([prefix, this.accountHash.toBytes()]);
     } else if (this.publicKey) {
-      result.push(0);
-      result.push(...(this.publicKey.bytes() ?? []));
+      const prefix = new Uint8Array([0]);
+      const publicKeyBytes = this.publicKey.bytes() || new Uint8Array(0);
+      result = concat([prefix, publicKeyBytes]);
+    } else {
+      result = new Uint8Array(0);
     }
 
-    return new Uint8Array(result);
+    return result;
   }
 
   static fromJSON(json: string): InitiatorAddr {

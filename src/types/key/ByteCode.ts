@@ -1,3 +1,5 @@
+import { concat } from '@ethersproject/bytes';
+
 import { Hash } from './Hash';
 import { PrefixName } from './Key';
 import { IResultWithBytes } from '../clvalue';
@@ -139,12 +141,12 @@ export class ByteCode {
    */
   toBytes(): Uint8Array {
     if (this.V1CasperWasm) {
-      return Uint8Array.of(
-        ByteCodeKind.V1CasperWasmKind,
-        ...this.V1CasperWasm.toBytes()
-      );
+      const kindBytes = new Uint8Array([ByteCodeKind.V1CasperWasmKind]);
+      const wasmBytes = this.V1CasperWasm.toBytes();
+
+      return concat([kindBytes, wasmBytes]);
     } else if (this.isEmpty) {
-      return Uint8Array.of(ByteCodeKind.EmptyKind);
+      return new Uint8Array([ByteCodeKind.EmptyKind]);
     } else {
       throw new Error('Unexpected ByteCode type');
     }

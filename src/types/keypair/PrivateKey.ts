@@ -1,3 +1,5 @@
+import { concat } from '@ethersproject/bytes';
+
 import { PublicKey } from './PublicKey';
 import { PrivateKey as Ed25519PrivateKey } from './ed25519/PrivateKey';
 import { PrivateKey as Secp256k1PrivateKey } from './secp256k1/PrivateKey';
@@ -77,7 +79,8 @@ export class PrivateKey {
    */
   public async sign(msg: Uint8Array): Promise<Uint8Array> {
     const signature = await this.priv.sign(msg);
-    return new Uint8Array([this.alg, ...signature]);
+    const algBytes = Uint8Array.of(this.alg);
+    return concat([algBytes, signature]);
   }
 
   /**
@@ -97,7 +100,8 @@ export class PrivateKey {
   public static async generate(algorithm: KeyAlgorithm): Promise<PrivateKey> {
     const priv = await PrivateKeyFactory.createPrivateKey(algorithm);
     const pubBytes = await priv.publicKeyBytes();
-    const pub = PublicKey.fromBuffer(new Uint8Array([algorithm, ...pubBytes]));
+    const algBytes = Uint8Array.of(algorithm);
+    const pub = PublicKey.fromBuffer(concat([algBytes, pubBytes]));
     return new PrivateKey(algorithm, pub, priv);
   }
 
@@ -116,7 +120,8 @@ export class PrivateKey {
       algorithm
     );
     const pubBytes = await priv.publicKeyBytes();
-    const pub = PublicKey.fromBuffer(new Uint8Array([algorithm, ...pubBytes]));
+    const algBytes = Uint8Array.of(algorithm);
+    const pub = PublicKey.fromBuffer(concat([algBytes, pubBytes]));
     return new PrivateKey(algorithm, pub, priv);
   }
 
@@ -135,7 +140,8 @@ export class PrivateKey {
       algorithm
     );
     const pubBytes = await priv.publicKeyBytes();
-    const pub = PublicKey.fromBuffer(new Uint8Array([algorithm, ...pubBytes]));
+    const algBytes = Uint8Array.of(algorithm);
+    const pub = PublicKey.fromBuffer(concat([algBytes, pubBytes]));
     return new PrivateKey(algorithm, pub, priv);
   }
 }

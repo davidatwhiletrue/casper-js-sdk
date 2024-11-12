@@ -1,5 +1,6 @@
 import { jsonMember, jsonObject } from 'typedjson';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
+import { concat } from '@ethersproject/bytes';
 
 import { Args } from './Args';
 import {
@@ -50,11 +51,11 @@ export class ModuleBytes {
       moduleBytes
     ).bytes();
 
-    const result = new Uint8Array([...lengthBytes, ...bytesArrayBytes]);
+    let result = concat([lengthBytes, bytesArrayBytes]);
 
     if (this.args) {
       const argBytes = this.args.toBytes();
-      return new Uint8Array([...result, ...argBytes]);
+      result = concat([result, argBytes]);
     }
 
     return result;
@@ -80,13 +81,11 @@ export class StoredContractByHash {
   }
 
   bytes(): Uint8Array {
+    const hashBytes = this.hash.hash.toBytes();
+    const entryPointBytes = CLValueString.newCLString(this.entryPoint).bytes();
     const argBytes = this.args.toBytes();
 
-    return new Uint8Array([
-      ...this.hash.hash.toBytes(),
-      ...CLValueString.newCLString(this.entryPoint).bytes(),
-      ...argBytes
-    ]);
+    return concat([hashBytes, entryPointBytes, argBytes]);
   }
 }
 
@@ -109,12 +108,11 @@ export class StoredContractByName {
   }
 
   bytes(): Uint8Array {
+    const nameBytes = CLValueString.newCLString(this.name).bytes();
+    const entryPointBytes = CLValueString.newCLString(this.entryPoint).bytes();
     const argBytes = this.args.toBytes();
-    return new Uint8Array([
-      ...CLValueString.newCLString(this.name).bytes(),
-      ...CLValueString.newCLString(this.entryPoint).bytes(),
-      ...argBytes
-    ]);
+
+    return concat([nameBytes, entryPointBytes, argBytes]);
   }
 }
 
@@ -144,21 +142,16 @@ export class StoredVersionedContractByHash {
   }
 
   bytes(): Uint8Array {
-    const hash = this.hash.hash.toBytes();
-    const option = new CLValueOption(
+    const hashBytes = this.hash.hash.toBytes();
+    const optionBytes = new CLValueOption(
       this.version
         ? CLValueUInt32.newCLUInt32(BigNumber.from(this.version))
         : null
-    );
-
+    ).bytes();
+    const entryPointBytes = CLValueString.newCLString(this.entryPoint).bytes();
     const argBytes = this.args?.toBytes() || new Uint8Array();
 
-    return new Uint8Array([
-      ...hash,
-      ...option.bytes(),
-      ...CLValueString.newCLString(this.entryPoint).bytes(),
-      ...argBytes
-    ]);
+    return concat([hashBytes, optionBytes, entryPointBytes, argBytes]);
   }
 }
 
@@ -183,20 +176,16 @@ export class StoredVersionedContractByName {
   }
 
   bytes(): Uint8Array {
-    const option = new CLValueOption(
+    const nameBytes = CLValueString.newCLString(this.name).bytes();
+    const optionBytes = new CLValueOption(
       this.version
         ? CLValueUInt32.newCLUInt32(BigNumber.from(this.version))
         : null
-    );
-
+    ).bytes();
+    const entryPointBytes = CLValueString.newCLString(this.entryPoint).bytes();
     const argBytes = this.args?.toBytes() || new Uint8Array();
 
-    return new Uint8Array([
-      ...CLValueString.newCLString(this.name).bytes(),
-      ...option.bytes(),
-      ...CLValueString.newCLString(this.entryPoint).bytes(),
-      ...argBytes
-    ]);
+    return concat([nameBytes, optionBytes, entryPointBytes, argBytes]);
   }
 }
 
@@ -289,37 +278,42 @@ export class ExecutableDeployItem {
 
   bytes(): Uint8Array {
     let bytes: Uint8Array;
+
     if (this.moduleBytes) {
       bytes = this.moduleBytes.bytes();
-      return new Uint8Array([ExecutableDeployItemType.ModuleBytes, ...bytes]);
+      return concat([
+        Uint8Array.of(ExecutableDeployItemType.ModuleBytes),
+        bytes
+      ]);
     } else if (this.storedContractByHash) {
       bytes = this.storedContractByHash.bytes();
-      return new Uint8Array([
-        ExecutableDeployItemType.StoredContractByHash,
-        ...bytes
+      return concat([
+        Uint8Array.of(ExecutableDeployItemType.StoredContractByHash),
+        bytes
       ]);
     } else if (this.storedContractByName) {
       bytes = this.storedContractByName.bytes();
-      return new Uint8Array([
-        ExecutableDeployItemType.StoredContractByName,
-        ...bytes
+      return concat([
+        Uint8Array.of(ExecutableDeployItemType.StoredContractByName),
+        bytes
       ]);
     } else if (this.storedVersionedContractByHash) {
       bytes = this.storedVersionedContractByHash.bytes();
-      return new Uint8Array([
-        ExecutableDeployItemType.StoredVersionedContractByHash,
-        ...bytes
+      return concat([
+        Uint8Array.of(ExecutableDeployItemType.StoredVersionedContractByHash),
+        bytes
       ]);
     } else if (this.storedVersionedContractByName) {
       bytes = this.storedVersionedContractByName.bytes();
-      return new Uint8Array([
-        ExecutableDeployItemType.StoredVersionedContractByName,
-        ...bytes
+      return concat([
+        Uint8Array.of(ExecutableDeployItemType.StoredVersionedContractByName),
+        bytes
       ]);
     } else if (this.transfer) {
       bytes = this.transfer.bytes();
-      return new Uint8Array([ExecutableDeployItemType.Transfer, ...bytes]);
+      return concat([Uint8Array.of(ExecutableDeployItemType.Transfer), bytes]);
     }
+
     return new Uint8Array();
   }
 

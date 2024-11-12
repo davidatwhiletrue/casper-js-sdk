@@ -1,4 +1,6 @@
 import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
+import { concat } from '@ethersproject/bytes';
+
 import { EntityAddr } from './EntityAddr';
 import { Hash } from './Hash';
 import { Conversions } from '../Conversions';
@@ -163,21 +165,28 @@ export class EntryPointAddr {
    * @throws EntryPointError if the EntryPointAddr type is unexpected.
    */
   toBytes(): Uint8Array {
-    const result = [];
+    let result: Uint8Array;
+
     if (this.vmCasperV1) {
-      result.push(EntryPointTag.V1EntryPoint);
-      result.push(...this.vmCasperV1.entityAddr.toBytes());
-      result.push(...this.vmCasperV1.nameBytes);
+      const entryPointTag = new Uint8Array([EntryPointTag.V1EntryPoint]);
+      const entityBytes = this.vmCasperV1.entityAddr.toBytes();
+      const nameBytes = this.vmCasperV1.nameBytes;
+
+      result = concat([entryPointTag, entityBytes, nameBytes]);
     } else if (this.vmCasperV2) {
-      result.push(EntryPointTag.V2EntryPoint);
-      result.push(...this.vmCasperV2.entityAddr.toBytes());
+      const entryPointTag = new Uint8Array([EntryPointTag.V2EntryPoint]);
+      const entityBytes = this.vmCasperV2.entityAddr.toBytes();
+
       const selectorBuffer = Buffer.alloc(SelectorBytesLen);
       selectorBuffer.writeUInt32LE(this.vmCasperV2.selector, 0);
-      result.push(...selectorBuffer);
+      const selectorBytes = new Uint8Array(selectorBuffer);
+
+      result = concat([entryPointTag, entityBytes, selectorBytes]);
     } else {
       throw new EntryPointError('Unexpected EntryPointAddr type');
     }
-    return new Uint8Array(result);
+
+    return result;
   }
 
   /**

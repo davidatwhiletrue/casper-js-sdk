@@ -1,5 +1,4 @@
-import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
-import { blake2b } from '@noble/hashes/blake2b';
+import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from 'typedjson';
 import { concat } from '@ethersproject/bytes';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -136,14 +135,36 @@ export class Deploy {
   @jsonMember({ constructor: ExecutableDeployItem })
   public session: ExecutableDeployItem;
 
+  /**
+   * Constructs a `Deploy` object
+   * @param hash The DeployHash identifying this Deploy
+   * @param header The deploy header
+   * @param payment An ExecutableDeployItem representing the payment logic
+   * @param session An ExecutableDeployItem representing the session logic
+   * @param approvals An array of signatures and associated accounts who have approved this deploy
+   */
+  constructor(
+    hash: Hash,
+    header: DeployHeader,
+    payment: ExecutableDeployItem,
+    session: ExecutableDeployItem,
+    approvals: Approval[]
+  ) {
+    this.approvals = approvals;
+    this.session = session;
+    this.payment = payment;
+    this.header = header;
+    this.hash = hash;
+  }
+
   public validate(): boolean {
     const paymentBytes = this.payment.bytes();
     const sessionBytes = this.session.bytes();
-    const calculatedBodyHash = new Hash(
-      blake2b(new Uint8Array([...paymentBytes, ...sessionBytes]))
-    );
+    const concatenatedBytes = concat([paymentBytes, sessionBytes]);
+    const calculatedBodyHash = new Hash(byteHash(concatenatedBytes));
+
     const headerBytes = this.header.toBytes();
-    const calculatedHash = new Hash(blake2b(headerBytes));
+    const calculatedHash = new Hash(byteHash(headerBytes));
 
     if (
       !this.header.bodyHash?.equals(calculatedBodyHash) ||
@@ -152,7 +173,7 @@ export class Deploy {
       throw new Error('Invalid deploy hash or body hash');
     }
 
-    for (const approval of this.approvals) {
+    this.approvals.forEach(approval => {
       if (
         !approval.signer.verifySignature(
           this.hash.toBytes(),
@@ -161,7 +182,8 @@ export class Deploy {
       ) {
         throw new Error('Invalid approval signature');
       }
-    }
+    });
+
     return true;
   }
 
@@ -195,13 +217,7 @@ export class Deploy {
     session: ExecutableDeployItem,
     approvals: Approval[] = []
   ): Deploy {
-    const deploy = new Deploy();
-    deploy.hash = hash;
-    deploy.header = header;
-    deploy.payment = payment;
-    deploy.session = session;
-    deploy.approvals = approvals;
-    return deploy;
+    return new Deploy(hash, header, payment, session, approvals);
   }
 
   public static fromHeaderAndItems(
@@ -211,9 +227,9 @@ export class Deploy {
   ): Deploy {
     const paymentBytes = payment.bytes();
     const sessionBytes = session.bytes();
-    const serializedBody = new Uint8Array([...paymentBytes, ...sessionBytes]);
-    deployHeader.bodyHash = new Hash(blake2b(serializedBody));
-    const deployHash = new Hash(blake2b(deployHeader.toBytes()));
+    const serializedBody = concat([paymentBytes, sessionBytes]);
+    deployHeader.bodyHash = new Hash(byteHash(serializedBody));
+    const deployHash = new Hash(byteHash(deployHeader.toBytes()));
     return Deploy.createNew(deployHash, deployHeader, payment, session);
   }
 
@@ -328,7 +344,7 @@ export class Deploy {
   public static toJson = (deploy: Deploy) => {
     const serializer = new TypedJSON(Deploy);
 
-    return serializer.toPlainJson(deploy);
+    return { deploy: serializer.toPlainJson(deploy) };
   };
 }
 

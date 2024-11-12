@@ -61,9 +61,9 @@ export class CLValueMap {
    */
   public getMap(): Record<string, CLValue> {
     const result: Record<string, CLValue> = {};
-    for (const [k, v] of this.indexedData.entries()) {
+    this.indexedData.forEach((v, k) => {
       result[k] = v;
-    }
+    });
     return result;
   }
 
@@ -81,9 +81,9 @@ export class CLValueMap {
    */
   public toString(): string {
     const b: string[] = [];
-    for (const [key, value] of this.indexedData.entries()) {
+    this.indexedData.forEach((value, key) => {
       b.push(`(${key}="${value.toString()}")`);
-    }
+    });
     return b.join('');
   }
 

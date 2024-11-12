@@ -1,8 +1,10 @@
-import { AllEventsNames, EventType, RawEvent } from "./event";
-import { ErrUnknownEventType } from "./errors";
+import { concat } from '@ethersproject/bytes';
 
-const headerID = "id:";
-const headerData = "data:";
+import { AllEventsNames, EventType, RawEvent } from './event';
+import { ErrUnknownEventType } from './errors';
+
+const headerID = 'id:';
+const headerData = 'data:';
 
 export class EventParser {
   private eventsToParse: Map<number, string> = new Map();
@@ -29,25 +31,38 @@ export class EventParser {
       if (this.hasPrefix(line, headerID)) {
         eventID = this.trimPrefix(headerID.length, line);
       } else if (this.hasPrefix(line, headerData)) {
+        const lineData = this.trimPrefix(headerData.length, line);
         if (eventData) {
-          eventData = new Uint8Array([...eventData, ...this.trimPrefix(headerData.length, line), '\n'.charCodeAt(0)]);
+          eventData = concat([
+            eventData,
+            lineData,
+            Uint8Array.of('\n'.charCodeAt(0))
+          ]);
         } else {
-          eventData = this.trimPrefix(headerData.length, line);
+          eventData = lineData;
         }
       }
     }
+
     return this.parseEventType(eventID, eventData);
   }
 
-  parseEventType(eventID: Uint8Array | undefined, eventData: Uint8Array | undefined): RawEvent | Error {
+  parseEventType(
+    eventID: Uint8Array | undefined,
+    eventData: Uint8Array | undefined
+  ): RawEvent | Error {
     if (!eventID || !eventData) {
-      return new Error("Missing eventID or eventData");
+      return new Error('Missing eventID or eventData');
     }
 
     let eventType: EventType | undefined;
-    const trimmedData = this.trimPrefix("{\"".length, eventData);
+    const trimmedData = this.trimPrefix('{"'.length, eventData);
 
-    for (const [eType, typeName] of this.eventsToParse.entries()) {
+    // Convert entries to an array to allow iteration in ES5
+    const eventEntries = Array.from(this.eventsToParse.entries());
+
+    for (let i = 0; i < eventEntries.length; i++) {
+      const [eType, typeName] = eventEntries[i];
       if (this.hasPrefix(trimmedData, typeName)) {
         eventType = eType;
         break;
@@ -59,24 +74,31 @@ export class EventParser {
     }
 
     if (eventType === EventType.APIVersionEventType) {
-      return new RawEvent(eventType, eventData.toString(), Number(eventID.toString()));
+      const idString = Buffer.from(eventID).toString();
+      return new RawEvent(
+        eventType,
+        Buffer.from(eventData).toString(),
+        Number(idString)
+      );
     }
 
     const parsedID = parseInt(new TextDecoder().decode(eventID), 10);
     if (isNaN(parsedID)) {
-      return new Error("Error parsing event id");
+      return new Error('Error parsing event id');
     }
 
-    return new RawEvent(eventType, eventData.toString(), parsedID);
+    return new RawEvent(eventType, Buffer.from(eventData).toString(), parsedID);
   }
 
   private hasPrefix(line: Uint8Array, prefix: string): boolean {
-    return String.fromCharCode(...line.slice(0, prefix.length)) === prefix;
+    const lineString = Buffer.from(line.slice(0, prefix.length)).toString();
+    return lineString === prefix;
   }
 
   private splitData(data: Uint8Array | string): Uint8Array[] {
-    const strData = typeof data === 'string' ? data : new TextDecoder().decode(data);
-    return strData.split(/\r?\n/).map((line) => new TextEncoder().encode(line));
+    const strData =
+      typeof data === 'string' ? data : new TextDecoder().decode(data);
+    return strData.split(/\r?\n/).map(line => new TextEncoder().encode(line));
   }
 
   trimPrefix(size: number, data: Uint8Array): Uint8Array {
@@ -97,4 +119,3 @@ export class EventParser {
     return data;
   }
 }
-

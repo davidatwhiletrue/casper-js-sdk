@@ -24,8 +24,13 @@ export class EventStreamReader {
       const { value, done } = await reader.next();
       if (done) break;
 
-      buffer = new Uint8Array([...buffer, ...value]);
+      // Concatenate new data to buffer using typed array allocation
+      const tempBuffer = new Uint8Array(buffer.length + value.length);
+      tempBuffer.set(buffer, 0);
+      tempBuffer.set(value, buffer.length);
+      buffer = tempBuffer;
 
+      // Enforce max buffer size limit
       if (buffer.length > this.maxBufferSize) {
         buffer = buffer.slice(-this.maxBufferSize);
       }
@@ -33,6 +38,7 @@ export class EventStreamReader {
       let splitIndex: number;
       let delimiterLength: number;
 
+      // Process each complete section separated by double newlines
       while (
         (([splitIndex, delimiterLength] = containsDoubleNewline(buffer)),
         splitIndex >= 0)
@@ -41,6 +47,8 @@ export class EventStreamReader {
         buffer = buffer.slice(splitIndex + delimiterLength);
       }
     }
+
+    // Yield remaining buffer if any data remains
     if (buffer.length > 0) yield buffer;
   }
 

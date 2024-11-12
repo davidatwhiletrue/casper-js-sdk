@@ -13,37 +13,37 @@ import { HexBytes } from './HexBytes';
 
 @jsonObject
 export class Proof {
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember(() => ({ constructor: PublicKey, name: 'public_key' }))
   public publicKey: PublicKey;
 
-  @jsonMember({ name: 'signature', constructor: HexBytes })
+  @jsonMember(() => ({ name: 'signature', constructor: HexBytes }))
   public signature: HexBytes;
 }
 
 @jsonObject
 export class Block {
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
   public hash: Hash;
 
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
   public stateRootHash: Hash;
 
-  @jsonMember({ name: 'last_switch_block_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'last_switch_block_hash', constructor: Hash }))
   public lastSwitchBlockHash: Hash | null;
 
-  @jsonMember({ name: 'parent_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
   public parentHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
   public eraID: number;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
   public timestamp: Timestamp;
 
-  @jsonMember({ name: 'accumulated_seed', constructor: Hash })
+  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
   public accumulatedSeed?: Hash;
 
   @jsonMember({ name: 'random_bit', constructor: Boolean })
@@ -52,13 +52,13 @@ export class Block {
   @jsonMember({ name: 'current_gas_price', constructor: Number })
   public currentGasPrice: number;
 
-  @jsonMember({ name: 'proposer', constructor: Proposer })
+  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
   public proposer: Proposer;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
   public protocolVersion?: string;
 
-  @jsonMember({ name: 'era_end', constructor: EraEnd })
+  @jsonMember(() => ({ name: 'era_end', constructor: EraEnd }))
   public eraEnd?: EraEnd;
 
   @jsonArrayMember(() => BlockTransaction, { name: 'transactions' })
@@ -67,10 +67,11 @@ export class Block {
   @jsonArrayMember(Number, { name: 'rewarded_signatures' })
   public rewardedSignatures: number[];
 
-  @jsonArrayMember(Proof, { name: 'proofs' })
+  @jsonArrayMember(() => Proof, { name: 'proofs' })
   public proofs: Proof[];
 
   public originBlockV1?: BlockV1;
+
   public originBlockV2?: BlockV2;
 
   constructor(
@@ -202,13 +203,13 @@ export class Block {
 
 @jsonObject
 export class BlockTransaction {
-  @jsonMember({ name: 'category', constructor: Proof })
+  @jsonMember({ name: 'category', constructor: Number })
   public category: TransactionCategory;
 
   @jsonMember({ name: 'version', constructor: Number })
   public version: TransactionVersion;
 
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
   public hash: Hash;
 
   constructor(
@@ -346,7 +347,7 @@ export function parseBlockTransactions(data: string): BlockTransaction[] {
 
 @jsonObject
 export class BlockV1 {
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
   public hash: Hash;
 
   @jsonMember({ name: 'header', constructor: () => BlockHeaderV1 })
@@ -361,19 +362,19 @@ export class BlockV1 {
 
 @jsonObject
 export class BlockBodyV1 {
-  @jsonArrayMember(Hash, { name: 'deploy_hashes' })
+  @jsonArrayMember(() => Hash, { name: 'deploy_hashes' })
   public deployHashes: Hash[];
 
-  @jsonMember({ name: 'proposer', constructor: Proposer })
+  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
   public proposer: Proposer;
 
-  @jsonArrayMember(Hash, { name: 'transfer_hashes' })
+  @jsonArrayMember(() => Hash, { name: 'transfer_hashes' })
   public transferHashes: Hash[];
 }
 
 @jsonObject
 export class BlockV2 {
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
   public hash: Hash;
 
   @jsonMember({ name: 'header', constructor: () => BlockHeaderV2 })
@@ -385,10 +386,10 @@ export class BlockV2 {
 
 @jsonObject
 export class BlockHeaderV1 {
-  @jsonMember({ name: 'accumulated_seed', constructor: Hash })
+  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
   public accumulatedSeed?: Hash;
 
-  @jsonMember({ name: 'body_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'body_hash', constructor: Hash }))
   public bodyHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -397,7 +398,7 @@ export class BlockHeaderV1 {
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember({ name: 'parent_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
   public parentHash: Hash;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -406,22 +407,22 @@ export class BlockHeaderV1 {
   @jsonMember({ name: 'random_bit', constructor: Boolean })
   public randomBit: boolean;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
   public stateRootHash: Hash;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
   public timestamp: Timestamp;
 
-  @jsonMember({ name: 'era_end', constructor: EraEndV1 })
+  @jsonMember(() => ({ name: 'era_end', constructor: EraEndV1 }))
   public eraEnd?: EraEndV1;
 }
 
 @jsonObject
 export class BlockHeaderV2 {
-  @jsonMember({ name: 'accumulated_seed', constructor: Hash })
+  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
   public accumulatedSeed?: Hash;
 
-  @jsonMember({ name: 'body_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'body_hash', constructor: Hash }))
   public bodyHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -433,10 +434,10 @@ export class BlockHeaderV2 {
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember({ name: 'parent_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
   public parentHash: Hash;
 
-  @jsonMember({ name: 'proposer', constructor: Proposer })
+  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
   public proposer: Proposer;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -445,16 +446,16 @@ export class BlockHeaderV2 {
   @jsonMember({ name: 'random_bit', constructor: Boolean })
   public randomBit: boolean;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
   public stateRootHash: Hash;
 
-  @jsonMember({ name: 'last_switch_block_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'last_switch_block_hash', constructor: Hash }))
   public lastSwitchBlockHash: Hash;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
   public timestamp: Timestamp;
 
-  @jsonMember({ name: 'era_end', constructor: EraEndV2 })
+  @jsonMember(() => ({ name: 'era_end', constructor: EraEndV2 }))
   public eraEnd?: EraEndV2;
 }
 
@@ -496,10 +497,10 @@ export class BlockHeaderWrapper {
 
 @jsonObject
 export class BlockHeader {
-  @jsonMember({ name: 'accumulated_seed', constructor: Hash })
+  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
   public accumulatedSeed?: Hash;
 
-  @jsonMember({ name: 'body_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'body_hash', constructor: Hash }))
   public bodyHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -511,10 +512,10 @@ export class BlockHeader {
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember({ name: 'parent_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
   public parentHash: Hash;
 
-  @jsonMember({ name: 'proposer', constructor: Proposer })
+  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
   public proposer: Proposer;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -523,13 +524,13 @@ export class BlockHeader {
   @jsonMember({ name: 'random_bit', constructor: Boolean })
   public randomBit: boolean;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
   public stateRootHash: Hash;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
   public timestamp: Timestamp;
 
-  @jsonMember({ name: 'era_end', constructor: EraEnd })
+  @jsonMember(() => ({ name: 'era_end', constructor: EraEnd }))
   public eraEnd?: EraEnd | null;
 
   private originBlockHeaderV1?: BlockHeaderV1;

@@ -53,7 +53,7 @@ export class EntryPointV1 {
 
   @jsonMember({
     name: 'entry_point_type',
-    constructor: () => EntryPointType
+    constructor: String
   })
   entryPointType: EntryPointType;
 
