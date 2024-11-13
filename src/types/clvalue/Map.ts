@@ -1,13 +1,15 @@
+import { concat } from '@ethersproject/bytes';
+
 import { CLType, CLTypeMap } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 import { CLValueTuple2 } from './Tuple2';
 import { CLValueUInt32 } from './Uint32';
 import { CLValueParser } from './Parser';
-import { concat } from '@ethersproject/bytes';
 import { toBytesU32 } from '../ByteConverters';
 
 /**
- * Represents a Map value in the CasperLabs type system.
+ * Represents a Map value in the Casper type system.
+ * This class manages key-value pairs, providing efficient access and manipulation.
  */
 export class CLValueMap {
   /**
@@ -26,7 +28,7 @@ export class CLValueMap {
   private indexedData: Map<string, CLValue> = new Map();
 
   /**
-   * Constructs a new CLValueMap instance.
+   * Initializes a new instance of the CLValueMap class.
    * @param mapType - The CLTypeMap representing the type of the map.
    * @param data - Optional array of CLValueTuple2 representing the map entries.
    * @param indexedData - Optional Map of string keys to CLValues for faster lookups.
@@ -42,8 +44,8 @@ export class CLValueMap {
   }
 
   /**
-   * Returns the byte representation of the map.
-   * @returns A Uint8Array representing the bytes of the map.
+   * Converts the map to its byte representation.
+   * @returns A Uint8Array representing the bytes of the map, including its size and key-value pairs.
    */
   bytes(): Uint8Array {
     const kvBytes = Array.from(this.data).map(element => {
@@ -76,7 +78,7 @@ export class CLValueMap {
   }
 
   /**
-   * Returns a string representation of the map.
+   * Provides a string representation of the map.
    * @returns A string representation of the map entries.
    */
   public toString(): string {
@@ -161,9 +163,10 @@ export class CLValueMap {
 
   /**
    * Creates a CLValueMap instance from a Uint8Array.
+   * Parses the byte array to interpret the size of the map and each key-value pair.
    * @param bytes - The Uint8Array containing the byte representation of the Map value.
    * @param mapType - The CLTypeMap representing the type of the map.
-   * @returns A new CLValueMap instance.
+   * @returns An object containing the new CLValueMap instance and any remaining bytes.
    */
   public static fromBytes(
     bytes: Uint8Array,

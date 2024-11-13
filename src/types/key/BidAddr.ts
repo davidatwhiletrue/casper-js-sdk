@@ -6,6 +6,7 @@ import { IResultWithBytes } from '../clvalue';
 
 /**
  * Enum representing the types of bid addresses.
+ * Each type corresponds to a unique tag value that identifies the specific type of bid address.
  */
 export enum BidAddrTag {
   Unified = 0,
@@ -26,14 +27,14 @@ export const ErrUnexpectedBidAddrTagInBidAddr = new Error(
 export const ErrInvalidBidAddrFormat = new Error('invalid BidAddr format');
 
 /**
- * Utility class for BidAddrTag operations.
+ * Utility class for handling operations related to BidAddrTag.
  */
 export class BidAddrTagUtils {
   /**
    * Converts a byte to a BidAddrTag.
-   * @param tag - The byte to convert.
+   * @param tag - The byte value to convert.
    * @returns The corresponding BidAddrTag.
-   * @throws {ErrInvalidBidAddrTag} If the byte doesn't correspond to a valid BidAddrTag.
+   * @throws {ErrInvalidBidAddrTag} If the byte doesn't match a valid BidAddrTag.
    */
   static fromByte(tag: number): BidAddrTag {
     const addrTag = tag as BidAddrTag;
@@ -52,8 +53,12 @@ export class BidAddrTagUtils {
 const UnifiedOrValidatorAddrLen = 33;
 const CreditAddrLen = 41;
 
+/**
+ * Represents information for a delegator in a Delegator BidAddr.
+ */
 @jsonObject
 export class DelegatorInfo {
+  /** The validator hash associated with this delegator. */
   @jsonMember({
     name: 'validator',
     constructor: Hash,
@@ -62,6 +67,7 @@ export class DelegatorInfo {
   })
   validator: Hash;
 
+  /** The delegator's hash. */
   @jsonMember({
     name: 'delegator',
     constructor: Hash,
@@ -71,8 +77,12 @@ export class DelegatorInfo {
   delegator: Hash;
 }
 
+/**
+ * Represents credit information within a Credit BidAddr.
+ */
 @jsonObject
 export class CreditInfo {
+  /** The validator associated with this credit. */
   @jsonMember({
     name: 'validator',
     constructor: Hash,
@@ -81,33 +91,34 @@ export class CreditInfo {
   })
   validator: Hash;
 
+  /** The era ID for this credit. */
   @jsonMember({ name: 'eraId', constructor: Number })
   eraId: number;
 }
 
 /**
- * Represents a bid address in the system.
+ * Represents a bid address, which can store information for unified, validator, delegator, or credit types.
  */
 @jsonObject
 export class BidAddr {
-  /** The unified hash, if this is a unified bid address. */
+  /** The unified hash if this is a unified bid address. */
   @jsonMember({ name: 'Unified', constructor: Hash })
   unified?: Hash;
 
-  /** The validator hash, if this is a validator bid address. */
+  /** The validator hash if this is a validator bid address. */
   @jsonMember({ name: 'Validator', constructor: Hash })
   validator?: Hash;
 
-  /** The delegator information, if this is a delegator bid address. */
+  /** The delegator information if this is a delegator bid address. */
   @jsonMember({ name: 'Delegator', constructor: DelegatorInfo })
   delegator?: DelegatorInfo;
 
-  /** The credit information, if this is a credit bid address. */
+  /** The credit information if this is a credit bid address. */
   @jsonMember({ name: 'Credit', constructor: CreditInfo })
   credit?: CreditInfo;
 
   /**
-   * Creates a new BidAddr instance.
+   * Constructs a new BidAddr instance.
    * @param unified - The unified hash.
    * @param validator - The validator hash.
    * @param delegator - The delegator information.

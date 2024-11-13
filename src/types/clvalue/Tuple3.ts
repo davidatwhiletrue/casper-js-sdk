@@ -4,7 +4,7 @@ import { CLValue, IResultWithBytes } from './CLValue';
 import { concat } from '@ethersproject/bytes';
 
 /**
- * Represents a tuple of three CLValues in the CasperLabs type system.
+ * Represents a tuple containing three CLValues in the Casper type system.
  */
 export class CLValueTuple3 {
   public innerType: CLType;
@@ -13,7 +13,7 @@ export class CLValueTuple3 {
   public inner3: CLValue;
 
   /**
-   * Constructs a new CLValueTuple3 instance.
+   * Initializes a new instance of the CLValueTuple3 class.
    * @param innerType - The CLType representing the type of the tuple.
    * @param inner1 - The first CLValue in the tuple.
    * @param inner2 - The second CLValue in the tuple.
@@ -32,7 +32,7 @@ export class CLValueTuple3 {
   }
 
   /**
-   * Returns the byte representation of the tuple.
+   * Converts the tuple to its byte representation.
    * @returns A Uint8Array representing the concatenated bytes of all three inner CLValues.
    */
   public bytes(): Uint8Array {
@@ -43,7 +43,7 @@ export class CLValueTuple3 {
   }
 
   /**
-   * Returns a string representation of the tuple.
+   * Provides a string representation of the tuple.
    * @returns A string representation of the tuple in the format "(value1, value2, value3)".
    */
   public toString(): string {
@@ -51,7 +51,7 @@ export class CLValueTuple3 {
   }
 
   /**
-   * Returns the values of the tuple as an array of CLValues.
+   * Retrieves the values of the tuple as an array.
    * @returns An array containing the three CLValues of the tuple.
    */
   public getValue(): [CLValue, CLValue, CLValue] {
@@ -63,7 +63,7 @@ export class CLValueTuple3 {
    * @param val1 - The first CLValue in the tuple.
    * @param val2 - The second CLValue in the tuple.
    * @param val3 - The third CLValue in the tuple.
-   * @returns A new CLValue instance with CLTypeTuple3 and a CLValueTuple3.
+   * @returns A new CLValue instance containing CLTypeTuple3 and a CLValueTuple3.
    */
   public static newCLTuple3(
     val1: CLValue,
@@ -78,9 +78,10 @@ export class CLValueTuple3 {
 
   /**
    * Creates a CLValueTuple3 instance from a Uint8Array.
+   * Parses the byte array to retrieve the three values of the tuple.
    * @param source - The Uint8Array containing the byte representation of the Tuple3 value.
    * @param clType - The CLTypeTuple3 representing the type of the tuple.
-   * @returns A new CLValueTuple3 instance or null if parsing fails.
+   * @returns An object containing the new CLValueTuple3 instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array,

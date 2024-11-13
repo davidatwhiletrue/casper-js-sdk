@@ -6,15 +6,15 @@ import { CLValueParser } from './Parser';
 import { CLValueUInt8 } from './Uint8';
 
 /**
- * Represents an optional value in the CasperLabs type system.
- * An option can either contain a value or be empty.
+ * Represents an optional value in the Casper type system.
+ * An option can either contain a value or be empty (null).
  */
 export class CLValueOption {
   public type?: CLTypeOption;
   public inner: CLValue | null;
 
   /**
-   * Constructs a new CLValueOption instance.
+   * Initializes a new instance of the CLValueOption class.
    * @param inner - The CLValue contained in the option, or null if empty.
    * @param type - The CLTypeOption representing the type of the option.
    */
@@ -24,9 +24,10 @@ export class CLValueOption {
   }
 
   /**
-   * Returns the byte representation of the option.
+   * Converts the option to its byte representation.
+   * If the option is empty, it returns a Uint8Array with a single 0 byte.
+   * If it contains a value, it returns a Uint8Array with 1 followed by the inner value's bytes.
    * @returns A Uint8Array representing the bytes of the option.
-   * If the option is empty, it returns [0]. Otherwise, it returns [1] followed by the inner value's bytes.
    */
   public bytes(): Uint8Array {
     if (this.isEmpty()) {
@@ -37,14 +38,11 @@ export class CLValueOption {
   }
 
   /**
-   * Returns a string representation of the option.
+   * Provides a string representation of the option.
    * @returns An empty string if the option is empty, otherwise the string representation of the inner value.
    */
   public toString(): string {
-    if (this.isEmpty()) {
-      return '';
-    }
-    return this.inner!.toString();
+    return this.isEmpty() ? '' : this.inner!.toString();
   }
 
   /**
@@ -56,8 +54,8 @@ export class CLValueOption {
   }
 
   /**
-   * Returns the inner value of the option.
-   * @returns The inner CLValue if the option is not empty, null otherwise.
+   * Retrieves the inner value of the option.
+   * @returns The inner CLValue if the option is not empty, or null if it is empty.
    */
   public value(): CLValue | null {
     return this.inner;
@@ -66,7 +64,7 @@ export class CLValueOption {
   /**
    * Creates a new CLValue instance with an Option value.
    * @param inner - The CLValue to be contained in the option.
-   * @returns A new CLValue instance with CLTypeOption and a CLValueOption.
+   * @returns A new CLValue instance containing CLTypeOption and a CLValueOption.
    */
   public static newCLOption(inner: CLValue): CLValue {
     const optionType = new CLTypeOption(inner.type);
@@ -77,9 +75,10 @@ export class CLValueOption {
 
   /**
    * Creates a CLValueOption instance from a Uint8Array.
+   * Parses the byte array to determine if the option is empty or contains a value.
    * @param source - The Uint8Array containing the byte representation of the Option value.
    * @param clType - The CLTypeOption representing the type of the option.
-   * @returns A new CLValueOption instance or null if parsing fails.
+   * @returns An object containing the new CLValueOption instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array,

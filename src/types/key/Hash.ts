@@ -10,16 +10,16 @@ import { IResultWithBytes } from '../clvalue';
 export class Hash {
   private hashBytes: Uint8Array;
 
-  /** The length of the hash in bytes. */
+  /** The fixed length of the hash in bytes. */
   static ByteHashLen = 32;
 
-  /** The length of the hash string representation in hexadecimal. */
+  /** The fixed length of the hash string representation in hexadecimal characters. */
   static StringHashLen = 64;
 
   /**
    * Creates a new Hash instance.
    * @param hashBytes - The byte array representing the hash.
-   * @throws Error if the hash length is invalid.
+   * @throws Error if the byte array length does not match the expected hash length.
    */
   constructor(hashBytes: Uint8Array) {
     if (hashBytes.length !== Hash.ByteHashLen) {
@@ -31,10 +31,10 @@ export class Hash {
   }
 
   /**
-   * Creates a Hash from a hexadecimal string.
+   * Creates a Hash instance from a hexadecimal string.
    * @param source - The hexadecimal string representation of the hash.
    * @returns A new Hash instance.
-   * @throws Error if the string length is invalid.
+   * @throws Error if the string length does not match the expected hash length.
    */
   static fromHex(source: string): Hash {
     if (source.length !== Hash.StringHashLen) {
@@ -47,7 +47,7 @@ export class Hash {
   }
 
   /**
-   * Converts the Hash to a hexadecimal string.
+   * Converts the Hash instance to a hexadecimal string.
    * @returns The hexadecimal string representation of the hash.
    */
   toHex(): string {
@@ -55,7 +55,7 @@ export class Hash {
   }
 
   /**
-   * Converts the Hash to a byte array.
+   * Converts the Hash instance to a byte array.
    * @returns The byte array representation of the hash.
    */
   toBytes(): Uint8Array {
@@ -63,7 +63,7 @@ export class Hash {
   }
 
   /**
-   * Converts the Hash to its JSON representation.
+   * Converts the Hash instance to its JSON representation.
    * @returns The JSON string representation of the hash.
    */
   toJSON(): string {
@@ -71,7 +71,7 @@ export class Hash {
   }
 
   /**
-   * Creates a Hash from its JSON representation.
+   * Creates a Hash instance from its JSON representation.
    * @param json - The JSON string representation of the hash.
    * @returns A new Hash instance.
    */
@@ -80,14 +80,14 @@ export class Hash {
   }
 
   /**
-   * Creates a Hash from a byte array.
+   * Creates a Hash instance from a byte array.
    * @param source - The byte array representing the hash.
-   * @returns A new Hash instance.
-   * @throws Error if the byte array length is invalid.
+   * @returns A result object containing the new Hash instance and the remaining bytes.
+   * @throws Error if the byte array length does not match the expected hash length.
    */
   static fromBytes(source: Uint8Array): IResultWithBytes<Hash> {
     if (source.length !== Hash.ByteHashLen) {
-      throw new Error('key length is not equal 32');
+      throw new Error('Key length is not equal to 32 bytes.');
     }
 
     const hashBytes = source.subarray(0, Hash.ByteHashLen);
@@ -98,18 +98,24 @@ export class Hash {
   }
 
   /**
-   * Creates a Hash from a Buffer.
+   * Creates a Hash instance from a Buffer.
    * @param buffer - The Buffer containing the hash bytes.
    * @returns A new Hash instance.
    * @throws Error if the buffer length is less than the required hash length.
    */
   static fromBuffer(buffer: Buffer): Hash {
     if (buffer.length < Hash.ByteHashLen) {
-      throw new Error('key length is not equal 32');
+      throw new Error('Key length is not equal to 32 bytes.');
     }
     return new Hash(new Uint8Array(buffer.slice(0, Hash.ByteHashLen)));
   }
 
+  /**
+   * Creates an array of Hash instances from a byte array.
+   * @param byteArray - The byte array containing multiple hash values.
+   * @returns An array of Hash instances created from the byte array.
+   * @throws Error if the byte array length is not a multiple of the hash length.
+   */
   public static createHashArray(byteArray: Uint8Array): Hash[] {
     if (byteArray.length % Hash.ByteHashLen !== 0) {
       throw new Error(
@@ -127,7 +133,7 @@ export class Hash {
   }
 
   /**
-   * Compares this Hash with another Hash for equality.
+   * Compares this Hash instance with another Hash instance for equality.
    * @param other - The other Hash to compare with.
    * @returns True if the hashes are equal, false otherwise.
    */

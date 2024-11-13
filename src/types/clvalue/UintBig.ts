@@ -6,19 +6,14 @@ import { CLValueUInt512 } from './Uint512';
 import { IResultWithBytes } from './CLValue';
 
 /**
- * Converts a BigNumber to a Uint8Array representation.
+ * Converts a BigNumber to a Uint8Array with a length prefix.
  *
- * The resulting Uint8Array has the following structure:
- * - The first byte represents the length of the BigNumber in bytes.
- * - The remaining bytes represent the BigNumber value itself.
+ * The resulting Uint8Array structure:
+ * - The first byte is the length of the BigNumber in bytes.
+ * - The remaining bytes represent the BigNumber itself.
  *
  * @param val - The BigNumber to convert.
- * @returns A Uint8Array representation of the BigNumber.
- *
- * @example
- * const bigNum = BigNumber.from('123456789');
- * const bytes = bigToBytes(bigNum);
- * console.log(bytes); // Uint8Array [ 4, 7, 91, 205, 21 ]
+ * @returns Uint8Array representation of the BigNumber.
  */
 export const bigToBytes = (val: BigNumber): Uint8Array => {
   let hex = val.toHexString().slice(2);
@@ -40,19 +35,14 @@ export const bigToBytes = (val: BigNumber): Uint8Array => {
 };
 
 /**
- * Converts an ArrayBuffer containing a byte representation of a BigNumber back to a BigNumber.
+ * Converts an ArrayBuffer with a length prefix to a BigNumber.
  *
- * The input ArrayBuffer should have the following structure:
- * - The first byte represents the length of the BigNumber in bytes.
- * - The remaining bytes represent the BigNumber value itself.
+ * Expected input structure:
+ * - First byte: length of the BigNumber in bytes.
+ * - Remaining bytes: BigNumber value.
  *
- * @param buffer - The ArrayBuffer containing the byte representation of a BigNumber.
- * @returns The BigNumber reconstructed from the byte representation.
- *
- * @example
- * const buffer = new Uint8Array([4, 7, 91, 205, 21]).buffer;
- * const bigNum = bigFromBuffer(buffer);
- * console.log(bigNum.toString()); // '123456789'
+ * @param buffer - The ArrayBuffer containing the prefixed byte representation.
+ * @returns BigNumber reconstructed from the byte representation.
  */
 export const bigFromBuffer = (buffer: ArrayBuffer): BigNumber => {
   const view = new DataView(buffer);
@@ -68,6 +58,14 @@ export const bigFromBuffer = (buffer: ArrayBuffer): BigNumber => {
   return BigNumber.from('0x' + hex);
 };
 
+/**
+ * Helper to parse BigNumber from prefixed bytes with bit size validation.
+ *
+ * @param rawBytes - Byte array containing the prefixed BigNumber data.
+ * @param bitSize - Bit size (e.g., 128, 256, or 512) to validate the BigNumber.
+ * @returns An object containing the parsed BigNumber and remaining bytes.
+ * @throws Error if the byte length exceeds expected size or data is insufficient.
+ */
 const fromBytesBigIntBase = (
   rawBytes: Uint8Array,
   bitSize: number
@@ -100,6 +98,11 @@ const fromBytesBigIntBase = (
   };
 };
 
+/**
+ * Parses a Uint128 CLValue from prefixed bytes.
+ * @param rawBytes - Byte array containing the prefixed Uint128 data.
+ * @returns The CLValueUInt128 parsed from the byte data.
+ */
 export const fromBytesUInt128 = (
   rawBytes: Uint8Array
 ): IResultWithBytes<CLValueUInt128> => {
@@ -107,6 +110,11 @@ export const fromBytesUInt128 = (
   return { result: new CLValueUInt128(value?.result), bytes: value?.bytes };
 };
 
+/**
+ * Parses a Uint256 CLValue from prefixed bytes.
+ * @param rawBytes - Byte array containing the prefixed Uint256 data.
+ * @returns The CLValueUInt256 parsed from the byte data.
+ */
 export const fromBytesUInt256 = (
   rawBytes: Uint8Array
 ): IResultWithBytes<CLValueUInt256> => {
@@ -114,6 +122,11 @@ export const fromBytesUInt256 = (
   return { result: new CLValueUInt256(value?.result), bytes: value?.bytes };
 };
 
+/**
+ * Parses a Uint512 CLValue from prefixed bytes.
+ * @param rawBytes - Byte array containing the prefixed Uint512 data.
+ * @returns The CLValueUInt512 parsed from the byte data.
+ */
 export const fromBytesUInt512 = (
   rawBytes: Uint8Array
 ): IResultWithBytes<CLValueUInt512> => {

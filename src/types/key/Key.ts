@@ -14,6 +14,9 @@ import { EntryPointAddr } from './EntryPointAddr';
 import { URef } from './URef';
 import { IResultWithBytes } from '../clvalue';
 
+/**
+ * Enum that defines prefixes used to identify different types of blockchain entities and objects.
+ */
 export enum PrefixName {
   Account = 'account-hash-',
   AddressableEntity = 'addressable-entity-',
@@ -45,6 +48,9 @@ export enum PrefixName {
   EntryPoint = 'entry-point-'
 }
 
+/**
+ * Enum representing different types of blockchain key types used in the system.
+ */
 const enum TypeID {
   Account = 0,
   Hash,
@@ -72,6 +78,9 @@ const enum TypeID {
   EntryPoint
 }
 
+/**
+ * Enum for human-readable key type names, used to represent various key entities in the blockchain.
+ */
 export enum KeyTypeName {
   Account = 'Account',
   Hash = 'Hash',
@@ -90,6 +99,9 @@ export enum KeyTypeName {
   ChecksumRegistry = 'ChecksumRegistry'
 }
 
+/**
+ * Mapping of key type names to their corresponding TypeID values.
+ */
 export const typeIDbyNames = new Map<KeyTypeName, TypeID>([
   [KeyTypeName.Account, TypeID.Account],
   [KeyTypeName.Hash, TypeID.Hash],
@@ -108,6 +120,9 @@ export const typeIDbyNames = new Map<KeyTypeName, TypeID>([
   [KeyTypeName.ChecksumRegistry, TypeID.ChecksumRegistry]
 ]);
 
+/**
+ * Mapping of blockchain key prefixes to their corresponding TypeID values.
+ */
 export const keyIDbyPrefix = new Map<PrefixName, TypeID>([
   [PrefixName.Account, TypeID.Account],
   [PrefixName.Hash, TypeID.Hash],
@@ -1028,8 +1043,6 @@ export class Key {
 
     return Key.createByType(source, keyIDbyPrefix.get(prefix)!);
   }
-
-  // Inside the Key class
 
   /**
    * Converts the Key instance to a JSON object.

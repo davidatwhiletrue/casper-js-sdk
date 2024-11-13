@@ -16,6 +16,9 @@ import { ContractHash, URef } from './key';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
 import { PublicKey } from './keypair';
 
+/**
+ * Enum representing the different types of executable deploy items.
+ */
 enum ExecutableDeployItemType {
   ModuleBytes,
   StoredContractByHash,
@@ -25,11 +28,20 @@ enum ExecutableDeployItemType {
   Transfer
 }
 
+/**
+ * Represents a deploy item containing module bytes and associated arguments.
+ */
 @jsonObject
 export class ModuleBytes {
+  /**
+   * The module bytes in hexadecimal format.
+   */
   @jsonMember({ name: 'module_bytes', constructor: String })
   moduleBytes: string;
 
+  /**
+   * The arguments passed to the module.
+   */
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -38,11 +50,20 @@ export class ModuleBytes {
   })
   args: Args;
 
+  /**
+   * Constructs a `ModuleBytes` instance with module bytes and arguments.
+   * @param moduleBytes The module bytes in hexadecimal format.
+   * @param args The arguments for the module.
+   */
   constructor(moduleBytes: string, args: Args) {
     this.moduleBytes = moduleBytes;
     this.args = args;
   }
 
+  /**
+   * Serializes the `ModuleBytes` instance to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     const moduleBytes = new Uint8Array(Buffer.from(this.moduleBytes, 'hex'));
     const lengthBytes = CLValueUInt32.newCLUInt32(
@@ -63,8 +84,14 @@ export class ModuleBytes {
   }
 }
 
+/**
+ * Represents a deploy item with a stored contract referenced by its hash.
+ */
 @jsonObject
 export class StoredContractByHash {
+  /**
+   * The hash of the stored contract.
+   */
   @jsonMember({
     name: 'hash',
     constructor: ContractHash,
@@ -72,7 +99,16 @@ export class StoredContractByHash {
     serializer: value => value.toJSON()
   })
   hash: ContractHash;
-  @jsonMember({ name: 'entry_point', constructor: String }) entryPoint: string;
+
+  /**
+   * The entry point of the contract to invoke.
+   */
+  @jsonMember({ name: 'entry_point', constructor: String })
+  entryPoint: string;
+
+  /**
+   * The arguments for the contract call.
+   */
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -81,12 +117,22 @@ export class StoredContractByHash {
   })
   args: Args;
 
+  /**
+   * Constructs a `StoredContractByHash` instance with the contract hash, entry point, and arguments.
+   * @param hash The contract hash.
+   * @param entryPoint The contract entry point.
+   * @param args The arguments for the contract.
+   */
   constructor(hash: ContractHash, entryPoint: string, args: Args) {
     this.hash = hash;
     this.entryPoint = entryPoint;
     this.args = args;
   }
 
+  /**
+   * Serializes the `StoredContractByHash` instance to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     const hashBytes = this.hash.hash.toBytes();
     const entryPointBytes = CLValueString.newCLString(this.entryPoint).bytes();
@@ -96,10 +142,26 @@ export class StoredContractByHash {
   }
 }
 
+/**
+ * Represents a deploy item with a stored contract referenced by its name.
+ */
 @jsonObject
 export class StoredContractByName {
-  @jsonMember({ name: 'name', constructor: String }) name: string;
-  @jsonMember({ name: 'entry_point', constructor: String }) entryPoint: string;
+  /**
+   * The name of the stored contract.
+   */
+  @jsonMember({ name: 'name', constructor: String })
+  name: string;
+
+  /**
+   * The entry point of the contract to invoke.
+   */
+  @jsonMember({ name: 'entry_point', constructor: String })
+  entryPoint: string;
+
+  /**
+   * The arguments for the contract call.
+   */
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -108,12 +170,22 @@ export class StoredContractByName {
   })
   args: Args;
 
+  /**
+   * Constructs a `StoredContractByName` instance with the contract name, entry point, and arguments.
+   * @param name The contract name.
+   * @param entryPoint The contract entry point.
+   * @param args The arguments for the contract.
+   */
   constructor(name: string, entryPoint: string, args: Args) {
     this.name = name;
     this.entryPoint = entryPoint;
     this.args = args;
   }
 
+  /**
+   * Serializes the `StoredContractByName` instance to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     const nameBytes = CLValueString.newCLString(this.name).bytes();
     const entryPointBytes = CLValueString.newCLString(this.entryPoint).bytes();
@@ -123,8 +195,14 @@ export class StoredContractByName {
   }
 }
 
+/**
+ * Represents a deploy item with a stored versioned contract referenced by its hash.
+ */
 @jsonObject
 export class StoredVersionedContractByHash {
+  /**
+   * The hash of the stored contract.
+   */
   @jsonMember({
     name: 'hash',
     constructor: ContractHash,
@@ -132,7 +210,16 @@ export class StoredVersionedContractByHash {
     serializer: value => value.toJSON()
   })
   hash: ContractHash;
-  @jsonMember({ name: 'entry_point', constructor: String }) entryPoint: string;
+
+  /**
+   * The entry point of the contract to invoke.
+   */
+  @jsonMember({ name: 'entry_point', constructor: String })
+  entryPoint: string;
+
+  /**
+   * The arguments for the contract call.
+   */
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -140,8 +227,20 @@ export class StoredVersionedContractByHash {
     serializer: serializeArgs
   })
   args: Args;
-  @jsonMember({ name: 'version', constructor: Number }) version?: number;
 
+  /**
+   * The version of the contract.
+   */
+  @jsonMember({ name: 'version', constructor: Number })
+  version?: number;
+
+  /**
+   * Constructs a `StoredVersionedContractByHash` instance with the contract hash, entry point, arguments, and version.
+   * @param hash The contract hash.
+   * @param entryPoint The contract entry point.
+   * @param args The arguments for the contract.
+   * @param version The contract version.
+   */
   constructor(
     hash: ContractHash,
     entryPoint: string,
@@ -154,6 +253,10 @@ export class StoredVersionedContractByHash {
     this.args = args;
   }
 
+  /**
+   * Serializes the `StoredVersionedContractByHash` instance to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     const hashBytes = this.hash.hash.toBytes();
     const optionBytes = new CLValueOption(
@@ -168,11 +271,32 @@ export class StoredVersionedContractByHash {
   }
 }
 
+/**
+ * Represents a deploy item with a stored versioned contract referenced by its name.
+ */
 @jsonObject
 export class StoredVersionedContractByName {
-  @jsonMember({ name: 'name', constructor: String }) name: string;
-  @jsonMember({ name: 'entry_point', constructor: String }) entryPoint: string;
-  @jsonMember({ name: 'version', constructor: Number }) version?: number;
+  /**
+   * The name of the stored contract.
+   */
+  @jsonMember({ name: 'name', constructor: String })
+  name: string;
+
+  /**
+   * The entry point of the contract to invoke.
+   */
+  @jsonMember({ name: 'entry_point', constructor: String })
+  entryPoint: string;
+
+  /**
+   * The version of the contract.
+   */
+  @jsonMember({ name: 'version', constructor: Number })
+  version?: number;
+
+  /**
+   * The arguments for the contract call.
+   */
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -181,6 +305,13 @@ export class StoredVersionedContractByName {
   })
   args: Args;
 
+  /**
+   * Constructs a `StoredVersionedContractByName` instance with the contract name, entry point, arguments, and version.
+   * @param name The contract name.
+   * @param entryPoint The contract entry point.
+   * @param args The arguments for the contract.
+   * @param version The contract version.
+   */
   constructor(name: string, entryPoint: string, args: Args, version?: number) {
     this.name = name;
     this.entryPoint = entryPoint;
@@ -188,6 +319,10 @@ export class StoredVersionedContractByName {
     this.args = args;
   }
 
+  /**
+   * Serializes the `StoredVersionedContractByName` instance to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     const nameBytes = CLValueString.newCLString(this.name).bytes();
     const optionBytes = new CLValueOption(
@@ -202,8 +337,14 @@ export class StoredVersionedContractByName {
   }
 }
 
+/**
+ * Represents a deploy item with a transfer of funds and associated arguments.
+ */
 @jsonObject
 export class TransferDeployItem {
+  /**
+   * The arguments for the transfer.
+   */
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -212,10 +353,23 @@ export class TransferDeployItem {
   })
   args: Args;
 
+  /**
+   * Constructs a `TransferDeployItem` instance with arguments.
+   * @param args The arguments for the transfer.
+   */
   constructor(args: Args) {
     this.args = args;
   }
 
+  /**
+   * Creates a new transfer deploy item with the specified amount, target, source purse, and transfer ID.
+   * @param amount The amount to transfer.
+   * @param target The target address (either a URef or a PublicKey).
+   * @param sourcePurse The source purse (optional).
+   * @param id The transfer ID.
+   * @returns A new `TransferDeployItem` instance.
+   * @throws Error if the target is not specified or the transfer ID is missing.
+   */
   public static newTransfer(
     amount: BigNumber | string,
     target: URef | PublicKey,
@@ -245,48 +399,92 @@ export class TransferDeployItem {
     return new TransferDeployItem(runtimeArgs);
   }
 
+  /**
+   * Serializes the `TransferDeployItem` instance to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     return this.args.toBytes();
   }
 }
 
+/**
+ * Represents an executable deploy item, which can be one of several types such as `ModuleBytes`, `StoredContractByHash`, etc.
+ */
 @jsonObject
 export class ExecutableDeployItem {
+  /**
+   * A module bytes deploy item.
+   */
   @jsonMember({ name: 'ModuleBytes', constructor: ModuleBytes })
   moduleBytes?: ModuleBytes;
+
+  /**
+   * A stored contract deploy item referenced by hash.
+   */
   @jsonMember({
     name: 'StoredContractByHash',
     constructor: StoredContractByHash
   })
   storedContractByHash?: StoredContractByHash;
+
+  /**
+   * A stored contract deploy item referenced by name.
+   */
   @jsonMember({
     name: 'StoredContractByName',
     constructor: StoredContractByName
   })
   storedContractByName?: StoredContractByName;
+
+  /**
+   * A stored versioned contract deploy item referenced by hash.
+   */
   @jsonMember({
     name: 'StoredVersionedContractByHash',
     constructor: StoredVersionedContractByHash
   })
   storedVersionedContractByHash?: StoredVersionedContractByHash;
+
+  /**
+   * A stored versioned contract deploy item referenced by name.
+   */
   @jsonMember({
     name: 'StoredVersionedContractByName',
     constructor: StoredVersionedContractByName
   })
   storedVersionedContractByName?: StoredVersionedContractByName;
+
+  /**
+   * A transfer deploy item.
+   */
   @jsonMember({ name: 'Transfer', constructor: TransferDeployItem })
   transfer?: TransferDeployItem;
 
+  /**
+   * Retrieves an argument by name from the deploy item.
+   * @param name The name of the argument.
+   * @returns The argument value, or `undefined` if not found.
+   */
   public getArgByName(name: string): CLValue | undefined {
     const deployItemArgs = this.getArgs();
     return deployItemArgs.args.get(name);
   }
 
+  /**
+   * Sets an argument by name for the deploy item.
+   * @param name The name of the argument.
+   * @param value The value of the argument.
+   */
   public setArg(name: string, value: CLValue) {
     const deployItemArgs = this.getArgs();
     deployItemArgs.insert(name, value);
   }
 
+  /**
+   * Retrieves the arguments for the deploy item.
+   * @returns The arguments for the deploy item.
+   */
   getArgs(): Args {
     if (this.moduleBytes) return this.moduleBytes.args;
     if (this.storedContractByHash) return this.storedContractByHash.args;
@@ -299,6 +497,10 @@ export class ExecutableDeployItem {
     throw new Error('failed to serialize ExecutableDeployItemJsonWrapper');
   }
 
+  /**
+   * Serializes the `ExecutableDeployItem` to a byte array.
+   * @returns The serialized byte array.
+   */
   bytes(): Uint8Array {
     let bytes: Uint8Array;
 
@@ -340,6 +542,11 @@ export class ExecutableDeployItem {
     return new Uint8Array();
   }
 
+  /**
+   * Creates a standard payment `ExecutableDeployItem` with the specified amount.
+   * @param amount The amount to be transferred.
+   * @returns A new `ExecutableDeployItem` instance with the payment.
+   */
   public static standardPayment(
     amount: BigNumber | string
   ): ExecutableDeployItem {
@@ -352,56 +559,56 @@ export class ExecutableDeployItem {
   }
 
   /**
-   * Casts the `ExecutableDeployItem` to `ModuleBytes` if possible
-   * @returns `ModuleBytes` representation of `ExecutableDeployItem`, or `undefined` if the `ExecutableDeployItem` cannot be cast
+   * Casts the `ExecutableDeployItem` to `ModuleBytes` if possible.
+   * @returns The `ModuleBytes` representation of the `ExecutableDeployItem`, or `undefined` if not possible.
    */
   public asModuleBytes(): ModuleBytes | undefined {
     return this.moduleBytes;
   }
 
   /**
-   * Identifies whether the `ExecutableDeployItem` is of the original type `Transfer`
-   * @returns `true` is the `ExecutableDeployItem` conforms to `Transfer`, and `false` otherwise.
+   * Checks if the `ExecutableDeployItem` is of type `Transfer`.
+   * @returns `true` if the `ExecutableDeployItem` is a transfer item, `false` otherwise.
    */
   public isTransfer() {
     return !!this.transfer;
   }
 
   /**
-   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredVersionedContractByHash`
-   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredVersionedContractByHash`, and `false` otherwise.
+   * Checks if the `ExecutableDeployItem` is of type `StoredVersionedContractByHash`.
+   * @returns `true` if the `ExecutableDeployItem` is a stored versioned contract by hash, `false` otherwise.
    */
   public isStoredVersionContractByHash(): boolean {
     return !!this.storedVersionedContractByHash;
   }
 
   /**
-   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredVersionedContractByName`
-   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredVersionedContractByName`, and `false` otherwise.
+   * Checks if the `ExecutableDeployItem` is of type `StoredVersionedContractByName`.
+   * @returns `true` if the `ExecutableDeployItem` is a stored versioned contract by name, `false` otherwise.
    */
   public isStoredVersionContractByName(): boolean {
     return !!this.storedVersionedContractByName;
   }
 
   /**
-   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredContractByName`
-   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredContractByName`, and `false` otherwise.
+   * Checks if the `ExecutableDeployItem` is of type `StoredContractByName`.
+   * @returns `true` if the `ExecutableDeployItem` is a stored contract by name, `false` otherwise.
    */
   public isStoredContractByName(): boolean {
     return !!this.storedContractByName;
   }
 
   /**
-   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredContractByHash`
-   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredContractByHash`, and `false` otherwise.
+   * Checks if the `ExecutableDeployItem` is of type `StoredContractByHash`.
+   * @returns `true` if the `ExecutableDeployItem` is a stored contract by hash, `false` otherwise.
    */
   public isStoredContractByHash(): boolean {
     return !!this.storedContractByHash;
   }
 
   /**
-   * Identifies whether the `ExecutableDeployItem` is of the original type `ModuleBytes`
-   * @returns `true` is the `ExecutableDeployItem` conforms to `ModuleBytes`, and `false` otherwise.
+   * Checks if the `ExecutableDeployItem` is of type `ModuleBytes`.
+   * @returns `true` if the `ExecutableDeployItem` is of type `ModuleBytes`, `false` otherwise.
    */
   public isModuleBytes(): boolean {
     return !!this.moduleBytes;

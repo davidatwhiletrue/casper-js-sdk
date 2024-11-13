@@ -23,8 +23,16 @@ import { ExecutableDeployItem } from './ExecutableDeployItem';
 import { byteHash, toBytesU32 } from './ByteConverters';
 import { Conversions } from './Conversions';
 
+/**
+ * Represents the header of a deploy in the blockchain.
+ * The header contains metadata such as the account initiating the deploy, the body hash, gas price, timestamp, TTL, and dependencies.
+ */
 @jsonObject
 export class DeployHeader {
+  /**
+   * The public key of the account initiating the deploy.
+   * This key is used to verify the identity of the account making the deploy request.
+   */
   @jsonMember({
     constructor: PublicKey,
     deserializer: json => {
@@ -38,6 +46,10 @@ export class DeployHeader {
   })
   public account?: PublicKey;
 
+  /**
+   * The hash of the body of the deploy, which is used to verify the contents of the deploy.
+   * The body contains the session logic and payment logic of the deploy.
+   */
   @jsonMember({
     constructor: Hash,
     deserializer: json => {
@@ -51,9 +63,17 @@ export class DeployHeader {
   })
   public bodyHash?: Hash;
 
+  /**
+   * The name of the blockchain chain that the deploy is associated with.
+   * This helps prevent the deploy from being accidentally or maliciously included in a different chain.
+   */
   @jsonMember({ name: 'chain_name', constructor: String })
   public chainName = '';
 
+  /**
+   * A list of other deploys that must be executed before this one.
+   * This ensures dependencies are executed in the correct order.
+   */
   @jsonArrayMember(Hash, {
     name: 'dependencies',
     serializer: (value: Hash[]) => value.map(it => it.toJSON()),
@@ -61,9 +81,17 @@ export class DeployHeader {
   })
   public dependencies: Hash[] = [];
 
+  /**
+   * The price of gas for executing the deploy.
+   * Gas is used to pay for the computational resources required to process the deploy.
+   */
   @jsonMember({ name: 'gas_price', constructor: Number })
   public gasPrice = 1;
 
+  /**
+   * The timestamp when the deploy was created.
+   * This timestamp is used to determine the deploy's position in time.
+   */
   @jsonMember({
     constructor: Timestamp,
     deserializer: json => Timestamp.fromJSON(json),
@@ -71,6 +99,10 @@ export class DeployHeader {
   })
   public timestamp: Timestamp = new Timestamp(new Date());
 
+  /**
+   * The time-to-live (TTL) for the deploy, after which it will expire if not executed.
+   * The default TTL is 30 minutes.
+   */
   @jsonMember({
     constructor: Duration,
     deserializer: json => Duration.fromJSON(json),
@@ -78,6 +110,16 @@ export class DeployHeader {
   })
   public ttl: Duration = new Duration(30 * 60 * 1000);
 
+  /**
+   * Constructs a `DeployHeader` instance with the specified parameters.
+   * @param chainName The name of the blockchain chain.
+   * @param dependencies A list of deploys that must be executed before this one.
+   * @param gasPrice The gas price for the deploy.
+   * @param timestamp The timestamp when the deploy is created.
+   * @param ttl The TTL for the deploy.
+   * @param account The public key of the account initiating the deploy (optional).
+   * @param bodyHash The hash of the body of the deploy (optional).
+   */
   constructor(
     chainName = '',
     dependencies: Hash[] = [],
@@ -96,6 +138,10 @@ export class DeployHeader {
     this.bodyHash = bodyHash;
   }
 
+  /**
+   * Converts the deploy header to a byte array for transmission or storage.
+   * @returns A `Uint8Array` representing the deploy header in byte format.
+   */
   public toBytes(): Uint8Array {
     const accountBytes = this.account?.bytes() ?? new Uint8Array();
     const timestampBytes = new Uint8Array(
@@ -145,38 +191,62 @@ export class DeployHeader {
     return result;
   }
 
+  /**
+   * Returns a default `DeployHeader` instance with default values.
+   * @returns A `DeployHeader` instance with default values.
+   */
   public static default(): DeployHeader {
     return new DeployHeader();
   }
 }
 
+/**
+ * Represents a deploy in the blockchain, including the header, payment, session, and approvals.
+ * A `Deploy` object is used to package the logic for executing a contract, payment, or transfer on the blockchain.
+ */
 @jsonObject
 export class Deploy {
+  /**
+   * A list of approvals, including signatures from accounts that have approved the deploy.
+   */
   @jsonArrayMember(() => Approval)
   public approvals: Approval[] = [];
 
+  /**
+   * The unique hash that identifies this deploy. This hash is used to verify the integrity of the deploy.
+   */
   @jsonMember({
     deserializer: json => Hash.fromJSON(json),
     serializer: value => value.toJSON()
   })
   public hash: Hash;
 
+  /**
+   * The header of the deploy, which contains metadata such as the account, gas price, timestamp, and TTL.
+   */
   @jsonMember({ constructor: DeployHeader })
   public header: DeployHeader;
 
+  /**
+   * The executable item representing the payment logic of the deploy.
+   */
   @jsonMember({ constructor: ExecutableDeployItem })
   public payment: ExecutableDeployItem;
 
+  /**
+   * The executable item representing the session logic of the deploy.
+   */
   @jsonMember({ constructor: ExecutableDeployItem })
   public session: ExecutableDeployItem;
 
   /**
-   * Constructs a `Deploy` object
-   * @param hash The DeployHash identifying this Deploy
-   * @param header The deploy header
-   * @param payment An ExecutableDeployItem representing the payment logic
-   * @param session An ExecutableDeployItem representing the session logic
-   * @param approvals An array of signatures and associated accounts who have approved this deploy
+   * Constructs a `Deploy` object.
+   *
+   * @param hash The deploy hash identifying this deploy.
+   * @param header The deploy header containing metadata.
+   * @param payment The executable deploy item representing the payment logic.
+   * @param session The executable deploy item representing the session logic.
+   * @param approvals An array of signatures and accounts who have approved this deploy.
    */
   constructor(
     hash: Hash,
@@ -192,6 +262,11 @@ export class Deploy {
     this.hash = hash;
   }
 
+  /**
+   * Validates the deploy by checking its body hash, deploy hash, and approval signatures.
+   *
+   * @returns `true` if the deploy is valid, otherwise throws an error.
+   */
   public validate(): boolean {
     const paymentBytes = this.payment.bytes();
     const sessionBytes = this.session.bytes();
@@ -222,12 +297,22 @@ export class Deploy {
     return true;
   }
 
+  /**
+   * Signs the deploy with a given private key and adds the signature to the approvals list.
+   *
+   * @param keys The private key used to sign the deploy.
+   */
   public async sign(keys: PrivateKey): Promise<void> {
     const signatureBytes = await keys.sign(this.hash.toBytes());
     const signature = new HexBytes(signatureBytes);
     this.approvals.push(new Approval(keys.publicKey, signature));
   }
 
+  /**
+   * Converts the deploy object into a byte array for transmission or storage.
+   *
+   * @returns A `Uint8Array` representing the deploy in byte format.
+   */
   toBytes(): Uint8Array {
     return concat([
       this.header.toBytes(),
@@ -238,11 +323,12 @@ export class Deploy {
   }
 
   /**
-   * Sets already generated signature
+   * Sets an already generated signature for the deploy.
    *
-   * @param deploy the Deploy instance
-   * @param signature the Ed25519 or Secp256K1 signature
-   * @param publicKey the public key used to generate the signature
+   * @param deploy The deploy instance.
+   * @param signature The Ed25519 or Secp256K1 signature.
+   * @param publicKey The public key used to generate the signature.
+   * @returns A new `Deploy` instance with the added signature.
    */
   public static setSignature(
     deploy: Deploy,
@@ -254,6 +340,16 @@ export class Deploy {
     return deploy;
   }
 
+  /**
+   * Creates a new `Deploy` instance with the provided parameters.
+   *
+   * @param hash The deploy hash identifying this deploy.
+   * @param header The deploy header.
+   * @param payment The executable deploy item for the payment logic.
+   * @param session The executable deploy item for the session logic.
+   * @param approvals An array of approvals for the deploy.
+   * @returns A new `Deploy` object.
+   */
   public static createNew(
     hash: Hash,
     header: DeployHeader,
@@ -264,6 +360,14 @@ export class Deploy {
     return new Deploy(hash, header, payment, session, approvals);
   }
 
+  /**
+   * Creates a `Deploy` instance from the deploy header and session/payment logic.
+   *
+   * @param deployHeader The deploy header.
+   * @param payment The payment logic of the deploy.
+   * @param session The session logic of the deploy.
+   * @returns A new `Deploy` object.
+   */
   public static fromHeaderAndItems(
     deployHeader: DeployHeader,
     payment: ExecutableDeployItem,
@@ -277,6 +381,13 @@ export class Deploy {
     return Deploy.createNew(deployHash, deployHeader, payment, session);
   }
 
+  /**
+   * Converts the `Deploy` into a `Transaction` object.
+   * This method creates a transaction based on the deploy, including its payment and session logic.
+   *
+   * @param deploy The deploy object.
+   * @returns A new `Transaction` object created from the deploy.
+   */
   static newTransactionFromDeploy(deploy: Deploy): Transaction {
     let paymentAmount = 0;
     const transactionEntryPoint: TransactionEntryPoint = new TransactionEntryPoint();
@@ -341,10 +452,10 @@ export class Deploy {
   }
 
   /**
-   * Convert a JSON representation of a deploy to a `Deploy` object
+   * Converts a JSON representation of a deploy to a `Deploy` object.
    *
-   * @param json A JSON representation of a `Deploy`
-   * @returns A `Deploy` object if successful, or throws an error if parsing fails
+   * @param json The JSON representation of a `Deploy`.
+   * @returns A `Deploy` object if successful, or throws an error if parsing fails.
    */
   public static fromJSON(json: any): Deploy {
     let deploy: Deploy | undefined;
@@ -380,28 +491,29 @@ export class Deploy {
   }
 
   /**
-   * Convert the deploy object to a JSON representation
+   * Converts the `Deploy` object into a JSON representation.
    *
-   * @param deploy The `Deploy` object to convert to JSON
-   * @returns A JSON version of the `Deploy`, which can be converted back later
+   * @param deploy The deploy object to convert to JSON.
+   * @returns A JSON representation of the deploy.
    */
   public static toJson = (deploy: Deploy) => {
     const serializer = new TypedJSON(Deploy);
-
     return { deploy: serializer.toPlainJson(deploy) };
   };
 
   /**
-   * Identifies whether this `Deploy` represents a transfer of CSPR
-   * @returns `true` if the `Deploy` is a `Transfer`, and `false` otherwise
+   * Identifies whether this `Deploy` represents a transfer of CSPR.
+   *
+   * @returns `true` if the deploy is a transfer, otherwise `false`.
    */
   public isTransfer(): boolean {
     return this.session.isTransfer();
   }
 
   /**
-   * Identifies whether this `Deploy` represents a standard payment, like that of gas payment
-   * @returns `true` if the `Deploy` is a standard payment, and `false` otherwise
+   * Identifies whether this `Deploy` represents a standard payment, like a gas payment.
+   *
+   * @returns `true` if the deploy is a standard payment, otherwise `false`.
    */
   public isStandardPayment(): boolean {
     if (this.payment.isModuleBytes()) {
@@ -412,23 +524,31 @@ export class Deploy {
 }
 
 /**
- * Creates an instance of standard payment logic
- * @deprecated Use {ExecutableDeployItem.standardPayment} instead
+ * Creates an instance of standard payment logic for use in a `Deploy` object.
+ * This method is deprecated. It is recommended to use the `ExecutableDeployItem.standardPayment` method instead.
  *
- * @param paymentAmount The amount of motes to be used to pay for gas
- * @returns A standard payment, as an `ExecutableDeployItem` to be attached to a `Deploy`
+ * @deprecated Use {ExecutableDeployItem.standardPayment} instead
+ * @param paymentAmount The amount of motes to be used to pay for gas. This value should be expressed in motes, where 1 mote = 1 * 10^-9 CSPR.
+ * @returns An `ExecutableDeployItem` representing the standard payment logic, to be attached to a `Deploy`.
+ *
+ * @example
+ * const paymentAmount = BigNumber.from('1000000');
+ * const paymentItem = standardPayment(paymentAmount);
  */
 export const standardPayment = (paymentAmount: BigNumber) => {
   return ExecutableDeployItem.standardPayment(paymentAmount);
 };
 
 /**
- * @deprecated Use Deploy.fromHeaderAndItems
- * Builds a `Deploy` object from `DeployParams`, session logic, and payment logic
- * @param deployParam The parameters of the deploy, see [DeployParams](#L1323)
- * @param session The session logic of the deploy
- * @param payment The payment logic of the deploy
- * @returns A new `Deploy` object
+ * Builds a `Deploy` object from the given parameters, session logic, and payment logic.
+ * This method is deprecated. It is recommended to use `Deploy.fromHeaderAndItems` instead.
+ *
+ * @deprecated Use `Deploy.fromHeaderAndItems` instead
+ * @param deployParam The parameters used for creating the deploy. See [DeployParams](#L1323).
+ * @param session The session logic of the deploy, represented as an `ExecutableDeployItem`.
+ * @param payment The payment logic of the deploy, represented as an `ExecutableDeployItem`.
+ * @returns A new `Deploy` object that represents the entire deploy.
+ *
  */
 export function makeDeploy(
   deployParam: DeployParams,
@@ -456,9 +576,15 @@ export function makeDeploy(
 }
 
 /**
- * Serializes an array of `Approval`s into a `Uint8Array` typed byte array
- * @param approvals An array of `Approval`s to be serialized
- * @returns `Uint8Array` typed byte array that can be deserialized to an array of `Approval`s
+ * Serializes an array of `Approval`s into a `Uint8Array` typed byte array.
+ * This is used to store or transmit the approvals associated with a deploy.
+ *
+ * @param approvals An array of `Approval` objects that represent signatures from accounts that have approved the deploy.
+ * @returns A `Uint8Array` typed byte array that can be deserialized back into an array of `Approval` objects.
+ *
+ * @example
+ * const approvals = [new Approval(publicKey, signature)];
+ * const serializedApprovals = serializeApprovals(approvals);
  */
 export const serializeApprovals = (approvals: Approval[]): Uint8Array => {
   const len = toBytesU32(approvals.length);
@@ -473,16 +599,24 @@ export const serializeApprovals = (approvals: Approval[]): Uint8Array => {
   return concat([len, bytes]);
 };
 
-/** @deprecated The parameters of a `Deploy` object. Use Deploy.fromHeaderAndItems */
+/**
+ * The parameters of a `Deploy` object.
+ * This class is deprecated. Use `Deploy.fromHeaderAndItems` instead.
+ *
+ * It is used to configure the construction of a `Deploy` object.
+ *
+ * @deprecated The parameters of a `Deploy` object. Use Deploy.fromHeaderAndItems
+ */
 export class DeployParams {
   /**
-   * Container for `Deploy` construction options.
-   * @param accountPublicKey The public key of the deploying account as a `PublicKey`
-   * @param chainName Name of the chain, to avoid the `Deploy` from being accidentally or maliciously included in a different chain.
-   * @param gasPrice Conversion rate between the cost of Wasm opcodes and the motes sent by the payment code, where 1 mote = 1 * 10^-9 CSPR
-   * @param ttl Time that the `Deploy` will remain valid for, in milliseconds. The default value is 1800000, which is 30 minutes
-   * @param dependencies Hex-encoded `Deploy` hashes of deploys which must be executed before this one.
-   * @param timestamp  Note that timestamp is UTC, not local.
+   * Constructor for `DeployParams`.
+   *
+   * @param accountPublicKey The public key of the deploying account as a `PublicKey`.
+   * @param chainName The name of the blockchain chain to avoid the `Deploy` from being accidentally or maliciously included in another chain.
+   * @param gasPrice The conversion rate between the cost of Wasm opcodes and the motes sent by the payment code. 1 mote = 1 * 10^-9 CSPR.
+   * @param ttl The time-to-live (TTL) for the deploy, in milliseconds. The default value is 30 minutes (1800000 milliseconds).
+   * @param dependencies Hex-encoded `Deploy` hashes of deploys that must be executed before this one.
+   * @param timestamp The timestamp when the deploy is created, in UTC.
    */
   constructor(
     public accountPublicKey: PublicKey,
@@ -501,4 +635,7 @@ export class DeployParams {
   }
 }
 
+/**
+ * Default TTL value used for deploys (30 minutes).
+ */
 export const DEFAULT_DEPLOY_TTL = 1800000;

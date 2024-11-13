@@ -5,7 +5,7 @@ const PublicKeySize = 32;
 
 /**
  * Represents an Ed25519 public key, supporting signature verification
- * and loading from byte arrays or PEM files.
+ * and loading from byte arrays.
  */
 export class PublicKey {
   /** The raw bytes of the public key. */
@@ -29,7 +29,9 @@ export class PublicKey {
 
   /**
    * Verifies a signature for a given message.
-   * @param message - The message that was signed.
+   * Utilizes the Ed25519 algorithm to check if the signature is valid
+   * for the given message and public key.
+   * @param message - The original message that was signed.
    * @param signature - The signature to verify.
    * @returns A promise that resolves to `true` if the signature is valid, or `false` otherwise.
    */
@@ -42,6 +44,8 @@ export class PublicKey {
 
   /**
    * Creates a PublicKey instance from a byte array.
+   * Validates the size of the byte array to ensure it matches the expected
+   * size of an Ed25519 public key.
    * @param data - The byte array representing the public key.
    * @returns A new PublicKey instance.
    * @throws Error if the byte array length is not equal to `PublicKeySize`.

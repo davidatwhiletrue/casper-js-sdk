@@ -3,14 +3,14 @@ import { CLValue, IResultWithBytes } from './CLValue';
 import { CLValueParser } from './Parser';
 
 /**
- * Represents a tuple of one CLValue in the CasperLabs type system.
+ * Represents a tuple containing one CLValue in the Casper type system.
  */
 export class CLValueTuple1 {
   public innerType: CLTypeTuple1;
   private innerVal: CLValue;
 
   /**
-   * Constructs a new CLValueTuple1 instance.
+   * Initializes a new instance of the CLValueTuple1 class.
    * @param innerType - The CLTypeTuple1 representing the type of the tuple.
    * @param innerVal - The CLValue contained in the tuple.
    */
@@ -20,7 +20,7 @@ export class CLValueTuple1 {
   }
 
   /**
-   * Returns the byte representation of the tuple.
+   * Converts the tuple to its byte representation.
    * @returns A Uint8Array representing the bytes of the inner CLValue.
    */
   public bytes(): Uint8Array {
@@ -28,7 +28,7 @@ export class CLValueTuple1 {
   }
 
   /**
-   * Returns a string representation of the tuple.
+   * Provides a string representation of the tuple.
    * @returns A string representation of the tuple in the format "(value)".
    */
   public toString(): string {
@@ -36,7 +36,7 @@ export class CLValueTuple1 {
   }
 
   /**
-   * Returns the value of the tuple.
+   * Retrieves the value of the tuple.
    * @returns The CLValue contained in the tuple.
    */
   public value(): CLValue {
@@ -46,7 +46,7 @@ export class CLValueTuple1 {
   /**
    * Creates a new CLValue instance with a Tuple1 value.
    * @param val - The CLValue to be contained in the tuple.
-   * @returns A new CLValue instance with CLTypeTuple1 and a CLValueTuple1.
+   * @returns A new CLValue instance containing CLTypeTuple1 and a CLValueTuple1.
    */
   public static newCLTuple1(val: CLValue): CLValue {
     const tupleType = new CLTypeTuple1(val.type);
@@ -57,9 +57,10 @@ export class CLValueTuple1 {
 
   /**
    * Creates a CLValueTuple1 instance from a Uint8Array.
+   * Parses the byte array to retrieve the inner value of the tuple.
    * @param source - The Uint8Array containing the byte representation of the Tuple1 value.
    * @param clType - The CLTypeTuple1 representing the type of the tuple.
-   * @returns A new CLValueTuple1 instance.
+   * @returns An object containing the new CLValueTuple1 instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array,

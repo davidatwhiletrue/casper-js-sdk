@@ -7,11 +7,12 @@ import { CLValueParser } from './Parser';
 import { toBytesU32 } from '../ByteConverters';
 
 /**
- * Represents a List value in the CasperLabs type system.
+ * Represents a List value in the Casper type system.
+ * This class provides methods to manage and manipulate lists of CLValues.
  */
 export class CLValueList {
   /**
-   * The type of the list.
+   * The type of the list elements.
    */
   public type: CLTypeList;
 
@@ -21,7 +22,7 @@ export class CLValueList {
   public elements: CLValue[];
 
   /**
-   * Constructs a new CLValueList instance.
+   * Initializes a new instance of the CLValueList class.
    * @param type - The CLTypeList representing the type of the list.
    * @param elements - Optional array of CLValues to initialize the list with.
    */
@@ -31,8 +32,8 @@ export class CLValueList {
   }
 
   /**
-   * Returns the byte representation of the list.
-   * @returns A Uint8Array representing the bytes of the list, including its length and elements.
+   * Converts the list to its byte representation, including the length and each element's bytes.
+   * @returns A Uint8Array representing the bytes of the list.
    */
   public bytes(): Uint8Array {
     const valueByteList = this.elements.map(e => e.bytes());
@@ -41,8 +42,8 @@ export class CLValueList {
   }
 
   /**
-   * Returns a string representation of the list.
-   * @returns A string representation of the list in the format "[elem1,elem2,...]".
+   * Provides a string representation of the list.
+   * @returns A string in the format "[elem1, elem2, ...]".
    */
   public toString(): string {
     const strData = this.elements.map(one => `"${one.toString()}"`);
@@ -116,7 +117,7 @@ export class CLValueList {
   }
 
   /**
-   * Returns a JSON representation of the list.
+   * Converts the list to a JSON-compatible representation.
    * @returns An array of string representations of the list elements.
    */
   public toJSON(): any {
@@ -126,7 +127,7 @@ export class CLValueList {
   /**
    * Creates a new CLValue instance with a List value.
    * @param elementType - The CLType for the elements of the list.
-   * @returns A new CLValue instance with CLTypeList and a CLValueList.
+   * @returns A new CLValue instance containing CLTypeList and a CLValueList.
    */
   public static newCLList(elementType: CLType): CLValue {
     const listType = new CLTypeList(elementType);
@@ -137,9 +138,10 @@ export class CLValueList {
 
   /**
    * Creates a CLValueList instance from a Uint8Array.
+   * Parses the byte array to interpret the length of the list and each element in the list.
    * @param source - The Uint8Array containing the byte representation of the List value.
    * @param clType - The CLTypeList representing the type of the list.
-   * @returns A new CLValueList instance.
+   * @returns An object containing the new CLValueList instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array,

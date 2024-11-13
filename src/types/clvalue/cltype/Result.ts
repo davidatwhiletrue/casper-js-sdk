@@ -1,5 +1,4 @@
 import { concat } from '@ethersproject/bytes';
-
 import { TypeID, TypeName, CLType } from './CLType';
 import { CLTypeParser } from './Parser';
 
@@ -11,8 +10,8 @@ export const ErrInvalidResultJsonFormat = new Error(
 );
 
 /**
- * Represents a Result type in the CasperLabs type system.
- * This class implements the CLType interface for Result types.
+ * Represents a Result type in the Casper type system.
+ * This class implements the CLType interface, allowing for Result types with defined Ok and Err types.
  */
 export class CLTypeResult implements CLType {
   /**
@@ -26,7 +25,7 @@ export class CLTypeResult implements CLType {
   innerErr: CLType;
 
   /**
-   * Constructs a new CLTypeResult instance.
+   * Initializes a new instance of the CLTypeResult class.
    * @param innerOk - The CLType of the Ok value.
    * @param innerErr - The CLType of the Err value.
    */
@@ -36,8 +35,9 @@ export class CLTypeResult implements CLType {
   }
 
   /**
-   * Converts the CLTypeResult to its byte representation.
-   * @returns A Uint8Array representing the CLTypeResult, including its type ID and the bytes of its Ok and Err types.
+   * Converts the CLTypeResult instance to its byte representation.
+   * This includes the type ID for Result, followed by the byte representations of the Ok and Err types.
+   * @returns A Uint8Array representing the CLTypeResult.
    */
   public toBytes(): Uint8Array {
     return concat([
@@ -48,7 +48,7 @@ export class CLTypeResult implements CLType {
   }
 
   /**
-   * Returns a string representation of the CLTypeResult.
+   * Provides a string representation of the CLTypeResult.
    * @returns A string in the format "(Result: Ok(okType), Err(errType))".
    */
   public toString(): string {
@@ -56,15 +56,15 @@ export class CLTypeResult implements CLType {
   }
 
   /**
-   * Gets the type ID of the CLTypeResult.
-   * @returns The TypeID for Result.
+   * Retrieves the type ID of the CLTypeResult.
+   * @returns The TypeID associated with Result.
    */
   public getTypeID(): TypeID {
     return TypeID.Result;
   }
 
   /**
-   * Gets the name of the CLTypeResult.
+   * Retrieves the name of the CLTypeResult.
    * @returns The TypeName for Result.
    */
   public getName(): TypeName {
@@ -72,8 +72,9 @@ export class CLTypeResult implements CLType {
   }
 
   /**
-   * Converts the CLTypeResult to a JSON representation.
-   * @returns An object with a "Result" key containing the Ok and Err types.
+   * Converts the CLTypeResult instance to a JSON-compatible representation.
+   * The JSON object includes a "Result" key containing the JSON representations of the Ok and Err types.
+   * @returns A JSON object representing the Result type and its Ok and Err types.
    */
   public toJSON(): { [key: string]: { ok: CLType; err: CLType } } {
     return {
@@ -86,8 +87,9 @@ export class CLTypeResult implements CLType {
 
   /**
    * Creates a CLTypeResult instance from a JSON representation.
+   * Parses JSON input to determine the Ok and Err types for the Result.
    * @param source - The JSON representation of the CLTypeResult.
-   * @returns A new CLTypeResult instance.
+   * @returns A new CLTypeResult instance with parsed Ok and Err types.
    * @throws {ErrInvalidResultJsonFormat} If the JSON structure is invalid.
    */
   public static fromJSON(source: any): CLTypeResult {

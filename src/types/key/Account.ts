@@ -3,19 +3,20 @@ import { Hash } from './Hash';
 
 /**
  * Represents an account hash in the Casper network.
- * Extends the Hash class with additional functionality specific to account hashes.
+ * This class extends the `Hash` class, adding specific methods and properties for managing account hashes, which include special prefixes.
  */
 @jsonObject
 export class AccountHash extends Hash {
   /**
-   * The prefix of the original hash string, if any.
+   * Stores the prefix of the original hash string if it had one.
+   * Possible prefixes are `"00"` or `"account-hash-"`.
    */
   private originPrefix: string;
 
   /**
-   * Creates a new AccountHash instance.
-   * @param hash - The underlying Hash object.
-   * @param originPrefix - The prefix of the original hash string, if any.
+   * Initializes a new AccountHash instance.
+   * @param hash - The underlying Hash object containing the raw bytes of the account hash.
+   * @param originPrefix - Optional. The prefix of the original hash string (default is an empty string).
    */
   constructor(hash: Hash, originPrefix = '') {
     super(hash.toBytes());
@@ -23,9 +24,10 @@ export class AccountHash extends Hash {
   }
 
   /**
-   * Creates an AccountHash instance from a string representation.
+   * Parses a string representation of an account hash and creates an AccountHash instance.
+   * Recognizes and preserves any prefix, either `"00"` or `"account-hash-"`.
    * @param source - The string representation of the account hash.
-   * @returns A new AccountHash instance.
+   * @returns A new AccountHash instance containing the parsed hash and prefix.
    */
   public static fromString(source: string): AccountHash {
     let originPrefix = '';
@@ -41,26 +43,28 @@ export class AccountHash extends Hash {
   }
 
   /**
-   * Returns the account hash as a prefixed string.
-   * @returns The account hash with the 'account-hash-' prefix.
+   * Returns the account hash as a string, prefixed with `"account-hash-"`.
+   * This is useful for displaying the hash in a format recognized by the Casper network.
+   * @returns The account hash as a prefixed string.
    */
   public toPrefixedString(): string {
     return PrefixNameAccount + this.toHex();
   }
 
   /**
-   * Converts the AccountHash to its JSON representation.
-   * @returns A string representation of the AccountHash, including the original prefix.
+   * Serializes the AccountHash to its JSON representation.
+   * The JSON representation includes the original prefix if present.
+   * @returns A string representation of the AccountHash for JSON serialization.
    */
   public toJSON(): string {
     return this.originPrefix + this.toHex();
   }
 
   /**
-   * Creates an AccountHash instance from its JSON representation.
+   * Deserializes an AccountHash instance from a JSON string representation.
    * @param data - The JSON string representation of the AccountHash.
-   * @returns A new AccountHash instance.
-   * @throws {Error} If the input is not a valid JSON string.
+   * @returns A new AccountHash instance created from the JSON string.
+   * @throws {Error} Throws an error if the input is not a valid JSON string.
    */
   public static fromJSON(data: string): AccountHash {
     return AccountHash.fromString(data);
@@ -68,6 +72,6 @@ export class AccountHash extends Hash {
 }
 
 /**
- * The prefix used for account hash strings.
+ * Constant defining the prefix used for account hash strings in the Casper network.
  */
 const PrefixNameAccount = 'account-hash-';

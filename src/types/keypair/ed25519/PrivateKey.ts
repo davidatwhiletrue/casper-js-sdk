@@ -22,6 +22,7 @@ interface PrivateKeyInternal {
 
 /**
  * Represents an Ed25519 private key, supporting key generation, signing, and PEM encoding.
+ * Provides methods for creating instances from byte arrays, hexadecimal strings, and PEM format.
  */
 export class PrivateKey implements PrivateKeyInternal {
   /** Size of the PEM prefix for Ed25519 private keys. */
@@ -66,6 +67,7 @@ export class PrivateKey implements PrivateKeyInternal {
 
   /**
    * Creates a PrivateKey instance from a byte array.
+   * Validates that the byte array matches the expected length for an Ed25519 private key.
    * @param key - The byte array representing the private key.
    * @returns A new PrivateKey instance.
    * @throws Error if the byte array length is not 64.
@@ -79,6 +81,7 @@ export class PrivateKey implements PrivateKeyInternal {
 
   /**
    * Creates a PrivateKey instance from a hexadecimal string.
+   * Converts the hexadecimal string to bytes and validates the length.
    * @param keyHex - The hexadecimal string representing the private key.
    * @returns A new PrivateKey instance.
    * @throws Error if the hex string length is not 128 characters.
@@ -94,7 +97,7 @@ export class PrivateKey implements PrivateKeyInternal {
   }
 
   /**
-   * Exports the private key to PEM format.
+   * Exports the private key to PEM format, with a standardized prefix and suffix.
    * @returns A PEM-encoded string of the private key.
    */
   toPem(): string {
@@ -109,6 +112,7 @@ export class PrivateKey implements PrivateKeyInternal {
 
   /**
    * Creates a PrivateKey instance from a PEM-encoded string.
+   * Parses the PEM content to extract the private key bytes.
    * @param content - The PEM string representing the private key.
    * @returns A new PrivateKey instance.
    * @throws Error if the content cannot be properly parsed.

@@ -47,7 +47,8 @@ interface PublicKeyInternal {
 }
 
 /**
- * Represents a public key with cryptographic algorithm and key data.
+ * Represents a public key with a cryptographic algorithm and key data.
+ * Provides utilities for serialization, verification, and obtaining an associated account hash.
  */
 @jsonObject
 export class PublicKey {
@@ -60,8 +61,8 @@ export class PublicKey {
 
   /**
    * Creates an instance of PublicKey.
-   * @param cryptoAlg - The cryptographic algorithm.
-   * @param key - The key data.
+   * @param cryptoAlg - The cryptographic algorithm used by the key.
+   * @param key - The actual key data.
    */
   constructor(cryptoAlg: KeyAlgorithm, key: PublicKeyInternal) {
     this.cryptoAlg = cryptoAlg;
@@ -93,7 +94,7 @@ export class PublicKey {
   }
 
   /**
-   * Converts the public key to a JSON-compatible string.
+   * Serializes the public key to a JSON-compatible string.
    * @returns A JSON string representation of the public key.
    */
   toJSON(): string {
@@ -154,7 +155,7 @@ export class PublicKey {
   }
 
   /**
-   * Generates an account hash for the public key.
+   * Generates an account hash for the public key, used to uniquely identify an account.
    * @returns An AccountHash representing the account associated with this public key.
    */
   accountHash(): AccountHash {
@@ -250,7 +251,7 @@ export class PublicKey {
 }
 
 /**
- * Represents a list of public keys with utility methods for checking membership.
+ * Represents a list of public keys, with utility methods for checking membership and managing keys.
  */
 export class PublicKeyList {
   private keys: PublicKey[];

@@ -5,7 +5,7 @@ import { Hash } from './Hash';
 import { IResultWithBytes } from '../clvalue';
 
 /**
- * Enum representing the types of entities.
+ * Enum representing the types of entities within the system.
  */
 export enum EntityKindType {
   SystemKind = 0,
@@ -22,7 +22,8 @@ export const ErrInvalidEntityAddrFormat = new Error(
 export const ErrInvalidEntityKind = new Error('invalid EntityKind');
 
 /**
- * Represents an entity address in the system.
+ * Represents an entity address in the system. This class supports addresses for three types of entities:
+ * system, account, and smart contract. The address type is indicated by either the system, account, or smartContract property being set.
  */
 @jsonObject
 export class EntityAddr {
@@ -40,9 +41,9 @@ export class EntityAddr {
 
   /**
    * Creates a new EntityAddr instance.
-   * @param system - The system hash.
-   * @param account - The account hash.
-   * @param smartContract - The smart contract hash.
+   * @param system - The hash representing a system entity.
+   * @param account - The hash representing an account entity.
+   * @param smartContract - The hash representing a smart contract entity.
    */
   constructor(system?: Hash, account?: Hash, smartContract?: Hash) {
     this.system = system;
@@ -51,8 +52,8 @@ export class EntityAddr {
   }
 
   /**
-   * Returns a prefixed string representation of the EntityAddr.
-   * @returns The prefixed string representation.
+   * Returns a prefixed string representation of the EntityAddr, with different prefixes for each entity type.
+   * @returns The prefixed string representation, with "prefix-system-", "prefix-account-", or "prefix-contract-" based on entity type.
    */
   toPrefixedString(): string {
     const PrefixNameAddressableEntity = 'prefix-';
@@ -91,6 +92,7 @@ export class EntityAddr {
 
   /**
    * Converts the EntityAddr to a byte array.
+   * The first byte represents the entity type, followed by the bytes of the associated hash.
    * @returns The byte array representation of the EntityAddr.
    * @throws {Error} If the EntityAddr type is unexpected.
    */
@@ -115,7 +117,8 @@ export class EntityAddr {
   }
 
   /**
-   * Creates an EntityAddr from a byte array.
+   * Creates an EntityAddr from a byte array. The first byte indicates the entity type,
+   * and the remaining bytes represent the hash.
    * @param bytes - The byte array.
    * @returns A new EntityAddr instance.
    * @throws {Error} If the buffer is empty or the format is invalid.

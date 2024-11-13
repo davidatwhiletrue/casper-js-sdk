@@ -4,13 +4,13 @@ import { CLValue, IResultWithBytes } from './CLValue';
 import { toBytesU64 } from '../ByteConverters';
 
 /**
- * Represents a 64-bit unsigned integer value in the CasperLabs type system.
+ * Represents a 64-bit unsigned integer value in the Casper type system.
  */
 export class CLValueUInt64 {
   private value: BigNumberish;
 
   /**
-   * Constructs a new CLValueUInt64 instance.
+   * Initializes a new instance of the CLValueUInt64 class.
    * @param value - The value to initialize the CLValueUInt64 with. Can be any BigNumberish type.
    */
   constructor(value: BigNumberish) {
@@ -18,15 +18,15 @@ export class CLValueUInt64 {
   }
 
   /**
-   * Returns the byte representation of the UInt64 value.
-   * @returns A Uint8Array representing the bytes of the UInt64 value in little-endian format.
+   * Converts the UInt64 value to its byte representation in little-endian format.
+   * @returns A Uint8Array representing the bytes of the UInt64 value.
    */
   public bytes(): Uint8Array {
     return toBytesU64(this.value);
   }
 
   /**
-   * Returns a string representation of the UInt64 value.
+   * Provides a string representation of the UInt64 value.
    * @returns The string representation of the value.
    */
   public toString(): string {
@@ -34,8 +34,8 @@ export class CLValueUInt64 {
   }
 
   /**
-   * Returns the bigint value of the UInt64.
-   * @returns The bigint representation of the value.
+   * Retrieves the BigNumberish value of the UInt64.
+   * @returns The BigNumberish representation of the value.
    */
   public getValue(): BigNumberish {
     return this.value;
@@ -44,7 +44,7 @@ export class CLValueUInt64 {
   /**
    * Creates a new CLValue instance with a UInt64 value.
    * @param val - The value to initialize the UInt64 with. Can be any BigNumberish type.
-   * @returns A new CLValue instance with CLTypeUInt64 and a CLValueUInt64.
+   * @returns A new CLValue instance containing CLTypeUInt64 and a CLValueUInt64.
    */
   public static newCLUint64(val: BigNumberish): CLValue {
     const res = new CLValue(CLTypeUInt64);
@@ -54,9 +54,10 @@ export class CLValueUInt64 {
 
   /**
    * Creates a CLValueUInt64 instance from a Uint8Array.
+   * Parses the byte array to retrieve the UInt64 value.
    * @param source - The Uint8Array containing the byte representation of the UInt64 value.
-   * @returns A new CLValueUInt64 instance.
-   * @throws Will throw an error if the source array is smaller than Int64ByteSize.
+   * @returns An object containing the new CLValueUInt64 instance and any remaining bytes.
+   * @throws Error if the source array is smaller than the required size for a UInt64.
    */
   public static fromBytes(source: Uint8Array): IResultWithBytes<CLValueUInt64> {
     if (source.length < Int64ByteSize) {

@@ -22,7 +22,7 @@ describe('CLUref', () => {
 
     expect(RWExampleURef).to.be.an.instanceof(URef);
     expect(badFn1).to.throw('Invalid URef data length; expected 32');
-    expect(badFn2).to.throw('Unsuported AccessRights');
+    expect(badFn2).to.throw('Unsupported AccessRights');
   });
 
   it('fromFormattedString() / toFormattedString() proper value', () => {

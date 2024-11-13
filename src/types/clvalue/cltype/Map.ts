@@ -1,5 +1,4 @@
 import { concat } from '@ethersproject/bytes';
-
 import { TypeID, TypeName, CLType } from './CLType';
 import { CLTypeParser } from './Parser';
 
@@ -9,8 +8,8 @@ import { CLTypeParser } from './Parser';
 export const MapJsonParsingError = new Error('map type parsing error');
 
 /**
- * Represents a Map type in the CasperLabs type system.
- * This class implements the CLType interface for Map types.
+ * Represents a Map type in the Casper type system.
+ * This class implements the CLType interface, allowing the use of key-value pairs with specified types.
  */
 export class CLTypeMap implements CLType {
   /**
@@ -24,7 +23,7 @@ export class CLTypeMap implements CLType {
   public val: CLType;
 
   /**
-   * Constructs a new CLTypeMap instance.
+   * Initializes a new instance of the CLTypeMap class.
    * @param keyType - The CLType of the map's keys.
    * @param valType - The CLType of the map's values.
    */
@@ -34,8 +33,9 @@ export class CLTypeMap implements CLType {
   }
 
   /**
-   * Converts the CLTypeMap to its byte representation.
-   * @returns A Uint8Array representing the CLTypeMap, including its type ID and the bytes of its key and value types.
+   * Converts the CLTypeMap instance to its byte representation.
+   * This includes the type ID for Map followed by the byte representations of the key and value types.
+   * @returns A Uint8Array representing the CLTypeMap.
    */
   public toBytes(): Uint8Array {
     return concat([
@@ -46,7 +46,7 @@ export class CLTypeMap implements CLType {
   }
 
   /**
-   * Returns a string representation of the CLTypeMap.
+   * Provides a string representation of the CLTypeMap.
    * @returns A string in the format "Map (keyType: valueType)".
    */
   public toString(): string {
@@ -54,15 +54,15 @@ export class CLTypeMap implements CLType {
   }
 
   /**
-   * Gets the type ID of the CLTypeMap.
-   * @returns The TypeID for Map.
+   * Retrieves the type ID of the CLTypeMap.
+   * @returns The TypeID associated with Map.
    */
   public getTypeID(): TypeID {
     return TypeID.Map;
   }
 
   /**
-   * Gets the name of the CLTypeMap.
+   * Retrieves the name of the CLTypeMap.
    * @returns The TypeName for Map.
    */
   public getName(): TypeName {
@@ -70,8 +70,9 @@ export class CLTypeMap implements CLType {
   }
 
   /**
-   * Converts the CLTypeMap to a JSON representation.
-   * @returns An object with a "Map" key containing the key and value types.
+   * Converts the CLTypeMap instance to a JSON-compatible representation.
+   * The JSON object includes a "Map" key containing the JSON representations of the key and value types.
+   * @returns A JSON object representing the map type and its key and value types.
    */
   public toJSON(): { Map: { key: CLType; value: CLType } } {
     return {
@@ -84,8 +85,9 @@ export class CLTypeMap implements CLType {
 
   /**
    * Creates a CLTypeMap instance from a JSON representation.
+   * Parses JSON input to determine the key and value types of the map.
    * @param source - The JSON representation of the CLTypeMap.
-   * @returns A new CLTypeMap instance.
+   * @returns A new CLTypeMap instance with parsed key and value types.
    * @throws {MapJsonParsingError} If the JSON structure is invalid.
    */
   public static fromJSON(source: any): CLTypeMap {

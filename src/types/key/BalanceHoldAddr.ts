@@ -33,6 +33,9 @@ export function getBalanceHoldAddrTag(tag: number): BalanceHoldAddrTag {
   throw new BalanceHoldAddrTagError('Invalid BalanceHoldAddrTag');
 }
 
+/**
+ * Constants related to the structure of a BalanceHoldAddr.
+ */
 const ByteHashLen = 32;
 const BlockTypeBytesLen = 8;
 const PrefixNameBalanceHold = 'balance-hold-';
@@ -40,18 +43,18 @@ const PrefixNameBalanceHold = 'balance-hold-';
 type URefAddr = Uint8Array;
 
 /**
- * Represents a hold on a balance.
+ * Represents a hold on a balance, including the address of the purse and the block time.
  */
 @jsonObject
 export class Hold {
   /**
-   * The address of the purse.
+   * The address of the purse on which the hold is placed.
    */
   @jsonMember({ name: 'PurseAddr', constructor: Uint8Array })
   purseAddr: URefAddr;
 
   /**
-   * The block time of the hold.
+   * The block time at which the hold was created.
    */
   @jsonMember({
     name: 'BlockTime',
@@ -68,18 +71,18 @@ export class Hold {
 }
 
 /**
- * Represents a balance hold address.
+ * Represents an address holding a balance, categorized by either 'Gas' or 'Processing' type.
  */
 @jsonObject
 export class BalanceHoldAddr {
   /**
-   * The gas hold, if any.
+   * The hold categorized as 'Gas', if any.
    */
   @jsonMember({ name: 'Gas', constructor: Hold })
   gas?: Hold;
 
   /**
-   * The processing hold, if any.
+   * The hold categorized as 'Processing', if any.
    */
   @jsonMember({ name: 'Processing', constructor: Hold })
   processing?: Hold;
@@ -90,7 +93,7 @@ export class BalanceHoldAddr {
   }
 
   /**
-   * Creates a BalanceHoldAddr from a string representation.
+   * Parses a string representation of a BalanceHoldAddr and returns a new instance.
    * @param source - The string representation of the BalanceHoldAddr.
    * @returns A new BalanceHoldAddr instance.
    */
@@ -102,8 +105,8 @@ export class BalanceHoldAddr {
   }
 
   /**
-   * Returns the prefixed string representation of the BalanceHoldAddr.
-   * @returns The prefixed string representation.
+   * Converts the BalanceHoldAddr to a prefixed string, using 'balance-hold-' as the prefix.
+   * @returns The prefixed string representation of the BalanceHoldAddr.
    */
   toPrefixedString(): string {
     const bytes = this.toBytes();
@@ -111,8 +114,9 @@ export class BalanceHoldAddr {
   }
 
   /**
-   * Converts the BalanceHoldAddr to its byte representation.
-   * @returns The byte representation of the BalanceHoldAddr.
+   * Serializes the BalanceHoldAddr to its byte representation.
+   * Includes a byte for the hold type, the purse address, and an 8-byte block time.
+   * @returns The serialized byte representation of the BalanceHoldAddr.
    */
   toBytes(): Uint8Array {
     let hold = this.gas;
@@ -137,8 +141,8 @@ export class BalanceHoldAddr {
   }
 
   /**
-   * Creates a BalanceHoldAddr from its byte representation.
-   * @param bytes - The byte representation of the BalanceHoldAddr.
+   * Deserializes a BalanceHoldAddr from a byte array.
+   * @param bytes - The byte array containing the BalanceHoldAddr data.
    * @returns A new BalanceHoldAddr instance.
    * @throws Error if the byte format is invalid.
    * @throws BalanceHoldAddrTagError if the hold type is unexpected.
@@ -170,8 +174,8 @@ export class BalanceHoldAddr {
   }
 
   /**
-   * Creates a BalanceHoldAddr from its JSON representation.
-   * @param json - The JSON string representation of the BalanceHoldAddr.
+   * Parses a JSON string representation of a BalanceHoldAddr.
+   * @param json - The JSON string.
    * @returns A new BalanceHoldAddr instance.
    */
   public static fromJSON(json: string): BalanceHoldAddr {
@@ -179,7 +183,7 @@ export class BalanceHoldAddr {
   }
 
   /**
-   * Converts the BalanceHoldAddr to its JSON representation.
+   * Serializes the BalanceHoldAddr to its JSON string representation.
    * @returns The JSON string representation of the BalanceHoldAddr.
    */
   public toJSON(): string {

@@ -45,7 +45,7 @@ export const ErrUnsupportedCLType = new Error(
 );
 
 /**
- * A utility class for parsing CLValues from various formats.
+ * A utility class for parsing CLValues from various formats, including JSON and byte arrays.
  */
 export class CLValueParser {
   /**
@@ -86,15 +86,14 @@ export class CLValueParser {
    * @returns A Uint8Array containing the serialized CLValue with type information.
    */
   static toBytesWithType(value: CLValue): Uint8Array {
-    const valueBytes = value.bytes();
-    return valueBytes;
+    return value.bytes();
   }
 
   /**
    * Parses a CLValue from a Uint8Array given its type.
    * @param bytes - The Uint8Array containing the serialized CLValue.
    * @param sourceType - The CLType of the value to parse.
-   * @returns The parsed CLValue.
+   * @returns An object containing the parsed CLValue and any remaining bytes.
    * @throws {ErrUnsupportedCLType} If an unsupported CLType is encountered.
    */
   public static fromBytesByType(

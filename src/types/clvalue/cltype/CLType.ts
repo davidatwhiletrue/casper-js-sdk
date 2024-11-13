@@ -1,15 +1,16 @@
 /**
- * The size of a 32-bit integer in bytes.
+ * The byte size of a 32-bit integer.
  */
 export const Int32ByteSize = 4;
 
 /**
- * The size of a 64-bit integer in bytes.
+ * The byte size of a 64-bit integer.
  */
 export const Int64ByteSize = 8;
 
 /**
- * Enumeration of type identifiers used in the CasperLabs type system.
+ * Enumeration of type identifiers used within the Casper type system.
+ * Each TypeID uniquely identifies a specific data type.
  */
 export enum TypeID {
   Bool,
@@ -43,7 +44,7 @@ export enum TypeID {
 export type TypeName = string;
 
 /**
- * Object containing string constants for type names in the CasperLabs type system.
+ * Object containing string constants for each type name in the Casper type system.
  */
 export const TypeName = {
   Bool: 'Bool' as TypeName,
@@ -72,51 +73,51 @@ export const TypeName = {
 };
 
 /**
- * Interface representing a CLType in the CasperLabs type system.
+ * Interface representing a CLType in the Casper type system.
  */
 export interface CLType {
   /**
-   * Converts the CLType to its byte representation.
+   * Converts the CLType instance to its byte representation.
    * @returns A Uint8Array representing the CLType.
    */
   toBytes(): Uint8Array;
 
   /**
-   * Returns a string representation of the CLType.
+   * Provides a string representation of the CLType.
    * @returns A string representation of the CLType.
    */
   toString(): string;
 
   /**
-   * Gets the type ID of the CLType.
-   * @returns The TypeID of the CLType.
+   * Retrieves the type ID of the CLType.
+   * @returns The TypeID associated with the CLType.
    */
   getTypeID(): TypeID;
 
   /**
-   * Gets the name of the CLType.
-   * @returns The TypeName of the CLType.
+   * Retrieves the name of the CLType.
+   * @returns The TypeName associated with the CLType.
    */
   getName(): TypeName;
 
   /**
-   * Converts the CLType to a JSON representation.
-   * @returns A JSON representation of the CLType.
+   * Converts the CLType instance to a JSON representation.
+   * @returns A JSON-compatible representation of the CLType.
    */
   toJSON(): any;
 }
 
 /**
- * Represents a simple type in the CasperLabs type system.
+ * Represents a simple data type in the Casper type system.
  */
 export class SimpleType implements CLType {
   private readonly typeID: TypeID;
   private readonly typeName: TypeName;
 
   /**
-   * Constructs a new SimpleType instance.
-   * @param typeID - The TypeID of the simple type.
-   * @param name - The TypeName of the simple type.
+   * Constructs a new instance of the SimpleType class.
+   * @param typeID - The TypeID for the simple type.
+   * @param name - The TypeName for the simple type.
    */
   constructor(typeID: TypeID, name: TypeName) {
     this.typeID = typeID;
@@ -132,7 +133,7 @@ export class SimpleType implements CLType {
   }
 
   /**
-   * Returns a string representation of the SimpleType.
+   * Provides a string representation of the SimpleType.
    * @returns The name of the SimpleType.
    */
   toString(): string {
@@ -140,23 +141,23 @@ export class SimpleType implements CLType {
   }
 
   /**
-   * Gets the type ID of the SimpleType.
-   * @returns The TypeID of the SimpleType.
+   * Retrieves the type ID of the SimpleType.
+   * @returns The TypeID for the SimpleType.
    */
   getTypeID(): TypeID {
     return this.typeID;
   }
 
   /**
-   * Gets the name of the SimpleType.
-   * @returns The TypeName of the SimpleType.
+   * Retrieves the name of the SimpleType.
+   * @returns The TypeName for the SimpleType.
    */
   getName(): TypeName {
     return this.typeName;
   }
 
   /**
-   * Converts the SimpleType to a JSON representation.
+   * Converts the SimpleType instance to a JSON representation.
    * @returns The name of the SimpleType as a string.
    */
   toJSON(): string {
@@ -165,78 +166,79 @@ export class SimpleType implements CLType {
 }
 
 // Predefined SimpleType instances
+
 /**
- * Represents a Boolean type in the CasperLabs type system.
+ * Represents a Boolean type in the Casper type system.
  */
 export const CLTypeBool = new SimpleType(TypeID.Bool, TypeName.Bool);
 
 /**
- * Represents a 32-bit signed integer type in the CasperLabs type system.
+ * Represents a 32-bit signed integer type in the Casper type system.
  */
 export const CLTypeInt32 = new SimpleType(TypeID.I32, TypeName.I32);
 
 /**
- * Represents a 64-bit signed integer type in the CasperLabs type system.
+ * Represents a 64-bit signed integer type in the Casper type system.
  */
 export const CLTypeInt64 = new SimpleType(TypeID.I64, TypeName.I64);
 
 /**
- * Represents an 8-bit unsigned integer type in the CasperLabs type system.
+ * Represents an 8-bit unsigned integer type in the Casper type system.
  */
 export const CLTypeUInt8 = new SimpleType(TypeID.U8, TypeName.U8);
 
 /**
- * Represents a 32-bit unsigned integer type in the CasperLabs type system.
+ * Represents a 32-bit unsigned integer type in the Casper type system.
  */
 export const CLTypeUInt32 = new SimpleType(TypeID.U32, TypeName.U32);
 
 /**
- * Represents a 64-bit unsigned integer type in the CasperLabs type system.
+ * Represents a 64-bit unsigned integer type in the Casper type system.
  */
 export const CLTypeUInt64 = new SimpleType(TypeID.U64, TypeName.U64);
 
 /**
- * Represents a 128-bit unsigned integer type in the CasperLabs type system.
+ * Represents a 128-bit unsigned integer type in the Casper type system.
  */
 export const CLTypeUInt128 = new SimpleType(TypeID.U128, TypeName.U128);
 
 /**
- * Represents a 256-bit unsigned integer type in the CasperLabs type system.
+ * Represents a 256-bit unsigned integer type in the Casper type system.
  */
 export const CLTypeUInt256 = new SimpleType(TypeID.U256, TypeName.U256);
 
 /**
- * Represents a 512-bit unsigned integer type in the CasperLabs type system.
+ * Represents a 512-bit unsigned integer type in the Casper type system.
  */
 export const CLTypeUInt512 = new SimpleType(TypeID.U512, TypeName.U512);
 
 /**
- * Represents a Unit type (similar to void) in the CasperLabs type system.
+ * Represents a Unit type (similar to void) in the Casper type system.
  */
 export const CLTypeUnit = new SimpleType(TypeID.Unit, TypeName.Unit);
 
 /**
- * Represents a String type in the CasperLabs type system.
+ * Represents a String type in the Casper type system.
  */
 export const CLTypeString = new SimpleType(TypeID.String, TypeName.String);
 
 /**
- * Represents a Key type in the CasperLabs type system.
+ * Represents a Key type in the Casper type system.
  */
 export const CLTypeKey = new SimpleType(TypeID.Key, TypeName.Key);
 
 /**
- * Represents a URef (Unforgeable Reference) type in the CasperLabs type system.
+ * Represents a URef (Unforgeable Reference) type in the Casper type system.
  */
 export const CLTypeUref = new SimpleType(TypeID.URef, TypeName.URef);
 
 /**
- * Represents an Any type in the CasperLabs type system.
+ * Represents an Any type in the Casper type system.
  */
 export const CLTypeAny = new SimpleType(TypeID.Any, TypeName.Any);
 
 /**
- * Represents a PublicKey type in the CasperLabs type system.
+ * Represents a PublicKey type in the Casper type system.
  */
 export const CLTypePublicKey = new SimpleType(
   TypeID.PublicKey,

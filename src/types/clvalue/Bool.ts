@@ -2,13 +2,14 @@ import { CLTypeBool } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 
 /**
- * Represents a boolean value in the CasperLabs type system.
+ * Represents a boolean value in the Casper type system.
+ * This class encapsulates a boolean value and provides methods for byte conversion and CLValue integration.
  */
 export class CLValueBool {
   private value: boolean;
 
   /**
-   * Constructs a new CLValueBool instance.
+   * Initializes a new instance of the CLValueBool class.
    * @param value - The boolean value to be stored.
    */
   constructor(value: boolean) {
@@ -16,7 +17,7 @@ export class CLValueBool {
   }
 
   /**
-   * Returns the byte representation of the boolean value.
+   * Converts the boolean value to its byte representation.
    * @returns A Uint8Array with a single byte: 1 for true, 0 for false.
    */
   public bytes(): Uint8Array {
@@ -24,7 +25,7 @@ export class CLValueBool {
   }
 
   /**
-   * Returns a string representation of the boolean value.
+   * Provides a string representation of the boolean value.
    * @returns The string 'true' or 'false'.
    */
   public toString(): string {
@@ -32,7 +33,7 @@ export class CLValueBool {
   }
 
   /**
-   * Returns the boolean value.
+   * Retrieves the boolean value.
    * @returns The stored boolean value.
    */
   public getValue(): boolean {
@@ -40,9 +41,9 @@ export class CLValueBool {
   }
 
   /**
-   * Creates a new CLValue instance with a boolean value.
+   * Creates a new CLValue instance containing a boolean value.
    * @param val - The boolean value to be stored in the CLValue.
-   * @returns A new CLValue instance containing the boolean value.
+   * @returns A new CLValue instance encapsulating the boolean value.
    */
   public static fromBoolean(val: boolean): CLValue {
     const res = new CLValue(CLTypeBool);
@@ -52,9 +53,10 @@ export class CLValueBool {
 
   /**
    * Creates a CLValueBool instance from a Uint8Array.
+   * Parses the first byte in the array to determine the boolean value.
    * @param source - The Uint8Array containing the byte representation of the boolean value.
-   * @returns A new CLValueBool instance.
-   * @throws Will throw an error if the source array is empty.
+   * @returns An object containing the new CLValueBool instance and any remaining bytes.
+   * @throws Will throw an error if the source array is empty or contains an invalid boolean byte.
    */
   public static fromBytes(source: Uint8Array): IResultWithBytes<CLValueBool> {
     if (source.length === 0) {

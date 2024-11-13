@@ -3,11 +3,20 @@ import { PublicKey } from './keypair';
 import { CLValueUInt512 } from './clvalue';
 import { URef } from './key';
 
+/**
+ * Represents a vesting schedule for staked amounts, including an initial release timestamp and locked amounts.
+ */
 @jsonObject
 export class VestingSchedule {
+  /**
+   * The initial release timestamp in milliseconds.
+   */
   @jsonMember({ name: 'initial_release_timestamp_millis', constructor: Number })
   initialReleaseTimestampMillis: number;
 
+  /**
+   * The list of locked amounts associated with this vesting schedule.
+   */
   @jsonArrayMember(CLValueUInt512, {
     name: 'locked_amounts',
     serializer: (value: CLValueUInt512[]) => value.map(it => it.toJSON()),
@@ -17,8 +26,14 @@ export class VestingSchedule {
   lockedAmounts: CLValueUInt512[];
 }
 
+/**
+ * Represents a bid by a validator, including details about the bonding purse, delegation rate, stake, and vesting schedule.
+ */
 @jsonObject
 export class ValidatorBid {
+  /**
+   * The bonding purse associated with the validator.
+   */
   @jsonMember({
     name: 'bonding_purse',
     constructor: URef,
@@ -27,12 +42,21 @@ export class ValidatorBid {
   })
   bondingPurse: URef;
 
+  /**
+   * The rate at which delegations to this validator are taxed.
+   */
   @jsonMember({ name: 'delegation_rate', constructor: Number })
   delegationRate: number;
 
+  /**
+   * Indicates whether the validator is currently inactive.
+   */
   @jsonMember({ name: 'inactive', constructor: Boolean })
   inactive: boolean;
 
+  /**
+   * The total amount staked by this validator.
+   */
   @jsonMember({
     name: 'staked_amount',
     constructor: CLValueUInt512,
@@ -41,16 +65,25 @@ export class ValidatorBid {
   })
   stakedAmount: CLValueUInt512;
 
+  /**
+   * Minimum and maximum amounts that can be delegated to this validator.
+   */
   @jsonMember({ name: 'minimum_delegation_amount', constructor: Number })
   minimumDelegationAmount: number;
 
   @jsonMember({ name: 'maximum_delegation_amount', constructor: Number })
   maximumDelegationAmount: number;
 
+  /**
+   * The vesting schedule for this validator’s stake.
+   */
   @jsonMember({ name: 'vesting_schedule', constructor: VestingSchedule })
   vestingSchedule?: VestingSchedule;
 }
 
+/**
+ * Represents a delegator who delegates their stake to a validator.
+ */
 @jsonObject
 export class Delegator {
   constructor(
@@ -67,7 +100,12 @@ export class Delegator {
     this.vestingSchedule = vestingSchedule;
   }
 
-  static newDelegatorFromDelegatorV1(v1: DelegatorV1) {
+  /**
+   * Creates a `Delegator` instance from a `DelegatorV1` instance.
+   * @param v1 - The `DelegatorV1` instance to convert.
+   * @returns A new `Delegator` instance.
+   */
+  static newDelegatorFromDelegatorV1(v1: DelegatorV1): Delegator {
     return new Delegator(
       v1.bondingPurse,
       v1.stakedAmount,
@@ -113,6 +151,9 @@ export class Delegator {
   vestingSchedule?: VestingSchedule;
 }
 
+/**
+ * Represents a bid entry, including the bonding purse, delegation rate, inactive status, and vesting schedule.
+ */
 @jsonObject
 export class Bid {
   @jsonMember({
@@ -152,6 +193,9 @@ export class Bid {
   vestingSchedule?: VestingSchedule;
 }
 
+/**
+ * Represents a version 1 delegator with basic properties such as bonding purse and stake amount.
+ */
 @jsonObject
 export class DelegatorV1 {
   @jsonMember({
@@ -190,11 +234,20 @@ export class DelegatorV1 {
   vestingSchedule?: VestingSchedule;
 }
 
+/**
+ * Represents a credit in a staking system, tied to a specific era and validator.
+ */
 @jsonObject
 export class Credit {
+  /**
+   * The era ID associated with this credit.
+   */
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
+  /**
+   * The public key of the validator for this credit.
+   */
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
@@ -203,6 +256,9 @@ export class Credit {
   })
   validatorPublicKey: PublicKey;
 
+  /**
+   * The amount of the credit.
+   */
   @jsonMember({
     name: 'amount',
     constructor: CLValueUInt512,
@@ -212,11 +268,20 @@ export class Credit {
   amount: CLValueUInt512;
 }
 
+/**
+ * Represents a bridge between validators, including their public keys and the associated era.
+ */
 @jsonObject
 export class Bridge {
+  /**
+   * The era ID during which this bridge was established.
+   */
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
+  /**
+   * The public key of the old validator.
+   */
   @jsonMember({
     name: 'old_validator_public_key',
     constructor: PublicKey,
@@ -225,6 +290,9 @@ export class Bridge {
   })
   oldValidatorPublicKey: PublicKey;
 
+  /**
+   * The public key of the new validator.
+   */
   @jsonMember({
     name: 'new_validator_public_key',
     constructor: PublicKey,

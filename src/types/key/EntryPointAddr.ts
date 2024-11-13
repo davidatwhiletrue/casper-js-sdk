@@ -7,7 +7,7 @@ import { Conversions } from '../Conversions';
 import { IResultWithBytes } from '../clvalue';
 
 /**
- * Enum representing the types of entry points.
+ * Enum representing the types of entry points in the Casper VM.
  */
 export enum EntryPointTag {
   V1EntryPoint = 0,
@@ -45,7 +45,7 @@ const V2Prefix = 'v2-';
 const SelectorBytesLen = 4;
 
 /**
- * Represents a V1 Casper VM entry point.
+ * Represents a V1 Casper VM entry point with an entity address and name bytes.
  */
 @jsonObject
 class VmCasperV1 {
@@ -67,7 +67,7 @@ class VmCasperV1 {
 }
 
 /**
- * Represents a V2 Casper VM entry point.
+ * Represents a V2 Casper VM entry point with an entity address and selector.
  */
 @jsonObject
 class VmCasperV2 {
@@ -89,7 +89,7 @@ class VmCasperV2 {
 }
 
 /**
- * Represents an entry point address in the system.
+ * Represents an entry point address in the system, which may be a V1 or V2 Casper VM entry point.
  */
 @jsonObject
 export class EntryPointAddr {
@@ -99,6 +99,11 @@ export class EntryPointAddr {
   @jsonMember({ name: 'VmCasperV2', constructor: VmCasperV2 })
   vmCasperV2?: VmCasperV2;
 
+  /**
+   * Creates a new EntryPointAddr instance.
+   * @param vmCasperV1 - The V1 Casper VM entry point, if applicable.
+   * @param vmCasperV2 - The V2 Casper VM entry point, if applicable.
+   */
   constructor(vmCasperV1?: VmCasperV1, vmCasperV2?: VmCasperV2) {
     this.vmCasperV1 = vmCasperV1;
     this.vmCasperV2 = vmCasperV2;

@@ -3,6 +3,9 @@ import { concat } from '@ethersproject/bytes';
 
 import { CLValueString } from './clvalue';
 
+/**
+ * Enum representing the available transaction entry points, each representing a different operation in the system.
+ */
 export enum TransactionEntryPointEnum {
   Custom = 'Custom',
   Transfer = 'Transfer',
@@ -16,6 +19,9 @@ export enum TransactionEntryPointEnum {
   Call = 'Call'
 }
 
+/**
+ * Enum representing the tags for different transaction entry points. This is used for efficient storage and comparison.
+ */
 export enum TransactionEntryPointTag {
   Custom = 0,
   Transfer,
@@ -29,39 +35,86 @@ export enum TransactionEntryPointTag {
   Call
 }
 
+/**
+ * Represents a transaction entry point, which can be one of several predefined actions or a custom action.
+ * This class contains multiple fields that correspond to different transaction actions.
+ */
 @jsonObject
 export class TransactionEntryPoint {
+  /**
+   * Custom entry point, where the value can be a string representing a custom action.
+   */
   @jsonMember({ constructor: String })
   custom?: string;
 
-  // Use Record<string, unknown> for generic empty objects
+  /**
+   * The transfer action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   transfer?: Record<string, unknown>;
 
+  /**
+   * The add bid action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   addBid?: Record<string, unknown>;
 
+  /**
+   * The withdraw bid action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   withdrawBid?: Record<string, unknown>;
 
+  /**
+   * The delegate action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   delegate?: Record<string, unknown>;
 
+  /**
+   * The undelegate action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   undelegate?: Record<string, unknown>;
 
+  /**
+   * The redelegate action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   redelegate?: Record<string, unknown>;
 
+  /**
+   * The activate bid action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   activateBid?: Record<string, unknown>;
 
+  /**
+   * The change bid public key action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   changeBidPublicKey?: Record<string, unknown>;
 
+  /**
+   * The call action as a generic object.
+   */
   @jsonMember({ constructor: Object })
   call?: Record<string, unknown>;
 
+  /**
+   * Creates a new `TransactionEntryPoint` instance, where each parameter corresponds to a specific entry point action.
+   *
+   * @param custom A custom entry point action represented as a string.
+   * @param transfer The transfer action, represented as a generic object.
+   * @param addBid The add bid action, represented as a generic object.
+   * @param withdrawBid The withdraw bid action, represented as a generic object.
+   * @param delegate The delegate action, represented as a generic object.
+   * @param undelegate The undelegate action, represented as a generic object.
+   * @param redelegate The redelegate action, represented as a generic object.
+   * @param activateBid The activate bid action, represented as a generic object.
+   * @param changeBidPublicKey The change bid public key action, represented as a generic object.
+   * @param call The call action, represented as a generic object.
+   */
   constructor(
     custom?: string,
     transfer?: Record<string, unknown>,
@@ -86,6 +139,11 @@ export class TransactionEntryPoint {
     this.call = call;
   }
 
+  /**
+   * Returns the tag corresponding to the transaction entry point. This helps identify the entry point in a compact manner.
+   *
+   * @returns The tag number associated with the entry point.
+   */
   private tag(): number {
     if (this.transfer) return TransactionEntryPointTag.Transfer;
     if (this.addBid) return TransactionEntryPointTag.AddBid;
@@ -100,6 +158,11 @@ export class TransactionEntryPoint {
     return TransactionEntryPointTag.Custom;
   }
 
+  /**
+   * Serializes the transaction entry point into a byte array.
+   *
+   * @returns A `Uint8Array` representing the transaction entry point and any associated data.
+   */
   bytes(): Uint8Array {
     let result = new Uint8Array([this.tag()]);
     if (this.custom) {
@@ -109,6 +172,12 @@ export class TransactionEntryPoint {
     return result;
   }
 
+  /**
+   * Converts the transaction entry point to a JSON-compatible format.
+   *
+   * @returns A JSON-compatible representation of the transaction entry point.
+   * @throws An error if the entry point is unknown.
+   */
   toJSON(): unknown {
     if (this.custom) {
       return { Custom: this.custom };
@@ -128,6 +197,13 @@ export class TransactionEntryPoint {
     throw new Error('Unknown entry point');
   }
 
+  /**
+   * Creates a `TransactionEntryPoint` instance from a JSON representation.
+   *
+   * @param json The JSON representation of the entry point.
+   * @returns A `TransactionEntryPoint` instance.
+   * @throws An error if the entry point is unknown.
+   */
   static fromJSON(json: any): TransactionEntryPoint {
     const entryPoint = new TransactionEntryPoint();
     if (json instanceof Object && json.Custom) {

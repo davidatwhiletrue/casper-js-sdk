@@ -11,8 +11,14 @@ import { Transfer } from './Transfer';
 import { Transform, TransformKey } from './Transform';
 import { TransactionHash } from './Transaction';
 
+/**
+ * Represents an operation performed during a transaction.
+ */
 @jsonObject
 export class Operation {
+  /**
+   * The key associated with the operation.
+   */
   @jsonMember({
     name: 'key',
     constructor: Key,
@@ -21,27 +27,51 @@ export class Operation {
   })
   public key: Key;
 
+  /**
+   * The type of the operation (e.g., "Write", "Transfer").
+   */
   @jsonMember({ name: 'kind', constructor: String })
   public kind: string;
 }
 
+/**
+ * A collection of transformations applied during a transaction.
+ */
 @jsonObject
 export class Effects extends Array<Transform> {}
 
+/**
+ * Represents the effect of a transaction, including the operations and transformations.
+ */
 @jsonObject
 export class Effect {
+  /**
+   * The operations performed as part of this effect.
+   */
   @jsonArrayMember(Operation, { name: 'operations' })
   public operations: Operation[] = [];
 
+  /**
+   * The transformations applied as part of this effect.
+   */
   @jsonArrayMember(TransformKey, { name: 'transforms' })
   public transforms: TransformKey[] = [];
 }
 
+/**
+ * Contains the result of a transaction's execution, including the effect and related transfers.
+ */
 @jsonObject
 export class ExecutionResultStatusData {
+  /**
+   * The effect of the transaction execution, including operations and transformations.
+   */
   @jsonMember({ name: 'effect', constructor: Effect })
   public effect: Effect;
 
+  /**
+   * The transfers that were part of the transaction execution.
+   */
   @jsonArrayMember(TransferHash, {
     name: 'transfers',
     serializer: (value: TransferHash[]) => value.map(it => it.toJSON()),
@@ -50,15 +80,27 @@ export class ExecutionResultStatusData {
   })
   public transfers: TransferHash[] = [];
 
+  /**
+   * The cost of the transaction execution.
+   */
   @jsonMember({ name: 'cost', constructor: Number })
   public cost: number;
 
+  /**
+   * The error message, if any, generated during the transaction execution.
+   */
   @jsonMember({ name: 'error_message', constructor: String })
   public errorMessage: string;
 }
 
+/**
+ * Represents version 2 of the execution result, containing more detailed information.
+ */
 @jsonObject
 export class ExecutionResultV2 {
+  /**
+   * The address of the initiator of the execution.
+   */
   @jsonMember({
     name: 'initiator',
     constructor: InitiatorAddr,
@@ -67,45 +109,84 @@ export class ExecutionResultV2 {
   })
   public initiator: InitiatorAddr;
 
+  /**
+   * The error message, if any, generated during the execution.
+   */
   @jsonMember({ name: 'error_message', constructor: String })
   public errorMessage?: string;
 
+  /**
+   * The execution limit for the transaction.
+   */
   @jsonMember({ name: 'limit', constructor: Number })
   public limit: number;
 
+  /**
+   * The amount of resources consumed during the transaction execution.
+   */
   @jsonMember({ name: 'consumed', constructor: Number })
   public consumed: number;
 
+  /**
+   * The cost associated with the transaction execution.
+   */
   @jsonMember({ name: 'cost', constructor: Number })
   public cost: number;
 
+  /**
+   * The payment made for the transaction, if any.
+   */
   @jsonMember({ name: 'payment', constructor: AnyT })
   public payment?: any;
 
+  /**
+   * The transfers included in the transaction execution.
+   */
   @jsonArrayMember(Transfer, {
     name: 'transfers',
     deserializer: (json: any) => json.map((it: string) => Transfer.fromJSON(it))
   })
   public transfers: Transfer[] = [];
 
+  /**
+   * The estimated size of the transaction execution.
+   */
   @jsonMember({ name: 'size_estimate', constructor: Number })
   public sizeEstimate: number;
 
+  /**
+   * The effects applied during the transaction execution.
+   */
   @jsonArrayMember(Transform, { name: 'effects' })
   public effects: Transform[] = [];
 }
 
+/**
+ * Represents version 1 of the execution result, containing basic information on success or failure.
+ */
 @jsonObject
 export class ExecutionResultV1 {
+  /**
+   * The status data for a successful execution.
+   */
   @jsonMember({ name: 'Success', constructor: ExecutionResultStatusData })
   public success?: ExecutionResultStatusData;
 
+  /**
+   * The status data for a failed execution.
+   */
   @jsonMember({ name: 'Failure', constructor: ExecutionResultStatusData })
   public failure?: ExecutionResultStatusData;
 }
 
+/**
+ * Contains the block hash and execution result of a deploy execution.
+ */
 @jsonObject
 export class DeployExecutionResult {
+  /**
+   * The block hash where the deploy was executed.
+   */
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
@@ -114,12 +195,21 @@ export class DeployExecutionResult {
   })
   public blockHash: Hash;
 
+  /**
+   * The execution result for the deploy.
+   */
   @jsonMember({ name: 'result', constructor: ExecutionResultV1 })
   public result: ExecutionResultV1;
 }
 
+/**
+ * Represents the result of a transaction execution, which includes the initiator, cost, transfers, and effects.
+ */
 @jsonObject
 export class ExecutionResult {
+  /**
+   * The address of the initiator of the execution.
+   */
   @jsonMember({
     constructor: InitiatorAddr,
     deserializer: json => InitiatorAddr.fromJSON(json),
@@ -127,35 +217,74 @@ export class ExecutionResult {
   })
   public initiator: InitiatorAddr;
 
+  /**
+   * The error message, if any, generated during the execution.
+   */
   @jsonMember({ name: 'error_message', constructor: String })
   public errorMessage?: string;
 
+  /**
+   * The execution limit for the transaction.
+   */
   @jsonMember({ constructor: Number })
   public limit: number;
 
+  /**
+   * The amount of resources consumed during the transaction execution.
+   */
   @jsonMember({ constructor: Number })
   public consumed: number;
 
+  /**
+   * The cost associated with the transaction execution.
+   */
   @jsonMember({ constructor: Number })
   public cost: number;
 
+  /**
+   * The payment made for the transaction, if any.
+   */
   @jsonMember({ constructor: AnyT })
   public payment?: any;
 
+  /**
+   * The transfers included in the transaction execution.
+   */
   @jsonArrayMember(Transfer, {
     deserializer: (json: any) => json.map((it: string) => Transfer.fromJSON(it))
   })
   public transfers: Transfer[] = [];
 
+  /**
+   * The estimated size of the transaction execution.
+   */
   @jsonMember({ constructor: Number })
   public sizeEstimate: number;
 
+  /**
+   * The effects applied during the transaction execution.
+   */
   @jsonArrayMember(Transform)
   public effects: Transform[] = [];
 
+  /**
+   * The original execution result in version 1 format, if applicable.
+   */
   public originExecutionResultV1?: ExecutionResultV1;
+
+  /**
+   * The original execution result in version 2 format, if applicable.
+   */
   public originExecutionResultV2?: ExecutionResultV2;
 
+  /**
+   * Deserializes an `ExecutionResult` from JSON data.
+   * Supports both version 1 and version 2 formats.
+   *
+   * @param data The JSON data representing the execution result.
+   * @returns The deserialized `ExecutionResult`.
+   * @throws Error if the data format is invalid or unknown.
+   */
   public static fromJSON(data: any): ExecutionResult {
     const rawObject = JSON.parse(data);
 
@@ -191,6 +320,12 @@ export class ExecutionResult {
     throw new Error('Incorrect RPC response structure');
   }
 
+  /**
+   * Creates an `ExecutionResult` from version 1 of the execution result.
+   *
+   * @param v1 The version 1 execution result.
+   * @returns The `ExecutionResult` created from version 1 data.
+   */
   public static fromV1(v1: ExecutionResultV1): ExecutionResult {
     const result = new ExecutionResult();
     const transforms: Transform[] = [];
@@ -255,8 +390,14 @@ export class ExecutionResult {
   }
 }
 
+/**
+ * Represents execution information about a deploy, including the block hash, height, and execution result.
+ */
 @jsonObject
 export class ExecutionInfo {
+  /**
+   * The block hash where the deploy was executed.
+   */
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
@@ -265,12 +406,26 @@ export class ExecutionInfo {
   })
   public blockHash: Hash;
 
+  /**
+   * The block height at the time the deploy was executed.
+   */
   @jsonMember({ name: 'block_height', constructor: Number })
   public blockHeight: number;
 
+  /**
+   * The execution result associated with the deploy.
+   */
   @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
   public executionResult: ExecutionResult;
 
+  /**
+   * Creates an `ExecutionInfo` instance from version 1 data.
+   *
+   * @param results The results of the deploy execution.
+   * @param height The block height, if available.
+   * @returns The `ExecutionInfo` instance created from version 1 data.
+   * @throws Error if the results are empty or missing.
+   */
   constructor(
     blockHash: Hash,
     blockHeight: number,
@@ -300,8 +455,14 @@ export class ExecutionInfo {
   }
 }
 
+/**
+ * Represents execution information for a deploy, including the block hash, height, and execution result.
+ */
 @jsonObject
 export class DeployExecutionInfo {
+  /**
+   * The block hash where the deploy was executed.
+   */
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
@@ -310,12 +471,25 @@ export class DeployExecutionInfo {
   })
   public blockHash: Hash;
 
+  /**
+   * The block height at the time the deploy was executed.
+   */
   @jsonMember({ name: 'block_height', constructor: Number })
   public blockHeight: number;
 
+  /**
+   * The execution result associated with the deploy.
+   */
   @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
   public executionResult: ExecutionResult;
 
+  /**
+   * Creates a `DeployExecutionInfo` instance from version 1 data.
+   *
+   * @param results The results of the deploy execution.
+   * @param height The block height, if available.
+   * @returns The `DeployExecutionInfo` instance created from version 1 data.
+   */
   public static fromV1(
     results: DeployExecutionResult[],
     height?: number

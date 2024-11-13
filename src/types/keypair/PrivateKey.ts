@@ -33,6 +33,7 @@ enum KeyAlgorithm {
 
 /**
  * Represents a private key with associated public key and cryptographic algorithm.
+ * Provides methods for signing messages, exporting to PEM, and generating public keys.
  */
 export class PrivateKey {
   /** The cryptographic algorithm used for the key. */
@@ -148,6 +149,7 @@ export class PrivateKey {
 
 /**
  * Factory class for creating instances of PrivateKeyInternal using different formats and algorithms.
+ * This utility class allows generating, importing, and creating private keys with specific cryptographic algorithms.
  */
 class PrivateKeyFactory {
   /**

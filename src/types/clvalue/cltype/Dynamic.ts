@@ -1,16 +1,16 @@
 import { TypeID, TypeName, CLType } from './CLType';
 
 /**
- * Represents a dynamic CLType in the CasperLabs type system.
- * This class allows for runtime determination of CLTypes.
+ * Represents a dynamic CLType in the Casper type system.
+ * This class allows for runtime determination of types, enabling dynamic manipulation of CLTypes.
  */
 export class CLTypeDynamic implements CLType {
   public typeID: TypeID;
   public inner: CLType;
 
   /**
-   * Constructs a new CLTypeDynamic instance.
-   * @param typeID - The TypeID of the dynamic type.
+   * Initializes a new instance of the CLTypeDynamic class.
+   * @param typeID - The TypeID representing the dynamic type.
    * @param inner - The inner CLType that this dynamic type represents.
    */
   constructor(typeID: TypeID, inner: CLType) {
@@ -19,7 +19,7 @@ export class CLTypeDynamic implements CLType {
   }
 
   /**
-   * Converts the CLTypeDynamic to its byte representation.
+   * Converts the CLTypeDynamic instance to its byte representation.
    * @returns A Uint8Array representing the bytes of the inner CLType.
    */
   public toBytes(): Uint8Array {
@@ -27,23 +27,23 @@ export class CLTypeDynamic implements CLType {
   }
 
   /**
-   * Returns a string representation of the CLTypeDynamic.
-   * @returns A string representation of the inner CLType.
+   * Provides a string representation of the CLTypeDynamic.
+   * @returns A string representing the inner CLType.
    */
   public toString(): string {
     return this.inner.toString();
   }
 
   /**
-   * Gets the type ID of the CLTypeDynamic.
-   * @returns The TypeID of the dynamic type.
+   * Retrieves the type ID of the CLTypeDynamic.
+   * @returns The TypeID associated with this dynamic type.
    */
   public getTypeID(): TypeID {
     return this.typeID;
   }
 
   /**
-   * Gets the name of the CLTypeDynamic.
+   * Retrieves the name of the CLTypeDynamic.
    * @returns The TypeName of the inner CLType.
    */
   public getName(): TypeName {
@@ -51,8 +51,8 @@ export class CLTypeDynamic implements CLType {
   }
 
   /**
-   * Converts the CLTypeDynamic to a JSON representation.
-   * @returns The JSON representation of the inner CLType.
+   * Converts the CLTypeDynamic instance to a JSON-compatible representation.
+   * @returns A JSON representation of the inner CLType.
    */
   public toJSON(): any {
     return this.inner.toJSON();

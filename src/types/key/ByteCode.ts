@@ -1,14 +1,15 @@
 import { concat } from '@ethersproject/bytes';
-
 import { Hash } from './Hash';
 import { PrefixName } from './Key';
 import { IResultWithBytes } from '../clvalue';
 
 /**
- * Enum representing the types of byte code.
+ * Enum representing types of byte code within the system.
  */
 enum ByteCodeKind {
+  /** Represents an empty byte code type. */
   EmptyKind = 0,
+  /** Represents a V1 Casper WASM byte code type. */
   V1CasperWasmKind = 1
 }
 
@@ -16,12 +17,14 @@ const EmptyPrefix = 'empty-';
 const V1WasmPrefix = 'v1-wasm-';
 
 /**
- * Custom error class for ByteCode related errors.
+ * Custom error class for ByteCode-related errors.
  */
 class ByteCodeError extends Error {
+  /** Error for an invalid byte code format. */
   static ErrInvalidByteCodeFormat = new ByteCodeError(
     'Invalid ByteCode format'
   );
+  /** Error for an invalid byte code kind. */
   static ErrInvalidByteCodeKind = new ByteCodeError('Invalid ByteCodeKind');
 
   constructor(message: string) {
@@ -31,16 +34,16 @@ class ByteCodeError extends Error {
 }
 
 /**
- * Represents a byte code in the system.
+ * Represents a byte code in the system, providing support for V1 Casper WASM or an empty byte code.
  */
 export class ByteCode {
   private V1CasperWasm?: Hash;
   private isEmpty: boolean;
 
   /**
-   * Creates a new ByteCode instance.
-   * @param V1CasperWasm - The V1 Casper WASM hash.
-   * @param isEmpty - Whether the byte code is empty.
+   * Constructs a new ByteCode instance.
+   * @param V1CasperWasm - The hash representing V1 Casper WASM byte code.
+   * @param isEmpty - Whether the byte code is empty. Default is `false`.
    */
   constructor(V1CasperWasm?: Hash, isEmpty = false) {
     this.V1CasperWasm = V1CasperWasm;
@@ -48,7 +51,7 @@ export class ByteCode {
   }
 
   /**
-   * Creates a ByteCode from its JSON representation.
+   * Creates a ByteCode from a JSON string representation.
    * @param data - The JSON string representation of the ByteCode.
    * @returns A new ByteCode instance.
    * @throws ByteCodeError.ErrInvalidByteCodeFormat if the format is invalid.
@@ -64,7 +67,7 @@ export class ByteCode {
   }
 
   /**
-   * Converts the ByteCode to its JSON representation.
+   * Converts the ByteCode instance to its JSON string representation.
    * @returns The JSON string representation of the ByteCode.
    */
   toJSON(): string {
@@ -72,8 +75,8 @@ export class ByteCode {
   }
 
   /**
-   * Checks if the ByteCode is empty.
-   * @returns True if the ByteCode is empty, false otherwise.
+   * Determines if the ByteCode instance represents an empty byte code.
+   * @returns True if the byte code is empty; otherwise, false.
    */
   isEmptyCode(): boolean {
     return this.isEmpty;
@@ -81,7 +84,7 @@ export class ByteCode {
 
   /**
    * Returns a prefixed string representation of the ByteCode.
-   * @returns The prefixed string representation.
+   * @returns A prefixed string based on the byte code type.
    * @throws Error if the ByteCode type is unexpected.
    */
   toPrefixedString(): string {
@@ -97,9 +100,9 @@ export class ByteCode {
   }
 
   /**
-   * Creates a ByteCode from a byte array.
+   * Creates a ByteCode instance from a byte array representation.
    * @param bytes - The byte array.
-   * @returns A new ByteCode instance.
+   * @returns An object with the new ByteCode instance and remaining bytes.
    * @throws ByteCodeError.ErrInvalidByteCodeFormat if the format is invalid.
    */
   static fromBytes(bytes: Uint8Array): IResultWithBytes<ByteCode> {
@@ -122,10 +125,10 @@ export class ByteCode {
   }
 
   /**
-   * Converts a byte to a ByteCodeKind.
+   * Converts a byte to its corresponding ByteCodeKind.
    * @param tag - The byte to convert.
    * @returns The corresponding ByteCodeKind.
-   * @throws ByteCodeError.ErrInvalidByteCodeKind if the byte doesn't correspond to a valid ByteCodeKind.
+   * @throws ByteCodeError.ErrInvalidByteCodeKind if the byte doesn't match a valid ByteCodeKind.
    */
   static newByteCodeKindFromByte(tag: number): ByteCodeKind {
     if (tag in ByteCodeKind) {
@@ -135,7 +138,7 @@ export class ByteCode {
   }
 
   /**
-   * Converts the ByteCode to a byte array.
+   * Converts the ByteCode instance to a byte array representation.
    * @returns The byte array representation of the ByteCode.
    * @throws Error if the ByteCode type is unexpected.
    */
@@ -143,7 +146,6 @@ export class ByteCode {
     if (this.V1CasperWasm) {
       const kindBytes = new Uint8Array([ByteCodeKind.V1CasperWasmKind]);
       const wasmBytes = this.V1CasperWasm.toBytes();
-
       return concat([kindBytes, wasmBytes]);
     } else if (this.isEmpty) {
       return new Uint8Array([ByteCodeKind.EmptyKind]);

@@ -3,26 +3,26 @@ import { Hash } from './Hash';
 import { PrefixName } from './Key';
 
 /**
- * Represents a contract package hash in the system.
+ * Represents a contract package hash within the system, with support for prefixed and JSON representations.
  */
 @jsonObject
 export class ContractPackageHash {
   /**
-   * The hash of the contract package.
+   * The hash object representing the contract package.
    */
   @jsonMember({ name: 'hash', constructor: Hash })
   hash: Hash;
 
   /**
-   * The original prefix of the contract package hash string, if any.
+   * The original prefix of the contract package hash string, if any (e.g., "hash-", "contract-package-wasm-", "contract-package-").
    */
   @jsonMember({ name: 'originPrefix', constructor: String })
   originPrefix: string;
 
   /**
-   * Creates a new ContractPackageHash instance.
-   * @param hash - The Hash object representing the contract package hash.
-   * @param originPrefix - The original prefix of the contract package hash string.
+   * Constructs a new `ContractPackageHash` instance.
+   * @param hash - The `Hash` object representing the contract package hash.
+   * @param originPrefix - The original prefix of the contract package hash string, if applicable.
    */
   constructor(hash: Hash, originPrefix: string) {
     this.hash = hash;
@@ -30,8 +30,8 @@ export class ContractPackageHash {
   }
 
   /**
-   * Converts the ContractPackageHash to its JSON representation.
-   * @returns A string representation of the ContractPackageHash, including the original prefix.
+   * Converts the `ContractPackageHash` instance to its JSON representation.
+   * @returns A string representation of the `ContractPackageHash`, including the original prefix.
    */
   toJSON(): string {
     return this.originPrefix + this.hash.toHex();
@@ -39,25 +39,25 @@ export class ContractPackageHash {
 
   /**
    * Returns the contract package hash as a prefixed string.
-   * @returns The contract package hash with the ContractPackage prefix.
+   * @returns The contract package hash prefixed with `ContractPackage`.
    */
   toPrefixedString(): string {
     return PrefixName.ContractPackage + this.hash.toHex();
   }
 
   /**
-   * Creates a ContractPackageHash instance from its JSON representation.
-   * @param json - The JSON string representation of the ContractPackageHash.
-   * @returns A new ContractPackageHash instance.
+   * Creates a `ContractPackageHash` instance from its JSON representation.
+   * @param json - The JSON string representation of the `ContractPackageHash`.
+   * @returns A new `ContractPackageHash` instance.
    */
   static fromJSON(json: string): ContractPackageHash {
     return ContractPackageHash.newContractPackage(json);
   }
 
   /**
-   * Creates a new ContractPackageHash instance from a string representation.
-   * @param source - The string representation of the contract package hash.
-   * @returns A new ContractPackageHash instance.
+   * Creates a new `ContractPackageHash` instance from a string representation.
+   * @param source - The string representation of the contract package hash, including any prefix.
+   * @returns A new `ContractPackageHash` instance.
    */
   static newContractPackage(source: string): ContractPackageHash {
     let originPrefix = '';

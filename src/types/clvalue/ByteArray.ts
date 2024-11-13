@@ -2,13 +2,14 @@ import { CLTypeByteArray } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 
 /**
- * Represents a byte array value in the CasperLabs type system.
+ * Represents a byte array value in the Casper type system.
+ * This class encapsulates a byte array, providing methods for conversion to and from CLValue.
  */
 export class CLValueByteArray {
   private data: Uint8Array;
 
   /**
-   * Constructs a new CLValueByteArray instance.
+   * Initializes a new instance of the CLValueByteArray class.
    * @param data - The Uint8Array to be stored in the CLValueByteArray.
    */
   constructor(data: Uint8Array) {
@@ -16,7 +17,7 @@ export class CLValueByteArray {
   }
 
   /**
-   * Returns the byte representation of the byte array.
+   * Retrieves the byte representation of the byte array.
    * @returns A Uint8Array representing the bytes of the byte array.
    */
   public bytes(): Uint8Array {
@@ -24,7 +25,8 @@ export class CLValueByteArray {
   }
 
   /**
-   * Returns a hexadecimal string representation of the byte array.
+   * Provides a hexadecimal string representation of the byte array.
+   * Each byte is represented by two hexadecimal digits.
    * @returns A string representing the byte array in hexadecimal format.
    */
   public toString(): string {
@@ -34,9 +36,9 @@ export class CLValueByteArray {
   }
 
   /**
-   * Creates a new CLValue instance with a ByteArray value.
-   * @param val - The Uint8Array to be stored in the CLValue.
-   * @returns A new CLValue instance containing the ByteArray.
+   * Creates a new CLValue instance containing a ByteArray value.
+   * @param val - The Uint8Array to be stored within the CLValue.
+   * @returns A new CLValue instance encapsulating the ByteArray.
    */
   public static newCLByteArray(val: Uint8Array): CLValue {
     const byteArrayType = new CLTypeByteArray(val.length);
@@ -48,9 +50,10 @@ export class CLValueByteArray {
 
   /**
    * Creates a CLValueByteArray instance from a Uint8Array.
+   * Extracts the bytes specified by the given CLTypeByteArray size.
    * @param data - The Uint8Array containing the byte representation of the ByteArray value.
-   * @param clType - The CLTypeByteArray representing the type of the ByteArray.
-   * @returns A new CLValueByteArray instance.
+   * @param clType - The CLTypeByteArray defining the size of the ByteArray.
+   * @returns An object containing the new CLValueByteArray instance and any remaining bytes.
    */
   public static fromBytes(
     data: Uint8Array,

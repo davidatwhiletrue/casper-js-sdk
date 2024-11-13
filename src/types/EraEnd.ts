@@ -12,8 +12,14 @@ import {
   serializeRewards
 } from './clvalue';
 
+/**
+ * Class representing the rewards associated with a validator in a given era.
+ */
 @jsonObject
 export class EraReward {
+  /**
+   * The public key of the validator receiving the reward.
+   */
   @jsonMember({
     name: 'validator',
     constructor: PublicKey,
@@ -22,6 +28,9 @@ export class EraReward {
   })
   public validator: PublicKey;
 
+  /**
+   * The amount of reward given to the validator.
+   */
   @jsonMember({
     name: 'amount',
     constructor: CLValueUInt512,
@@ -30,14 +39,26 @@ export class EraReward {
   })
   public amount: CLValueUInt512;
 
+  /**
+   * Constructs an `EraReward` instance.
+   *
+   * @param validator The public key of the validator.
+   * @param amount The reward amount.
+   */
   constructor(validator: PublicKey, amount: CLValueUInt512) {
     this.validator = validator;
     this.amount = amount;
   }
 }
 
+/**
+ * Class representing the era report containing information about equivocators, inactive validators, and rewards.
+ */
 @jsonObject
 export class EraReport {
+  /**
+   * List of validators that have been found to equivocate during the era.
+   */
   @jsonArrayMember(PublicKey, {
     name: 'equivocators',
     serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
@@ -46,6 +67,9 @@ export class EraReport {
   })
   public equivocators: PublicKey[];
 
+  /**
+   * List of inactive validators during the era.
+   */
   @jsonArrayMember(PublicKey, {
     name: 'inactive_validators',
     serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
@@ -54,9 +78,19 @@ export class EraReport {
   })
   public inactiveValidators: PublicKey[];
 
+  /**
+   * List of rewards distributed to validators during the era.
+   */
   @jsonArrayMember(EraReward, { name: 'rewards' })
   public rewards: EraReward[];
 
+  /**
+   * Constructs an `EraReport` instance.
+   *
+   * @param equivocators The list of equivocators.
+   * @param inactiveValidators The list of inactive validators.
+   * @param rewards The list of rewards distributed to validators.
+   */
   constructor(
     equivocators: PublicKey[] = [],
     inactiveValidators: PublicKey[] = [],
@@ -68,8 +102,14 @@ export class EraReport {
   }
 }
 
+/**
+ * Class representing the details of an era's end, version 2. It includes information like equivocations, inactive validators, and rewards.
+ */
 @jsonObject
 export class EraEndV2 {
+  /**
+   * List of validators that have been found to equivocate during the era.
+   */
   @jsonArrayMember(PublicKey, {
     name: 'equivocators',
     serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
@@ -78,6 +118,9 @@ export class EraEndV2 {
   })
   public equivocators: PublicKey[];
 
+  /**
+   * List of inactive validators during the era.
+   */
   @jsonArrayMember(PublicKey, {
     name: 'inactive_validators',
     serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
@@ -86,11 +129,17 @@ export class EraEndV2 {
   })
   public inactiveValidators: PublicKey[];
 
+  /**
+   * List of validator weights for the next era.
+   */
   @jsonArrayMember(ValidatorWeightEraEnd, {
     name: 'next_era_validator_weights'
   })
   public nextEraValidatorWeights: ValidatorWeightEraEnd[];
 
+  /**
+   * A map of rewards for each validator, identified by their public key, in the next era.
+   */
   @jsonMapMember(String, Array, {
     name: 'rewards',
     serializer: serializeRewards,
@@ -98,9 +147,21 @@ export class EraEndV2 {
   })
   public rewards: Map<string, CLValueUInt512[]>;
 
+  /**
+   * The gas price for the next era.
+   */
   @jsonMember({ name: 'next_era_gas_price', constructor: Number })
   public nextEraGasPrice: number;
 
+  /**
+   * Constructs an `EraEndV2` instance.
+   *
+   * @param equivocators The list of equivocators.
+   * @param inactiveValidators The list of inactive validators.
+   * @param nextEraValidatorWeights The validator weights for the next era.
+   * @param rewards The map of rewards for each validator in the next era.
+   * @param nextEraGasPrice The gas price for the next era.
+   */
   constructor(
     equivocators: PublicKey[],
     inactiveValidators: PublicKey[],
@@ -116,16 +177,31 @@ export class EraEndV2 {
   }
 }
 
+/**
+ * Class representing the details of an era's end, version 1.
+ */
 @jsonObject
 export class EraEndV1 {
+  /**
+   * The era report containing equivocators, inactive validators, and rewards.
+   */
   @jsonMember({ name: 'era_report', constructor: EraReport })
   public eraReport: EraReport;
 
+  /**
+   * The list of validator weights for the next era.
+   */
   @jsonArrayMember(ValidatorWeightEraEnd, {
     name: 'next_era_validator_weights'
   })
   public nextEraValidatorWeights: ValidatorWeightEraEnd[];
 
+  /**
+   * Constructs an `EraEndV1` instance.
+   *
+   * @param eraReport The era report.
+   * @param nextEraValidatorWeights The validator weights for the next era.
+   */
   constructor(
     eraReport: EraReport,
     nextEraValidatorWeights: ValidatorWeightEraEnd[]
@@ -135,8 +211,14 @@ export class EraEndV1 {
   }
 }
 
+/**
+ * A class that represents the end of an era with a unified structure.
+ */
 @jsonObject
 export class EraEnd {
+  /**
+   * List of validators that have been found to equivocate during the era.
+   */
   @jsonArrayMember(PublicKey, {
     name: 'equivocators',
     serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
@@ -145,6 +227,9 @@ export class EraEnd {
   })
   public equivocators: PublicKey[];
 
+  /**
+   * List of inactive validators during the era.
+   */
   @jsonArrayMember(PublicKey, {
     name: 'inactive_validators',
     serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
@@ -153,11 +238,17 @@ export class EraEnd {
   })
   public inactiveValidators: PublicKey[];
 
+  /**
+   * List of validator weights for the next era.
+   */
   @jsonArrayMember(ValidatorWeightEraEnd, {
     name: 'next_era_validator_weights'
   })
   public nextEraValidatorWeights: ValidatorWeightEraEnd[];
 
+  /**
+   * A map of rewards for each validator, identified by their public key.
+   */
   @jsonMapMember(String, CLValueUInt512, {
     name: 'rewards',
     deserializer: deserializeRewards,
@@ -165,9 +256,21 @@ export class EraEnd {
   })
   public rewards: Map<string, CLValueUInt512[]>;
 
+  /**
+   * The gas price for the next era.
+   */
   @jsonMember({ name: 'next_era_gas_price', constructor: Number })
   public nextEraGasPrice: number;
 
+  /**
+   * Constructs an `EraEnd` instance.
+   *
+   * @param equivocators The list of equivocators.
+   * @param inactiveValidators The list of inactive validators.
+   * @param nextEraValidatorWeights The validator weights for the next era.
+   * @param rewards The map of rewards for each validator.
+   * @param nextEraGasPrice The gas price for the next era.
+   */
   constructor(
     equivocators: PublicKey[] = [],
     inactiveValidators: PublicKey[] = [],
@@ -182,6 +285,12 @@ export class EraEnd {
     this.nextEraGasPrice = nextEraGasPrice;
   }
 
+  /**
+   * Converts an `EraEndV2` instance to `EraEnd`.
+   *
+   * @param eraEnd The `EraEndV2` instance.
+   * @returns A new `EraEnd` instance, or `null` if the `EraEndV2` is `null`.
+   */
   static fromV2(eraEnd: EraEndV2 | null): EraEnd | null {
     if (!eraEnd) return null;
     const result = new EraEnd();
@@ -193,6 +302,12 @@ export class EraEnd {
     return result;
   }
 
+  /**
+   * Converts an `EraEndV1` instance to `EraEnd`.
+   *
+   * @param eraEnd The `EraEndV1` instance.
+   * @returns A new `EraEnd` instance, or `null` if the `EraEndV1` is `null`.
+   */
   static fromV1(eraEnd: EraEndV1 | null): EraEnd | null {
     if (!eraEnd) return null;
 

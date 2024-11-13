@@ -5,7 +5,7 @@ import { CLValue, IResultWithBytes } from './CLValue';
 import { CLValueParser } from './Parser';
 
 /**
- * Represents a tuple of two CLValues in the CasperLabs type system.
+ * Represents a tuple containing two CLValues in the Casper type system.
  */
 export class CLValueTuple2 {
   public innerType: CLTypeTuple2;
@@ -13,7 +13,7 @@ export class CLValueTuple2 {
   public inner2: CLValue;
 
   /**
-   * Constructs a new CLValueTuple2 instance.
+   * Initializes a new instance of the CLValueTuple2 class.
    * @param innerType - The CLTypeTuple2 representing the type of the tuple.
    * @param inner1 - The first CLValue in the tuple.
    * @param inner2 - The second CLValue in the tuple.
@@ -25,7 +25,7 @@ export class CLValueTuple2 {
   }
 
   /**
-   * Returns the byte representation of the tuple.
+   * Converts the tuple to its byte representation.
    * @returns A Uint8Array representing the concatenated bytes of both inner CLValues.
    */
   public bytes(): Uint8Array {
@@ -35,7 +35,7 @@ export class CLValueTuple2 {
   }
 
   /**
-   * Returns a string representation of the tuple.
+   * Provides a string representation of the tuple.
    * @returns A string representation of the tuple in the format "(value1, value2)".
    */
   public toString(): string {
@@ -43,7 +43,7 @@ export class CLValueTuple2 {
   }
 
   /**
-   * Returns the values of the tuple as an array of CLValues.
+   * Retrieves the values of the tuple as an array.
    * @returns An array containing the two CLValues of the tuple.
    */
   public value(): [CLValue, CLValue] {
@@ -54,7 +54,7 @@ export class CLValueTuple2 {
    * Creates a new CLValue instance with a Tuple2 value.
    * @param val1 - The first CLValue in the tuple.
    * @param val2 - The second CLValue in the tuple.
-   * @returns A new CLValue instance with CLTypeTuple2 and a CLValueTuple2.
+   * @returns A new CLValue instance containing CLTypeTuple2 and a CLValueTuple2.
    */
   public static newCLTuple2(val1: CLValue, val2: CLValue): CLValue {
     const tupleType = new CLTypeTuple2(val1.type, val2.type);
@@ -65,9 +65,10 @@ export class CLValueTuple2 {
 
   /**
    * Creates a CLValueTuple2 instance from a Uint8Array.
+   * Parses the byte array to retrieve the two values of the tuple.
    * @param source - The Uint8Array containing the byte representation of the Tuple2 value.
    * @param clType - The CLTypeTuple2 representing the type of the tuple.
-   * @returns A new CLValueTuple2 instance.
+   * @returns An object containing the new CLValueTuple2 instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array,

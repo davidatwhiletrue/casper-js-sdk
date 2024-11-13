@@ -3,8 +3,14 @@ import { URef } from './key';
 import { PublicKey } from './keypair';
 import { CLValueUInt512 } from './clvalue';
 
+/**
+ * Represents an unbonding purse, which contains information about the unbonding process of a bonded amount.
+ */
 @jsonObject
 export class UnbondingPurse {
+  /**
+   * The amount being unbonded, represented as `CLValueUInt512`.
+   */
   @jsonMember({
     name: 'amount',
     constructor: CLValueUInt512,
@@ -13,6 +19,9 @@ export class UnbondingPurse {
   })
   amount: CLValueUInt512;
 
+  /**
+   * The bonding purse from which the unbonding is taking place, represented as a `URef`.
+   */
   @jsonMember({
     name: 'bonding_purse',
     constructor: URef,
@@ -21,9 +30,15 @@ export class UnbondingPurse {
   })
   bondingPurse: URef;
 
+  /**
+   * The era when the unbonding purse was created.
+   */
   @jsonMember({ name: 'era_of_creation', constructor: Number })
   eraOfCreation: number;
 
+  /**
+   * The public key of the unbonder, representing the individual initiating the unbonding process.
+   */
   @jsonMember({
     name: 'unbonder_public_key',
     constructor: PublicKey,
@@ -32,6 +47,9 @@ export class UnbondingPurse {
   })
   unbonderPublicKey: PublicKey;
 
+  /**
+   * The public key of the validator associated with the unbonding.
+   */
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
@@ -40,6 +58,9 @@ export class UnbondingPurse {
   })
   validatorPublicKey: PublicKey;
 
+  /**
+   * The public key of a new validator, if applicable. This may be used for transferring the bonded amount to a new validator.
+   */
   @jsonMember({
     name: 'new_validator',
     constructor: PublicKey,

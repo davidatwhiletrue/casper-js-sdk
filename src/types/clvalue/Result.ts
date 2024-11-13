@@ -1,11 +1,12 @@
+import { concat } from '@ethersproject/bytes';
+
 import { CLType, CLTypeResult } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 import { CLValueParser } from './Parser';
-import { concat } from '@ethersproject/bytes';
 import { CLValueUInt8 } from './Uint8';
 
 /**
- * Represents a Result type in the CasperLabs type system.
+ * Represents a Result type in the Casper type system.
  * A Result can either be a success (Ok) or an error (Err).
  */
 export class CLValueResult {
@@ -14,7 +15,7 @@ export class CLValueResult {
   public inner: CLValue;
 
   /**
-   * Constructs a new CLValueResult instance.
+   * Initializes a new instance of the CLValueResult class.
    * @param type - The CLTypeResult representing the type of the Result.
    * @param isSuccess - A boolean indicating whether the Result is a success (true) or an error (false).
    * @param inner - The CLValue contained within the Result.
@@ -26,8 +27,9 @@ export class CLValueResult {
   }
 
   /**
-   * Returns the byte representation of the Result.
-   * @returns A Uint8Array representing the bytes of the Result, including a success flag and the inner value.
+   * Converts the Result to its byte representation.
+   * Includes a success flag byte (1 for success, 0 for error) followed by the bytes of the inner value.
+   * @returns A Uint8Array representing the bytes of the Result.
    */
   public bytes(): Uint8Array {
     const successByte = Uint8Array.from([this.isSuccess ? 1 : 0]);
@@ -36,7 +38,7 @@ export class CLValueResult {
   }
 
   /**
-   * Returns a string representation of the Result.
+   * Provides a string representation of the Result.
    * @returns A string representation of the Result, either "Ok(innerValue)" or "Err(innerValue)".
    */
   public toString(): string {
@@ -46,7 +48,7 @@ export class CLValueResult {
   }
 
   /**
-   * Returns the inner CLValue of the Result.
+   * Retrieves the inner CLValue of the Result.
    * @returns The CLValue contained within the Result.
    */
   public value(): CLValue {
@@ -59,7 +61,7 @@ export class CLValueResult {
    * @param innerErr - The CLType for the error case.
    * @param value - The CLValue to be contained in the Result.
    * @param isSuccess - A boolean indicating whether the Result is a success (true) or an error (false).
-   * @returns A new CLValue instance with CLTypeResult and a CLValueResult.
+   * @returns A new CLValue instance containing CLTypeResult and a CLValueResult.
    */
   public static newCLResult(
     innerOk: CLType,
@@ -75,9 +77,10 @@ export class CLValueResult {
 
   /**
    * Creates a CLValueResult instance from a Uint8Array.
+   * Parses the byte array to interpret the success flag and the inner value.
    * @param source - The Uint8Array containing the byte representation of the Result value.
    * @param clType - The CLTypeResult representing the type of the Result.
-   * @returns A new CLValueResult instance.
+   * @returns An object containing the new CLValueResult instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array,

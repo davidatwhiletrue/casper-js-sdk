@@ -4,21 +4,22 @@ import { arrayify, concat } from '@ethersproject/bytes';
 import { blake2b } from '@noble/hashes/blake2b';
 
 /**
- * Convert number to bytes
- * @param bitSize The bit size of the integer
- * @param signed `true` if the integer is signed, `false` if not
- * @returns `Uint8Array` buffer representation of the integer
+ * Converts a BigNumberish value to bytes with specified bit size and signedness.
+ * @param bitSize - The bit size of the integer.
+ * @param signed - `true` if the integer is signed; `false` otherwise.
+ * @returns A function that converts a BigNumberish value into a `Uint8Array` byte representation.
  */
 export const toBytesNumber = (bitSize: number, signed: boolean) => (
   value: BigNumberish
 ): Uint8Array => {
   const val = BigNumber.from(value);
 
-  // Check bounds are safe for encoding
+  // Calculate the maximum allowed unsigned value for the given bit size
   const maxUintValue = MaxUint256.mask(bitSize);
 
   if (signed) {
-    const bounds = maxUintValue.mask(bitSize - 1); // 1 bit for signed
+    // Calculate signed bounds for the given bit size
+    const bounds = maxUintValue.mask(bitSize - 1);
     if (val.gt(bounds) || val.lt(bounds.add(One).mul(NegativeOne))) {
       throw new Error('value out-of-bounds, value: ' + value);
     }
@@ -31,18 +32,14 @@ export const toBytesNumber = (bitSize: number, signed: boolean) => (
   const bytes = arrayify(valTwos);
 
   if (valTwos.gte(0)) {
-    // for positive number, we had to deal with paddings
     if (bitSize > 64) {
-      // if zero just return zero
       if (valTwos.eq(0)) {
         return bytes;
       }
-      // for u128, u256, u512, we have to and append extra byte for length
       return concat([bytes, Uint8Array.from([bytes.length])])
         .slice()
         .reverse();
     } else {
-      // for other types, we have to add padding 0s
       const byteLength = bitSize / 8;
       return concat([
         bytes.slice().reverse(),
@@ -55,56 +52,59 @@ export const toBytesNumber = (bitSize: number, signed: boolean) => (
 };
 
 /**
- * Converts `u8` to little endian.
+ * Converts an 8-bit unsigned integer (`u8`) to little-endian byte format.
  */
 export const toBytesU8 = toBytesNumber(8, false);
 
 /**
- * Converts `i32` to little endian.
+ * Converts a 32-bit signed integer (`i32`) to little-endian byte format.
  */
 export const toBytesI32 = toBytesNumber(32, true);
 
 /**
- * Converts `u32` to little endian.
+ * Converts a 32-bit unsigned integer (`u32`) to little-endian byte format.
  */
 export const toBytesU32 = toBytesNumber(32, false);
 
 /**
- * Converts `u64` to little endian.
+ * Converts a 64-bit unsigned integer (`u64`) to little-endian byte format.
  */
 export const toBytesU64 = toBytesNumber(64, false);
 
 /**
- * Converts `i64` to little endian.
+ * Converts a 64-bit signed integer (`i64`) to little-endian byte format.
  */
 export const toBytesI64 = toBytesNumber(64, true);
 
 /**
- * Converts `u128` to little endian.
+ * Converts a 128-bit unsigned integer (`u128`) to little-endian byte format.
  */
 export const toBytesU128 = toBytesNumber(128, false);
 
 /**
- * Converts `u256` to little endian.
+ * Converts a 256-bit unsigned integer (`u256`) to little-endian byte format.
  */
 export const toBytesU256 = toBytesNumber(256, false);
 
 /**
- * Converts `u512` to little endian.
+ * Converts a 512-bit unsigned integer (`u512`) to little-endian byte format.
  */
 export const toBytesU512 = toBytesNumber(512, false);
 
 /**
- * @deprecated
+ * Converts a deploy hash to bytes.
+ * @param deployHash - A `Uint8Array` representing the deploy hash.
+ * @returns The `Uint8Array` representation of the deploy hash.
+ * @deprecated This function will be removed in future versions.
  */
-export const toBytesDeployHash = (deployHash: Uint8Array) => {
+export const toBytesDeployHash = (deployHash: Uint8Array): Uint8Array => {
   return deployHash;
 };
 
 /**
- * Serializes a string into an array of bytes
- * @param str The string to be converted
- * @returns A `Uint8Array` representation of the string
+ * Serializes a string into a byte array.
+ * @param str - The string to be converted.
+ * @returns A `Uint8Array` representation of the string, including its length as a `u32` prefix.
  */
 export function toBytesString(str: string): Uint8Array {
   const arr = Uint8Array.from(Buffer.from(str));
@@ -112,30 +112,28 @@ export function toBytesString(str: string): Uint8Array {
 }
 
 /**
- * Deserializes an array of bytes into a string
- * @param byte `Uint8Array` buffer of bytes to be deserialized
- * @returns The serialized string
+ * Deserializes a byte array into a string.
+ * @param byte - `Uint8Array` representing the serialized string.
+ * @returns The deserialized string.
  */
 export const fromBytesString = (byte: Uint8Array): string => {
   return Buffer.from(byte).toString();
 };
 
 /**
- * Serializes an array of u8, equal to Vec<u8> in rust.
- * @param arr `Uint8Array` buffer of u8 integers
- * @returns Serialized `Uint8Array` buffer
+ * Serializes an array of `u8` values, equivalent to `Vec<u8>` in Rust.
+ * @param arr - A `Uint8Array` buffer of `u8` integers.
+ * @returns A serialized `Uint8Array` with the array's length as a `u32` prefix.
  */
 export function toBytesArrayU8(arr: Uint8Array): Uint8Array {
   return concat([toBytesU32(arr.length), arr]);
 }
 
 /**
- * Use blake2b to compute hash of ByteArray
- * @param x Byte array of type `Uint8Array` to compute the blake2b hash on
- * @returns `Uint8Array` buffer of the blake2b hash
+ * Computes the Blake2b hash of a byte array.
+ * @param x - A `Uint8Array` byte array to compute the Blake2b hash on.
+ * @returns A `Uint8Array` buffer containing the 32-byte Blake2b hash.
  */
 export function byteHash(x: Uint8Array): Uint8Array {
-  return blake2b(x, {
-    dkLen: 32
-  });
+  return blake2b(x, { dkLen: 32 });
 }

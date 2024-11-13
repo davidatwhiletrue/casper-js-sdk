@@ -1,13 +1,14 @@
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 
 /**
- * A utility class for various data conversions used in the CasperLabs ecosystem.
+ * A utility class for various data conversions used in the Casper ecosystem.
+ * Provides methods to convert between different encodings (Base64, Base16) and to perform conversions between CSPR and motes.
  */
 export class Conversions {
   /**
-   * Encodes a Uint8Array into a string using Base-64 encoding.
+   * Encodes a `Uint8Array` into a string using Base-64 encoding.
    *
-   * @param bytes - The Uint8Array to be encoded.
+   * @param bytes - The `Uint8Array` to be encoded.
    * @returns A Base-64 encoded string representation of the input bytes.
    *
    * @example
@@ -20,10 +21,10 @@ export class Conversions {
   }
 
   /**
-   * Decodes a Base-64 encoded string and returns a Uint8Array of bytes.
+   * Decodes a Base-64 encoded string and returns a `Uint8Array` of bytes.
    *
    * @param base64String - The Base-64 encoded string to be decoded.
-   * @returns A Uint8Array containing the decoded bytes.
+   * @returns A `Uint8Array` containing the decoded bytes.
    *
    * @example
    * const base64 = "SGVsbG8=";
@@ -50,9 +51,9 @@ export class Conversions {
   }
 
   /**
-   * Encodes a Uint8Array into a string using Base-16 (hexadecimal) encoding.
+   * Encodes a `Uint8Array` into a string using Base-16 (hexadecimal) encoding.
    *
-   * @param bytes - The Uint8Array to be encoded.
+   * @param bytes - The `Uint8Array` to be encoded.
    * @returns A Base-16 encoded string representation of the input bytes.
    *
    * @example
@@ -65,10 +66,10 @@ export class Conversions {
   }
 
   /**
-   * Decodes a Base-16 (hexadecimal) encoded string and returns a Uint8Array of bytes.
+   * Decodes a Base-16 (hexadecimal) encoded string and returns a `Uint8Array` of bytes.
    *
    * @param base16String - The Base-16 encoded string to be decoded.
-   * @returns A Uint8Array containing the decoded bytes.
+   * @returns A `Uint8Array` containing the decoded bytes.
    *
    * @example
    * const base16 = "48656c6c6f";

@@ -5,16 +5,16 @@ import { sha256 } from '@noble/hashes/sha256';
 const PublicKeySize = 33;
 
 /**
- * Represents a secp256k1 public key, providing methods to retrieve bytes
- * and verify signatures.
+ * Represents a secp256k1 public key, providing methods to retrieve the compressed
+ * public key bytes and verify digital signatures.
  */
 export class PublicKey {
-  /** The raw bytes of the public key. */
+  /** The raw bytes of the public key in compressed format. */
   private key: Uint8Array;
 
   /**
    * Creates an instance of PublicKey.
-   * @param key - The public key bytes.
+   * @param key - The public key bytes in compressed format.
    */
   constructor(key: Uint8Array) {
     this.key = key;
@@ -30,8 +30,10 @@ export class PublicKey {
 
   /**
    * Verifies a signature for a given message.
-   * @param message - The message that was signed.
-   * @param signature - The signature to verify.
+   * Uses the secp256k1 algorithm to validate if the provided signature matches
+   * the public key for the given message.
+   * @param message - The original message that was signed.
+   * @param signature - The signature to verify. Supports both raw (64-byte R || S) and DER formats.
    * @returns A promise that resolves to `true` if the signature is valid, or `false` otherwise.
    */
   async verifySignature(
@@ -59,8 +61,8 @@ export class PublicKey {
   }
 
   /**
-   * Creates a PublicKey instance from a byte array.
-   * @param data - The byte array representing the public key.
+   * Creates a PublicKey instance from a byte array, validating the size and format.
+   * @param data - The byte array representing the public key in compressed format.
    * @returns A promise that resolves to a new PublicKey instance.
    * @throws Error if the public key size is incorrect or if the key is invalid.
    */

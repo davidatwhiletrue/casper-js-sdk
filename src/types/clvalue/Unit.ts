@@ -2,7 +2,7 @@ import { CLTypeUnit } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 
 /**
- * Represents a Unit value in the CasperLabs type system.
+ * Represents a Unit value in the Casper type system.
  * A Unit value is similar to 'null' or 'void' in other languages.
  */
 export class CLValueUnit {

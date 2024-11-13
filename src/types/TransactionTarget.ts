@@ -7,21 +7,40 @@ import { Hash } from './key';
 import { CLValueString } from './clvalue';
 import { ExecutableDeployItem } from './ExecutableDeployItem';
 
+/**
+ * Enum representing different types of transaction targets.
+ */
 enum TransactionTargetType {
+  /** Native target type, used for transactions without a specific target. */
   Native = 0,
+  /** Stored target type, used for contracts or stored items. */
   Stored = 1,
+  /** Session target type, used for session-based transactions. */
   Session = 2
 }
 
+/**
+ * Enum representing different invocation target tags for identifying transaction target types.
+ */
 enum InvocationTargetTag {
+  /** Invocation target by hash. */
   ByHash = 0,
+  /** Invocation target by name. */
   ByName = 1,
+  /** Invocation target by package hash. */
   ByPackageHash = 2,
+  /** Invocation target by package name. */
   ByPackageName = 3
 }
 
+/**
+ * Represents the invocation target for a transaction identified by a package hash.
+ */
 @jsonObject
 export class ByPackageHashInvocationTarget {
+  /**
+   * The address of the package in the form of a hash.
+   */
   @jsonMember({
     name: 'addr',
     constructor: Hash,
@@ -30,21 +49,43 @@ export class ByPackageHashInvocationTarget {
   })
   addr: Hash;
 
+  /**
+   * The version of the package, if specified.
+   */
   @jsonMember({ name: 'version', isRequired: false, constructor: Number })
   version?: number;
 }
 
+/**
+ * Represents the invocation target for a transaction identified by a package name.
+ */
 @jsonObject
 export class ByPackageNameInvocationTarget {
+  /**
+   * The name of the package.
+   */
   @jsonMember({ name: 'name', constructor: String })
   name: string;
 
+  /**
+   * The version of the package, if specified.
+   */
   @jsonMember({ name: 'version', isRequired: false, constructor: Number })
   version?: number;
 }
 
+/**
+ * Represents a transaction invocation target, which can be one of the following:
+ * - By hash
+ * - By name
+ * - By package hash
+ * - By package name
+ */
 @jsonObject
 export class TransactionInvocationTarget {
+  /**
+   * Invocation target by hash, if specified.
+   */
   @jsonMember({
     name: 'ByHash',
     isRequired: false,
@@ -60,9 +101,15 @@ export class TransactionInvocationTarget {
   })
   byHash?: Hash;
 
+  /**
+   * Invocation target by name, if specified.
+   */
   @jsonMember({ name: 'ByName', isRequired: false, constructor: String })
   byName?: string;
 
+  /**
+   * Invocation target by package hash, if specified.
+   */
   @jsonMember({
     name: 'ByPackageHash',
     isRequired: false,
@@ -70,6 +117,9 @@ export class TransactionInvocationTarget {
   })
   byPackageHash?: ByPackageHashInvocationTarget;
 
+  /**
+   * Invocation target by package name, if specified.
+   */
   @jsonMember({
     name: 'ByPackageName',
     isRequired: false,
@@ -78,51 +128,108 @@ export class TransactionInvocationTarget {
   byPackageName?: ByPackageNameInvocationTarget;
 }
 
+/**
+ * Represents a stored target, which includes both the invocation target and runtime.
+ */
 @jsonObject
 export class StoredTarget {
+  /**
+   * The invocation target for the stored transaction.
+   */
   @jsonMember({ name: 'id', constructor: TransactionInvocationTarget })
   id: TransactionInvocationTarget;
 
+  /**
+   * The runtime associated with the stored transaction.
+   */
   @jsonMember({ name: 'runtime', constructor: String })
   runtime: TransactionRuntime;
 }
 
+/**
+ * Represents a session target, which includes both the module bytes and runtime.
+ */
 @jsonObject
 export class SessionTarget {
+  /**
+   * The module bytes associated with the session target.
+   */
   @jsonMember({ name: 'module_bytes', constructor: String })
   moduleBytes: string;
 
+  /**
+   * The runtime associated with the session target.
+   */
   @jsonMember({ name: 'runtime', constructor: String })
   runtime: TransactionRuntime;
 }
 
+/**
+ * Represents a transaction target, which could be one of the following types:
+ * - Native (no specific target)
+ * - Stored (contract or stored item target)
+ * - Session (session-based target)
+ */
 @jsonObject
 export class TransactionTarget {
+  /**
+   * Native transaction target, representing a transaction with no specific target.
+   */
   @jsonMember({ constructor: Object })
   native?: object;
 
+  /**
+   * Stored transaction target, representing a transaction that targets a stored contract or item.
+   */
   @jsonMember({ name: 'Stored', constructor: StoredTarget })
   stored?: StoredTarget;
 
+  /**
+   * Session transaction target, representing a session-based transaction.
+   */
   @jsonMember({ name: 'Session', constructor: SessionTarget })
   session?: SessionTarget;
 
+  /**
+   * Constructs a `TransactionTarget` instance with the specified values for native, stored, or session targets.
+   *
+   * @param native The native transaction target, if applicable.
+   * @param stored The stored transaction target, if applicable.
+   * @param session The session transaction target, if applicable.
+   */
   constructor(native?: object, stored?: StoredTarget, session?: SessionTarget) {
     this.native = native;
     this.stored = stored;
     this.session = session;
   }
 
+  /**
+   * Converts a 32-bit unsigned integer to a byte array.
+   *
+   * @param value The 32-bit unsigned integer to convert.
+   * @returns A `Uint8Array` representing the value.
+   */
   private uint32ToBytes(value: number): Uint8Array {
     const buffer = new ArrayBuffer(4);
     new DataView(buffer).setUint32(0, value, true);
     return new Uint8Array(buffer);
   }
 
+  /**
+   * Converts a hexadecimal string to a byte array.
+   *
+   * @param hexString The hexadecimal string to convert.
+   * @returns A `Uint8Array` representing the hexadecimal string.
+   */
   private hexStringToBytes(hexString: string): Uint8Array {
     return Uint8Array.from(Buffer.from(hexString, 'hex'));
   }
 
+  /**
+   * Serializes the `TransactionTarget` into a byte array.
+   *
+   * @returns A `Uint8Array` representing the serialized transaction target.
+   */
   toBytes(): Uint8Array {
     let result: Uint8Array = new Uint8Array();
 
@@ -197,6 +304,13 @@ export class TransactionTarget {
     return result;
   }
 
+  /**
+   * Deserializes a `TransactionTarget` from a JSON object.
+   *
+   * @param json The JSON object to deserialize.
+   * @returns A `TransactionTarget` instance.
+   * @throws Error if the JSON object format is invalid.
+   */
   static fromJSON(json: any): TransactionTarget {
     const target = new TransactionTarget();
 
@@ -237,6 +351,12 @@ export class TransactionTarget {
     return target;
   }
 
+  /**
+   * Converts the `TransactionTarget` into a JSON-compatible format.
+   *
+   * @returns The JSON representation of the `TransactionTarget`.
+   * @throws Error if the target type is unknown.
+   */
   toJSON(): any {
     if (this.native !== undefined) {
       return 'Native';
@@ -259,6 +379,12 @@ export class TransactionTarget {
     }
   }
 
+  /**
+   * Creates a new `TransactionTarget` from a session-based transaction.
+   *
+   * @param session The `ExecutableDeployItem` that defines the session-based transaction.
+   * @returns A new `TransactionTarget` instance derived from the session.
+   */
   public static newTransactionTargetFromSession(
     session: ExecutableDeployItem
   ): TransactionTarget {

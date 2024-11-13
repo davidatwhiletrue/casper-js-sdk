@@ -5,18 +5,20 @@ import { Hash } from './Hash';
 export const PrefixNameTransfer = 'transfer-';
 
 /**
- * Represents a transfer hash, extending the Hash class, with an additional prefix for transfer entities.
+ * Represents a transfer hash, extending the `Hash` class, with an additional prefix specific to transfer entities.
+ * This prefix aids in identifying transfer-related hashes within the system.
  */
 @jsonObject
 export class TransferHash extends Hash {
   /**
-   * The origin prefix used to identify transfer-related hashes.
+   * The origin prefix used to identify transfer-related hashes, defaulting to `transfer-`.
    */
   @jsonMember({ name: 'originPrefix', constructor: String })
   originPrefix: string = PrefixNameTransfer;
 
   /**
    * Creates an instance of TransferHash.
+   * Supports both hex strings (with or without the transfer prefix) and Uint8Array representations of the hash.
    * @param source - A hex string or Uint8Array representing the hash.
    */
   constructor(source: string | Uint8Array) {
@@ -33,9 +35,9 @@ export class TransferHash extends Hash {
   }
 
   /**
-   * Initializes the TransferHash from a source string.
-   * @param source - The source string representing the transfer hash.
-   * @returns An object containing the hash bytes and the origin prefix.
+   * Parses a source string to extract the hash bytes and verify if it includes the transfer prefix.
+   * @param source - The source string representing the transfer hash, optionally prefixed.
+   * @returns An object containing the hash bytes and the detected origin prefix.
    */
   private static initializeFromSource(
     source: string
@@ -51,7 +53,8 @@ export class TransferHash extends Hash {
   }
 
   /**
-   * Converts the TransferHash to a prefixed string representation.
+   * Converts the TransferHash to a standardized prefixed string format.
+   * This format includes the transfer-specific prefix followed by the hash in hexadecimal format.
    * @returns A string representation of the TransferHash with its prefix.
    */
   toPrefixedString(): string {
@@ -59,17 +62,19 @@ export class TransferHash extends Hash {
   }
 
   /**
-   * Converts the TransferHash to a JSON-compatible string.
-   * @returns A JSON string representation of the TransferHash.
+   * Serializes the TransferHash to a JSON-compatible string.
+   * Primarily used for JSON-based data exchange or storage.
+   * @returns A JSON-compatible string representation of the TransferHash.
    */
   toJSON(): string {
     return this.toPrefixedString();
   }
 
   /**
-   * Creates a TransferHash instance from a JSON string.
+   * Instantiates a TransferHash from a JSON-compatible string, allowing for easy deserialization.
+   * The string should represent the TransferHash in prefixed hex format.
    * @param json - The JSON string representing the TransferHash.
-   * @returns A new TransferHash instance.
+   * @returns A new TransferHash instance initialized from the JSON string.
    */
   static fromJSON(json: string): TransferHash {
     return new TransferHash(json);

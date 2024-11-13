@@ -29,7 +29,8 @@ import { CLTypeTuple3 } from './Tuple3';
 import { IResultWithBytes } from '../CLValue';
 
 /**
- * A utility class for parsing CLTypes from various formats.
+ * A utility class for parsing various CLTypes from different formats, such as JSON, strings, and bytes.
+ * This class includes static methods for handling both simple and complex types, along with error handling for unsupported or unrecognized formats.
  */
 export class CLTypeParser {
   /**
@@ -131,9 +132,9 @@ export class CLTypeParser {
   }
 
   /**
-   * Parses a CLType from an ArrayBuffer.
-   * @param buf - The ArrayBuffer to parse.
-   * @returns The parsed CLType.
+   * Parses a CLType from a Uint8Array.
+   * @param bytes - The Uint8Array to parse.
+   * @returns An object containing the parsed CLType and the remaining bytes.
    * @throws BufferConstructorNotDetectedError if the type is not recognized.
    */
   static matchBytesToCLType(bytes: Uint8Array): IResultWithBytes<CLType> {
@@ -165,19 +166,13 @@ export class CLTypeParser {
           result: optionInner,
           bytes: optionBytes
         } = CLTypeParser.matchBytesToCLType(remainder);
-        return {
-          result: new CLTypeOption(optionInner),
-          bytes: optionBytes
-        };
+        return { result: new CLTypeOption(optionInner), bytes: optionBytes };
       case TypeID.List:
         const {
           result: listInner,
           bytes: listBytes
         } = CLTypeParser.matchBytesToCLType(remainder);
-        return {
-          result: new CLTypeList(listInner),
-          bytes: listBytes
-        };
+        return { result: new CLTypeList(listInner), bytes: listBytes };
       case TypeID.ByteArray:
         const {
           result: byteArrayInner,
@@ -201,7 +196,6 @@ export class CLTypeParser {
           result: innerErr,
           bytes: errBytes
         } = CLTypeParser.matchBytesToCLType(resultBytes);
-
         return { result: new CLTypeResult(innerOk, innerErr), bytes: errBytes };
       case TypeID.Map:
         const {
@@ -217,7 +211,6 @@ export class CLTypeParser {
           result: val,
           bytes: valBytes
         } = CLTypeParser.matchBytesToCLType(keyBytes);
-
         return { result: new CLTypeMap(key, val), bytes: valBytes };
       case TypeID.Tuple1:
         const {
@@ -239,7 +232,6 @@ export class CLTypeParser {
           result: innerType2Res,
           bytes: innerType2Bytes
         } = CLTypeParser.matchBytesToCLType(innerType1Bytes);
-
         return {
           result: new CLTypeTuple2(innerType1Res, innerType2Res),
           bytes: innerType2Bytes
@@ -251,7 +243,7 @@ export class CLTypeParser {
         } = CLTypeParser.matchBytesToCLType(remainder);
 
         if (!innerType1Byte) {
-          throw new Error('Missing second tuple type bytes in CLTuple2Type');
+          throw new Error('Missing second tuple type bytes in CLTuple3Type');
         }
 
         const {
@@ -260,14 +252,13 @@ export class CLTypeParser {
         } = CLTypeParser.matchBytesToCLType(innerType1Byte);
 
         if (!innerType2Byte) {
-          throw new Error('Missing third tuple type bytes in CLTuple2Type');
+          throw new Error('Missing third tuple type bytes in CLTuple3Type');
         }
 
         const {
           result: innerType3,
           bytes: innerType3Byte
         } = CLTypeParser.matchBytesToCLType(innerType2Byte);
-
         return {
           result: new CLTypeTuple3(innerType1, innerType2, innerType3),
           bytes: innerType3Byte
@@ -286,7 +277,6 @@ export class CLTypeParser {
     if (typeof rawData === 'string') {
       return CLTypeParser.getSimpleTypeByName(rawData as TypeName);
     }
-
     return CLTypeParser.fromComplexStruct(rawData);
   }
 

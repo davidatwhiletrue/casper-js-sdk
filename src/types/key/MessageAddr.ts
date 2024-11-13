@@ -1,5 +1,4 @@
 import { concat } from '@ethersproject/bytes';
-
 import { jsonMember, jsonObject } from 'typedjson';
 import { EntityAddr } from './EntityAddr';
 import { Hash } from './Hash';
@@ -15,8 +14,9 @@ const PrefixNameMessage = 'message-';
 const PrefixNameAddressableEntity = 'entity-';
 
 /**
- * Represents a message address within the system, identified by an entity address,
- * a topic name hash, and an optional message index.
+ * Represents an addressable message within the system. The address is composed of an associated entity address,
+ * a hashed topic name, and an optional message index. It offers various utilities for serialization, deserialization,
+ * and converting the address into prefixed string and byte representations.
  */
 @jsonObject
 export class MessageAddr {
@@ -45,19 +45,20 @@ export class MessageAddr {
   })
   public entityAddr: EntityAddr;
 
-  /** The hash of the topic name. */
+  /** The hash of the topic name associated with this message. */
   @jsonMember({ name: 'TopicNameHash', constructor: Hash })
   public topicNameHash: Hash;
 
-  /** The optional index of the message. */
+  /** The optional index of the message within the topic. */
   @jsonMember({ name: 'MessageIndex', constructor: Number })
   public messageIndex?: number;
 
   /**
-   * Creates a MessageAddr instance from a string representation.
+   * Instantiates a `MessageAddr` from its string representation.
+   * The string should follow the prefixed format used in the system.
    * @param source - The string representation of the MessageAddr.
    * @returns A new MessageAddr instance.
-   * @throws Error if the format is invalid.
+   * @throws Error if the provided string does not match the expected format.
    */
   static fromString(source: string): MessageAddr {
     let messageIndex: number | undefined;
@@ -88,8 +89,9 @@ export class MessageAddr {
   }
 
   /**
-   * Converts the MessageAddr to a prefixed string representation.
-   * @returns A prefixed string representation of the MessageAddr.
+   * Converts the `MessageAddr` into a standardized prefixed string format.
+   * Useful for displaying or storing the address in text format.
+   * @returns A prefixed string representation of the `MessageAddr`.
    */
   toPrefixedString(): string {
     let result = PrefixNameMessage;
@@ -107,17 +109,20 @@ export class MessageAddr {
   }
 
   /**
-   * Converts the MessageAddr to a JSON-compatible string.
-   * @returns A JSON string representation of the MessageAddr.
+   * Serializes the `MessageAddr` into a JSON-compatible string format.
+   * Primarily used for JSON-based data exchange.
+   * @returns A JSON string representation of the `MessageAddr`.
    */
   toJSON(): string {
     return this.toPrefixedString();
   }
 
   /**
-   * Creates a MessageAddr instance from a byte array.
+   * Constructs a `MessageAddr` instance from a byte array.
+   * Interprets the byte array in a structured format to extract
+   * the entity address, topic name hash, and optionally, the message index.
    * @param bytes - The byte array representing the MessageAddr.
-   * @returns A new MessageAddr instance.
+   * @returns A new `MessageAddr` instance wrapped in an `IResultWithBytes`.
    */
   static fromBytes(bytes: Uint8Array): IResultWithBytes<MessageAddr> {
     const entityAddr = EntityAddr.fromBytes(bytes);
@@ -140,8 +145,9 @@ export class MessageAddr {
   }
 
   /**
-   * Converts the MessageAddr to a byte array representation.
-   * @returns A Uint8Array representing the MessageAddr.
+   * Converts the `MessageAddr` to a byte array, enabling binary data storage.
+   * Useful for transmission or storage where a compact format is needed.
+   * @returns A `Uint8Array` representing the `MessageAddr`.
    */
   toBytes(): Uint8Array {
     const entityBytes = this.entityAddr.toBytes();

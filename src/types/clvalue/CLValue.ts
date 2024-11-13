@@ -30,7 +30,7 @@ import { CLValueTuple3 } from './Tuple3';
 import { CLValueAny } from './Any';
 
 /**
- * Interface representing a value that can be converted to bytes and string.
+ * Interface representing a value that can be converted to bytes and a string.
  */
 interface IValue {
   bytes(): Uint8Array;
@@ -43,7 +43,7 @@ export interface IResultWithBytes<T> {
 }
 
 /**
- * Represents a CLValue in the CasperLabs type system.
+ * Represents a CLValue in the Casper type system.
  * CLValue is a container for various types of values used in smart contracts.
  */
 export class CLValue {
@@ -73,7 +73,7 @@ export class CLValue {
   public publicKey?: PublicKey;
 
   /**
-   * Constructs a new CLValue instance.
+   * Initializes a new CLValue instance.
    * @param type - The CLType of the value.
    */
   constructor(type: CLType) {
@@ -81,14 +81,11 @@ export class CLValue {
   }
 
   /**
-   * Gets the actual type of the CLValue.
-   * @returns The CLType of the value, resolving CLTypeDynamic if necessary.
+   * Gets the actual type of the CLValue, resolving dynamic types if necessary.
+   * @returns The CLType of the value.
    */
   public getType(): CLType {
-    if (this.type instanceof CLTypeDynamic) {
-      return this.type.inner;
-    }
-    return this.type;
+    return this.type instanceof CLTypeDynamic ? this.type.inner : this.type;
   }
 
   /**
@@ -108,7 +105,7 @@ export class CLValue {
   }
 
   /**
-   * Gets the appropriate value based on the CLValue's type.
+   * Retrieves the value associated with the CLValue's type.
    * @returns An IValue representing the actual value stored in the CLValue.
    * @throws Error if the type is not implemented.
    */
@@ -168,7 +165,7 @@ export class CLValue {
   }
 
   /**
-   * Gets the Key value from the CLValue.
+   * Retrieves the Key value from the CLValue.
    * @returns The Key stored in the CLValue.
    * @throws Error if the Key property is empty.
    */
@@ -182,9 +179,9 @@ export class CLValue {
   }
 
   /**
-   * Creates a new CLValue instance with a Key value.
+   * Creates a new CLValue instance containing a Key value.
    * @param data - The Key to be stored in the CLValue.
-   * @returns A new CLValue instance containing the Key.
+   * @returns A new CLValue instance encapsulating the Key.
    */
   public static newCLKey(data: Key): CLValue {
     const clValue = new CLValue(CLTypeKey);
@@ -193,9 +190,9 @@ export class CLValue {
   }
 
   /**
-   * Creates a new CLValue instance with a URef value.
+   * Creates a new CLValue instance containing a URef value.
    * @param data - The URef to be stored in the CLValue.
-   * @returns A new CLValue instance containing the URef.
+   * @returns A new CLValue instance encapsulating the URef.
    */
   public static newCLUref(data: URef): CLValue {
     const clValue = new CLValue(CLTypeUref);
@@ -204,9 +201,9 @@ export class CLValue {
   }
 
   /**
-   * Creates a new CLValue instance with a PublicKey value.
+   * Creates a new CLValue instance containing a PublicKey value.
    * @param data - The PublicKey to be stored in the CLValue.
-   * @returns A new CLValue instance containing the PublicKey.
+   * @returns A new CLValue instance encapsulating the PublicKey.
    */
   public static newCLPublicKey(data: PublicKey): CLValue {
     const clValue = new CLValue(CLTypePublicKey);

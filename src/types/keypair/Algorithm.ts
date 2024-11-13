@@ -1,5 +1,6 @@
 /**
  * Enum representing supported cryptographic key algorithms.
+ * Each value corresponds to a specific cryptographic algorithm used in digital signatures.
  */
 export enum KeyAlgorithm {
   /** ED25519 digital signature algorithm */
@@ -20,11 +21,12 @@ export const KeySettings: Record<KeyAlgorithm, { name: string }> = {
 
 /**
  * Utility class for working with key algorithms, allowing conversion to string and byte formats.
+ * Provides convenient methods to retrieve the algorithm name and numeric representation.
  */
 export class KeyAlgorithmUtils {
   /**
    * Creates an instance of KeyAlgorithmUtils.
-   * @param algorithm - The key algorithm to manage.
+   * @param algorithm - The key algorithm to manage, specified by the `KeyAlgorithm` enum.
    */
   constructor(private algorithm: KeyAlgorithm) {}
 

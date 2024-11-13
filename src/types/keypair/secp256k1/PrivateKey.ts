@@ -27,7 +27,8 @@ interface PrivateKeyInternal {
 }
 
 /**
- * Represents a secp256k1 private key, supporting generation, signing, and PEM encoding.
+ * Represents a secp256k1 private key, supporting key generation, signing, and PEM encoding.
+ * The class offers static methods to create instances from bytes, hex, and PEM formats.
  */
 export class PrivateKey implements PrivateKeyInternal {
   /** The raw bytes of the private key. */
@@ -68,6 +69,7 @@ export class PrivateKey implements PrivateKeyInternal {
 
   /**
    * Signs a message using the private key.
+   * The message is first hashed with SHA-256 before signing.
    * @param message - The message to sign.
    * @returns A promise that resolves to the signature bytes in compact format.
    */
@@ -115,7 +117,7 @@ export class PrivateKey implements PrivateKeyInternal {
   }
 
   /**
-   * Exports the private key to PEM format.
+   * Exports the private key to PEM format, which can be used for secure storage or sharing.
    * @returns A PEM-encoded string of the private key.
    */
   toPem(): string {

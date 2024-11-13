@@ -6,13 +6,13 @@ import { CLValueUInt32 } from './Uint32';
 import { fromBytesString } from '../ByteConverters';
 
 /**
- * Represents a string value in the CasperLabs type system.
+ * Represents a string value in the Casper type system.
  */
 export class CLValueString {
   private value: string;
 
   /**
-   * Constructs a new CLValueString instance.
+   * Initializes a new instance of the CLValueString class.
    * @param value - The string value to be represented.
    */
   constructor(value: string) {
@@ -20,8 +20,9 @@ export class CLValueString {
   }
 
   /**
-   * Returns the byte representation of the string value.
-   * @returns A Uint8Array representing the bytes of the string, prefixed with its length.
+   * Converts the string value to its byte representation.
+   * The result is a Uint8Array containing the length of the string (as a 4-byte prefix) followed by the string's bytes.
+   * @returns A Uint8Array representing the bytes of the string.
    */
   public bytes(): Uint8Array {
     const sizeBytes = this.sizeToBytes(this.value.length);
@@ -29,6 +30,11 @@ export class CLValueString {
     return concat([sizeBytes, valueBytes]);
   }
 
+  /**
+   * Converts a size number to its 4-byte Uint8Array representation in little-endian format.
+   * @param size - The size to convert.
+   * @returns A Uint8Array representing the size.
+   */
   private sizeToBytes(size: number): Uint8Array {
     const buffer = new ArrayBuffer(4);
     const view = new DataView(buffer);
@@ -37,7 +43,7 @@ export class CLValueString {
   }
 
   /**
-   * Returns the string value.
+   * Provides the string value.
    * @returns The string value.
    */
   public toString(): string {
@@ -47,7 +53,7 @@ export class CLValueString {
   /**
    * Creates a new CLValue instance with a string value.
    * @param val - The string value to be represented.
-   * @returns A new CLValue instance with CLTypeString and a CLValueString.
+   * @returns A new CLValue instance containing CLTypeString and a CLValueString.
    */
   public static newCLString(val: string): CLValue {
     const res = new CLValue(CLTypeString);
@@ -57,8 +63,9 @@ export class CLValueString {
 
   /**
    * Creates a CLValueString instance from a Uint8Array.
+   * Parses the byte array to retrieve the string value, interpreting the first 4 bytes as the string length.
    * @param source - The Uint8Array containing the byte representation of the string value.
-   * @returns A new CLValueString instance.
+   * @returns An object containing the new CLValueString instance and any remaining bytes.
    */
   public static fromBytes(source: Uint8Array): IResultWithBytes<CLValueString> {
     const uint32Value = CLValueUInt32.fromBytes(source);

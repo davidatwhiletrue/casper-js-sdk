@@ -6,15 +6,15 @@ import { CLTypeUInt512 } from './cltype';
 import { toBytesU512 } from '../ByteConverters';
 
 /**
- * Represents a 512-bit unsigned integer value in the CasperLabs type system.
+ * Represents a 512-bit unsigned integer value in the Casper type system.
  */
 export class CLValueUInt512 {
   public val: BigNumber;
   public isStringFmt: boolean;
 
   /**
-   * Constructs a new CLValueUInt512 instance.
-   * @param val - The value to initialize the CLValueUInt512 with. Can be a BigNumber or a string.
+   * Initializes a new instance of the CLValueUInt512 class.
+   * @param val - The value to initialize the CLValueUInt512 with. Accepts a BigNumber or a string.
    */
   constructor(val: BigNumber | string) {
     this.val = BigNumber.from(val);
@@ -22,7 +22,7 @@ export class CLValueUInt512 {
   }
 
   /**
-   * Returns the byte representation of the UInt512 value.
+   * Converts the UInt512 value to its byte representation.
    * @returns A Uint8Array representing the bytes of the UInt512 value.
    */
   public bytes(): Uint8Array {
@@ -30,7 +30,7 @@ export class CLValueUInt512 {
   }
 
   /**
-   * Returns a string representation of the UInt512 value.
+   * Provides a string representation of the UInt512 value.
    * @returns The string representation of the value.
    */
   public toString(): string {
@@ -38,7 +38,7 @@ export class CLValueUInt512 {
   }
 
   /**
-   * Returns the BigNumber value of the UInt512.
+   * Retrieves the BigNumber value of the UInt512.
    * @returns The BigNumber representation of the value.
    */
   public value(): BigNumber {
@@ -50,10 +50,7 @@ export class CLValueUInt512 {
    * @returns A string if the value was originally provided as a string, otherwise a number.
    */
   public toJSON(): string | number {
-    if (this.isStringFmt) {
-      return this.toString();
-    }
-    return this.val.toNumber();
+    return this.isStringFmt ? this.toString() : this.val.toNumber();
   }
 
   /**
@@ -77,8 +74,9 @@ export class CLValueUInt512 {
 
   /**
    * Creates a CLValueUInt512 instance from a Uint8Array.
+   * Parses the byte array to retrieve the UInt512 value.
    * @param source - The Uint8Array containing the byte representation of the UInt512 value.
-   * @returns A new CLValueUInt512 instance.
+   * @returns An object containing the new CLValueUInt512 instance and any remaining bytes.
    */
   public static fromBytes(
     source: Uint8Array
@@ -89,7 +87,7 @@ export class CLValueUInt512 {
   /**
    * Creates a new CLValue instance with a UInt512 value.
    * @param val - The value to initialize the UInt512 with. Can be a BigNumber or a string.
-   * @returns A new CLValue instance with CLTypeUInt512 and a CLValueUInt512.
+   * @returns A new CLValue instance containing CLTypeUInt512 and a CLValueUInt512.
    */
   public static newCLUInt512(val: BigNumber | string): CLValue {
     const res = new CLValue(CLTypeUInt512);
@@ -98,6 +96,12 @@ export class CLValueUInt512 {
   }
 }
 
+/**
+ * Deserializes an array of rewards into a Map.
+ * @param arr - The array to be deserialized, where each element is a tuple containing a key and an array of rewards.
+ * @returns A Map where each key corresponds to an array of CLValueUInt512 rewards.
+ * @throws Will throw an error if duplicate keys are detected.
+ */
 export const deserializeRewards = (arr: any) => {
   const parsed = new Map(
     Array.from(arr, ([key, value]) => {
@@ -115,6 +119,11 @@ export const deserializeRewards = (arr: any) => {
   return parsed;
 };
 
+/**
+ * Serializes a Map of rewards into an array format suitable for JSON storage.
+ * @param map - A Map where each key corresponds to an array of CLValueUInt512 rewards.
+ * @returns An array where each element is a tuple containing a key and an array of rewards in JSON format.
+ */
 export const serializeRewards = (map: Map<string, CLValueUInt512[]>) => {
   return Array.from(map, ([key, value]) => {
     const serializedValue = value.map(item => item.toJSON());
