@@ -75,10 +75,6 @@ describe('Test Transaction', () => {
     const toJson = TransactionV1.toJson(transaction);
     const parsed = TransactionV1.fromJSON(toJson.transaction);
 
-    console.log(toJson);
-    console.log(parsed);
-    console.log(JSON.stringify(toJson));
-
     const transactionPaymentAmount = parsed.body.args.args
       .get('amount')!
       .toString();

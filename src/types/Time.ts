@@ -52,7 +52,6 @@ export class Duration {
   }
 
   static parseDurationString(durationStr: string): number {
-    console.log(durationStr);
     const parts = durationStr.match(/(\d+)([smhd])/g);
     if (!parts) throw new Error('Invalid duration format');
 
