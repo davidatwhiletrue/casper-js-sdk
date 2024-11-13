@@ -6,7 +6,19 @@ export class Proposer {
   @jsonMember({ name: 'isSystem', constructor: Boolean })
   isSystem: boolean;
 
-  @jsonMember({ name: 'publicKey', constructor: keypair.PublicKey })
+  @jsonMember({
+    name: 'publicKey',
+    constructor: keypair.PublicKey,
+    deserializer: json => {
+      if (!json) return;
+
+      return keypair.PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   publicKey?: keypair.PublicKey;
 
   constructor(isSystem = false, publicKey?: keypair.PublicKey) {

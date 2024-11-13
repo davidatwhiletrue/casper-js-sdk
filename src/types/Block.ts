@@ -13,37 +13,86 @@ import { HexBytes } from './HexBytes';
 
 @jsonObject
 export class Proof {
-  @jsonMember(() => ({ constructor: PublicKey, name: 'public_key' }))
+  @jsonMember(() => ({
+    constructor: PublicKey,
+    name: 'public_key',
+    deserializer: (json: string) => PublicKey.fromJSON(json),
+    serializer: (value: PublicKey) => value.toJSON()
+  }))
   public publicKey: PublicKey;
 
-  @jsonMember(() => ({ name: 'signature', constructor: HexBytes }))
+  @jsonMember(() => ({
+    name: 'signature',
+    constructor: HexBytes,
+    deserializer: (json: string) => HexBytes.fromJSON(json),
+    serializer: (value: HexBytes) => value.toJSON()
+  }))
   public signature: HexBytes;
 }
 
 @jsonObject
 export class Block {
-  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public hash: Hash;
 
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public stateRootHash: Hash;
 
-  @jsonMember(() => ({ name: 'last_switch_block_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'last_switch_block_hash',
+    constructor: Hash,
+    deserializer: (json: string) => (json ? Hash.fromJSON(json) : null),
+    serializer: (value: Hash) => (value ? value.toJSON() : null),
+    preserveNull: true
+  }))
   public lastSwitchBlockHash: Hash | null;
 
-  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'parent_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public parentHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
   public eraID: number;
 
-  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
+  @jsonMember(() => ({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: (json: string) => Timestamp.fromJSON(json),
+    serializer: (value: Timestamp) => value.toJSON()
+  }))
   public timestamp: Timestamp;
 
-  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'accumulated_seed',
+    constructor: Hash,
+    deserializer: (json: string) => {
+      if (!json) return;
+
+      return Hash.fromJSON(json);
+    },
+    serializer: (value: Hash) => {
+      if (!value) return;
+
+      return value.toJSON();
+    }
+  }))
   public accumulatedSeed?: Hash;
 
   @jsonMember({ name: 'random_bit', constructor: Boolean })
@@ -52,7 +101,12 @@ export class Block {
   @jsonMember({ name: 'current_gas_price', constructor: Number })
   public currentGasPrice: number;
 
-  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
+  @jsonMember(() => ({
+    name: 'proposer',
+    constructor: Proposer,
+    deserializer: (json: string) => Proposer.fromJSON(json),
+    serializer: (value: Proposer) => value.toJSON()
+  }))
   public proposer: Proposer;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -61,7 +115,10 @@ export class Block {
   @jsonMember(() => ({ name: 'era_end', constructor: EraEnd }))
   public eraEnd?: EraEnd;
 
-  @jsonArrayMember(() => BlockTransaction, { name: 'transactions' })
+  @jsonArrayMember(() => BlockTransaction, {
+    name: 'transactions',
+    deserializer: (json: string) => BlockTransaction.fromJSON(json)
+  })
   public transactions: BlockTransaction[];
 
   @jsonArrayMember(Number, { name: 'rewarded_signatures' })
@@ -209,7 +266,12 @@ export class BlockTransaction {
   @jsonMember({ name: 'version', constructor: Number })
   public version: TransactionVersion;
 
-  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public hash: Hash;
 
   constructor(
@@ -347,7 +409,12 @@ export function parseBlockTransactions(data: string): BlockTransaction[] {
 
 @jsonObject
 export class BlockV1 {
-  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public hash: Hash;
 
   @jsonMember({ name: 'header', constructor: () => BlockHeaderV1 })
@@ -362,19 +429,37 @@ export class BlockV1 {
 
 @jsonObject
 export class BlockBodyV1 {
-  @jsonArrayMember(() => Hash, { name: 'deploy_hashes' })
+  @jsonArrayMember(() => Hash, {
+    name: 'deploy_hashes',
+    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
+  })
   public deployHashes: Hash[];
 
-  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
+  @jsonMember(() => ({
+    name: 'proposer',
+    constructor: Proposer,
+    deserializer: (json: string) => Proposer.fromJSON(json),
+    serializer: (value: Proposer) => value.toJSON()
+  }))
   public proposer: Proposer;
 
-  @jsonArrayMember(() => Hash, { name: 'transfer_hashes' })
+  @jsonArrayMember(() => Hash, {
+    name: 'transfer_hashes',
+    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
+  })
   public transferHashes: Hash[];
 }
 
 @jsonObject
 export class BlockV2 {
-  @jsonMember(() => ({ name: 'hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public hash: Hash;
 
   @jsonMember({ name: 'header', constructor: () => BlockHeaderV2 })
@@ -386,10 +471,26 @@ export class BlockV2 {
 
 @jsonObject
 export class BlockHeaderV1 {
-  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'accumulated_seed',
+    constructor: Hash,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: (value: Hash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   public accumulatedSeed?: Hash;
 
-  @jsonMember(() => ({ name: 'body_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'body_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public bodyHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -398,7 +499,12 @@ export class BlockHeaderV1 {
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'parent_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public parentHash: Hash;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -407,10 +513,20 @@ export class BlockHeaderV1 {
   @jsonMember({ name: 'random_bit', constructor: Boolean })
   public randomBit: boolean;
 
-  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public stateRootHash: Hash;
 
-  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
+  @jsonMember(() => ({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: (json: string) => Timestamp.fromJSON(json),
+    serializer: (value: Timestamp) => value.toJSON()
+  }))
   public timestamp: Timestamp;
 
   @jsonMember(() => ({ name: 'era_end', constructor: EraEndV1 }))
@@ -419,10 +535,26 @@ export class BlockHeaderV1 {
 
 @jsonObject
 export class BlockHeaderV2 {
-  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'accumulated_seed',
+    constructor: Hash,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: (value: Hash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   public accumulatedSeed?: Hash;
 
-  @jsonMember(() => ({ name: 'body_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'body_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public bodyHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -434,10 +566,20 @@ export class BlockHeaderV2 {
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'parent_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public parentHash: Hash;
 
-  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
+  @jsonMember(() => ({
+    name: 'proposer',
+    constructor: Proposer,
+    deserializer: (json: string) => Proposer.fromJSON(json),
+    serializer: (value: Proposer) => value.toJSON()
+  }))
   public proposer: Proposer;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -446,13 +588,28 @@ export class BlockHeaderV2 {
   @jsonMember({ name: 'random_bit', constructor: Boolean })
   public randomBit: boolean;
 
-  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public stateRootHash: Hash;
 
-  @jsonMember(() => ({ name: 'last_switch_block_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'last_switch_block_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public lastSwitchBlockHash: Hash;
 
-  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
+  @jsonMember(() => ({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: (json: string) => Timestamp.fromJSON(json),
+    serializer: (value: Timestamp) => value.toJSON()
+  }))
   public timestamp: Timestamp;
 
   @jsonMember(() => ({ name: 'era_end', constructor: EraEndV2 }))
@@ -461,7 +618,11 @@ export class BlockHeaderV2 {
 
 @jsonObject
 export class BlockBodyV2 {
-  @jsonArrayMember(BlockTransaction, { name: 'transactions' })
+  @jsonArrayMember(BlockTransaction, {
+    name: 'transactions',
+    deserializer: (json: any) =>
+      json.map((it: string) => BlockTransaction.fromJSON(it))
+  })
   public transactions: BlockTransaction[];
 
   @jsonArrayMember(Number, { name: 'rewarded_signatures' })
@@ -497,10 +658,26 @@ export class BlockHeaderWrapper {
 
 @jsonObject
 export class BlockHeader {
-  @jsonMember(() => ({ name: 'accumulated_seed', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'accumulated_seed',
+    constructor: Hash,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: (value: Hash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   public accumulatedSeed?: Hash;
 
-  @jsonMember(() => ({ name: 'body_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'body_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public bodyHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -512,10 +689,20 @@ export class BlockHeader {
   @jsonMember({ name: 'height', constructor: Number })
   public height: number;
 
-  @jsonMember(() => ({ name: 'parent_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'parent_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public parentHash: Hash;
 
-  @jsonMember(() => ({ name: 'proposer', constructor: Proposer }))
+  @jsonMember(() => ({
+    name: 'proposer',
+    constructor: Proposer,
+    deserializer: (json: string) => Proposer.fromJSON(json),
+    serializer: (value: Proposer) => value.toJSON()
+  }))
   public proposer: Proposer;
 
   @jsonMember({ name: 'protocol_version', constructor: String })
@@ -524,10 +711,20 @@ export class BlockHeader {
   @jsonMember({ name: 'random_bit', constructor: Boolean })
   public randomBit: boolean;
 
-  @jsonMember(() => ({ name: 'state_root_hash', constructor: Hash }))
+  @jsonMember(() => ({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  }))
   public stateRootHash: Hash;
 
-  @jsonMember(() => ({ name: 'timestamp', constructor: Timestamp }))
+  @jsonMember(() => ({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: (json: string) => Timestamp.fromJSON(json),
+    serializer: (value: Timestamp) => value.toJSON()
+  }))
   public timestamp: Timestamp;
 
   @jsonMember(() => ({ name: 'era_end', constructor: EraEnd }))

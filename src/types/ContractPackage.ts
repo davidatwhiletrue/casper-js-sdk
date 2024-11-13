@@ -20,7 +20,11 @@ export class ContractGroup {
   @jsonMember({ name: 'group', constructor: String })
   group: string;
 
-  @jsonArrayMember(URef, { name: 'keys' })
+  @jsonArrayMember(URef, {
+    name: 'keys',
+    serializer: (value: URef[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => URef.fromJSON(it))
+  })
   keys: URef[];
 
   constructor(group: string, keys: URef[]) {
@@ -31,7 +35,12 @@ export class ContractGroup {
 
 @jsonObject
 export class ContractVersion {
-  @jsonMember({ name: 'contract_hash', constructor: ContractHash })
+  @jsonMember({
+    name: 'contract_hash',
+    constructor: ContractHash,
+    deserializer: json => ContractHash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   contractHash: ContractHash;
 
   @jsonMember({ name: 'contract_version', constructor: Number })
@@ -53,7 +62,12 @@ export class ContractVersion {
 
 @jsonObject
 export class ContractPackage {
-  @jsonMember({ name: 'access_key', constructor: URef })
+  @jsonMember({
+    name: 'access_key',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   accessKey: URef;
 
   @jsonArrayMember(DisabledContractVersion, { name: 'disabled_versions' })

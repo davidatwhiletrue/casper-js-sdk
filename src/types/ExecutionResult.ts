@@ -13,7 +13,12 @@ import { TransactionHash } from './Transaction';
 
 @jsonObject
 export class Operation {
-  @jsonMember({ name: 'key', constructor: Key })
+  @jsonMember({
+    name: 'key',
+    constructor: Key,
+    deserializer: json => Key.fromJSON(json),
+    serializer: (value: Key) => value.toJSON()
+  })
   public key: Key;
 
   @jsonMember({ name: 'kind', constructor: String })
@@ -37,7 +42,12 @@ export class ExecutionResultStatusData {
   @jsonMember({ name: 'effect', constructor: Effect })
   public effect: Effect;
 
-  @jsonArrayMember(TransferHash, { name: 'transfers' })
+  @jsonArrayMember(TransferHash, {
+    name: 'transfers',
+    serializer: (value: TransferHash[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => TransferHash.fromJSON(it))
+  })
   public transfers: TransferHash[] = [];
 
   @jsonMember({ name: 'cost', constructor: Number })
@@ -49,7 +59,12 @@ export class ExecutionResultStatusData {
 
 @jsonObject
 export class ExecutionResultV2 {
-  @jsonMember({ name: 'initiator', constructor: InitiatorAddr })
+  @jsonMember({
+    name: 'initiator',
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public initiator: InitiatorAddr;
 
   @jsonMember({ name: 'error_message', constructor: String })
@@ -67,7 +82,10 @@ export class ExecutionResultV2 {
   @jsonMember({ name: 'payment', constructor: AnyT })
   public payment?: any;
 
-  @jsonArrayMember(Transfer, { name: 'transfers' })
+  @jsonArrayMember(Transfer, {
+    name: 'transfers',
+    deserializer: (json: any) => json.map((it: string) => Transfer.fromJSON(it))
+  })
   public transfers: Transfer[] = [];
 
   @jsonMember({ name: 'size_estimate', constructor: Number })
@@ -88,7 +106,12 @@ export class ExecutionResultV1 {
 
 @jsonObject
 export class DeployExecutionResult {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public blockHash: Hash;
 
   @jsonMember({ name: 'result', constructor: ExecutionResultV1 })
@@ -97,7 +120,11 @@ export class DeployExecutionResult {
 
 @jsonObject
 export class ExecutionResult {
-  @jsonMember({ constructor: InitiatorAddr })
+  @jsonMember({
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: (value: InitiatorAddr) => value.toJSON()
+  })
   public initiator: InitiatorAddr;
 
   @jsonMember({ name: 'error_message', constructor: String })
@@ -115,7 +142,9 @@ export class ExecutionResult {
   @jsonMember({ constructor: AnyT })
   public payment?: any;
 
-  @jsonArrayMember(Transfer)
+  @jsonArrayMember(Transfer, {
+    deserializer: (json: any) => json.map((it: string) => Transfer.fromJSON(it))
+  })
   public transfers: Transfer[] = [];
 
   @jsonMember({ constructor: Number })
@@ -228,7 +257,12 @@ export class ExecutionResult {
 
 @jsonObject
 export class ExecutionInfo {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public blockHash: Hash;
 
   @jsonMember({ name: 'block_height', constructor: Number })
@@ -268,7 +302,12 @@ export class ExecutionInfo {
 
 @jsonObject
 export class DeployExecutionInfo {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public blockHash: Hash;
 
   @jsonMember({ name: 'block_height', constructor: Number })

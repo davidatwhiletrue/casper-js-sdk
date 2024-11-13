@@ -1,4 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
+import { assert, expect } from 'chai';
 
 import { Duration, Timestamp } from './Time';
 import {
@@ -28,8 +29,6 @@ describe('Test Transaction', () => {
   it('should create a Transaction from TransactionV1', async () => {
     const keys = await PrivateKey.generate(KeyAlgorithm.ED25519);
     const timestamp = new Timestamp(new Date());
-    const duration = new Duration(18000000000);
-    const initiatorAddr = new InitiatorAddr(keys.publicKey);
     const paymentAmount = 20000000000000;
 
     const pricingMode = new PricingMode();
@@ -40,8 +39,8 @@ describe('Test Transaction', () => {
     const transactionHeader = TransactionV1Header.build({
       chainName: 'casper-net-1',
       timestamp,
-      ttl: duration,
-      initiatorAddr,
+      ttl: new Duration(1800000),
+      initiatorAddr: new InitiatorAddr(keys.publicKey),
       pricingMode
     });
 
@@ -72,5 +71,21 @@ describe('Test Transaction', () => {
       transactionBody
     );
     await transaction.sign(keys);
+
+    const toJson = TransactionV1.toJson(transaction);
+    const parsed = TransactionV1.fromJSON(toJson.transaction);
+
+    console.log(toJson);
+    console.log(parsed);
+    console.log(JSON.stringify(toJson));
+
+    const transactionPaymentAmount = parsed.body.args.args
+      .get('amount')!
+      .toString();
+
+    assert.deepEqual(parsed.approvals[0].signer, keys.publicKey);
+    expect(transaction.body).to.deep.equal(transactionBody);
+    expect(transaction.header).to.deep.equal(transactionHeader);
+    assert.deepEqual(parseInt(transactionPaymentAmount, 10), paymentAmount);
   });
 });

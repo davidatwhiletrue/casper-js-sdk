@@ -4,10 +4,20 @@ import { Hash } from './key';
 
 @jsonObject
 export class ReservationKind {
-  @jsonMember({ name: 'receipt', constructor: Hash })
+  @jsonMember({
+    name: 'receipt',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   receipt: Hash;
 
-  @jsonMember({ name: 'reservation_data', constructor: HexBytes })
+  @jsonMember({
+    name: 'reservation_data',
+    constructor: HexBytes,
+    deserializer: json => HexBytes.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   reservationData: HexBytes;
 
   @jsonMember({ name: 'reservation_kind', constructor: Number })

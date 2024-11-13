@@ -6,10 +6,16 @@ import { AccountHash } from './key';
 
 @jsonObject
 export class InitiatorAddr {
-  @jsonMember({ name: 'PublicKey', constructor: PublicKey })
+  @jsonMember({
+    name: 'PublicKey',
+    constructor: PublicKey
+  })
   public publicKey?: PublicKey;
 
-  @jsonMember({ name: 'AccountHash', constructor: AccountHash })
+  @jsonMember({
+    name: 'AccountHash',
+    constructor: AccountHash
+  })
   public accountHash?: AccountHash;
 
   constructor(publicKey?: PublicKey, accountHash?: AccountHash) {
@@ -34,20 +40,13 @@ export class InitiatorAddr {
     return result;
   }
 
-  static fromJSON(json: string): InitiatorAddr {
-    let parsed;
-    try {
-      parsed = JSON.parse(json);
-    } catch {
-      throw new Error('Invalid JSON input for InitiatorAddr');
-    }
-
+  static fromJSON(json: any): InitiatorAddr {
     const initiatorAddr = new InitiatorAddr();
 
-    if (parsed.publicKey) {
-      initiatorAddr.publicKey = PublicKey.fromHex(parsed.publicKey);
-    } else if (parsed.accountHash) {
-      initiatorAddr.accountHash = AccountHash.fromString(parsed.accountHash);
+    if (json.publicKey) {
+      initiatorAddr.publicKey = PublicKey.fromHex(json.publicKey);
+    } else if (json.accountHash) {
+      initiatorAddr.accountHash = AccountHash.fromString(json.accountHash);
     }
 
     return initiatorAddr;

@@ -4,7 +4,12 @@ import { StoredValue } from './StoredValue';
 
 @jsonObject
 export class EraSummary {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public blockHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
@@ -13,7 +18,12 @@ export class EraSummary {
   @jsonMember({ name: 'stored_value', constructor: StoredValue })
   public storedValue: StoredValue;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public stateRootHash: Hash;
 
   @jsonMember({ name: 'merkle_proof', constructor: String })

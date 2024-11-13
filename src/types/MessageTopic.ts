@@ -20,7 +20,9 @@ export class MessageTopic {
 
   @jsonMember({
     name: 'topic_name_hash',
-    constructor: Hash
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
   })
   topicNameHash: Hash;
 }
@@ -50,13 +52,17 @@ export class Message {
 
   @jsonMember({
     name: 'topic_name_hash',
-    constructor: Hash
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
   })
   topicNameHash: Hash;
 
   @jsonMember({
     name: 'entity_hash',
-    constructor: EntityAddr
+    constructor: EntityAddr,
+    deserializer: json => EntityAddr.fromJSON(json),
+    serializer: value => value.toJSON()
   })
   entityHash: EntityAddr;
 

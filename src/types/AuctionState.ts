@@ -5,7 +5,12 @@ import { PublicKey } from './keypair';
 
 @jsonObject
 export class PublicKeyAndBid {
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   publicKey: PublicKey;
 
   @jsonMember({ name: 'bid', constructor: Bid })

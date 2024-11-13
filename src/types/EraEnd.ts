@@ -6,14 +6,28 @@ import {
 } from 'typedjson';
 import { PublicKey } from './keypair';
 import { ValidatorWeightEraEnd } from './ValidatorWeight';
-import { CLValueUInt512 } from './clvalue';
+import {
+  CLValueUInt512,
+  deserializeRewards,
+  serializeRewards
+} from './clvalue';
 
 @jsonObject
 export class EraReward {
-  @jsonMember({ name: 'validator', constructor: PublicKey })
+  @jsonMember({
+    name: 'validator',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public validator: PublicKey;
 
-  @jsonMember({ name: 'amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public amount: CLValueUInt512;
 
   constructor(validator: PublicKey, amount: CLValueUInt512) {
@@ -24,10 +38,20 @@ export class EraReward {
 
 @jsonObject
 export class EraReport {
-  @jsonArrayMember(PublicKey, { name: 'equivocators' })
+  @jsonArrayMember(PublicKey, {
+    name: 'equivocators',
+    serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => PublicKey.fromJSON(it))
+  })
   public equivocators: PublicKey[];
 
-  @jsonArrayMember(PublicKey, { name: 'inactive_validators' })
+  @jsonArrayMember(PublicKey, {
+    name: 'inactive_validators',
+    serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => PublicKey.fromJSON(it))
+  })
   public inactiveValidators: PublicKey[];
 
   @jsonArrayMember(EraReward, { name: 'rewards' })
@@ -46,10 +70,20 @@ export class EraReport {
 
 @jsonObject
 export class EraEndV2 {
-  @jsonArrayMember(PublicKey, { name: 'equivocators' })
+  @jsonArrayMember(PublicKey, {
+    name: 'equivocators',
+    serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => PublicKey.fromJSON(it))
+  })
   public equivocators: PublicKey[];
 
-  @jsonArrayMember(PublicKey, { name: 'inactive_validators' })
+  @jsonArrayMember(PublicKey, {
+    name: 'inactive_validators',
+    serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => PublicKey.fromJSON(it))
+  })
   public inactiveValidators: PublicKey[];
 
   @jsonArrayMember(ValidatorWeightEraEnd, {
@@ -57,7 +91,11 @@ export class EraEndV2 {
   })
   public nextEraValidatorWeights: ValidatorWeightEraEnd[];
 
-  @jsonMapMember(String, CLValueUInt512, { name: 'rewards' })
+  @jsonMapMember(String, Array, {
+    name: 'rewards',
+    serializer: serializeRewards,
+    deserializer: deserializeRewards
+  })
   public rewards: Map<string, CLValueUInt512[]>;
 
   @jsonMember({ name: 'next_era_gas_price', constructor: Number })
@@ -99,10 +137,20 @@ export class EraEndV1 {
 
 @jsonObject
 export class EraEnd {
-  @jsonArrayMember(PublicKey, { name: 'equivocators' })
+  @jsonArrayMember(PublicKey, {
+    name: 'equivocators',
+    serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => PublicKey.fromJSON(it))
+  })
   public equivocators: PublicKey[];
 
-  @jsonArrayMember(PublicKey, { name: 'inactive_validators' })
+  @jsonArrayMember(PublicKey, {
+    name: 'inactive_validators',
+    serializer: (value: PublicKey[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => PublicKey.fromJSON(it))
+  })
   public inactiveValidators: PublicKey[];
 
   @jsonArrayMember(ValidatorWeightEraEnd, {
@@ -110,7 +158,11 @@ export class EraEnd {
   })
   public nextEraValidatorWeights: ValidatorWeightEraEnd[];
 
-  @jsonMapMember(String, CLValueUInt512, { name: 'rewards' })
+  @jsonMapMember(String, CLValueUInt512, {
+    name: 'rewards',
+    deserializer: deserializeRewards,
+    serializer: serializeRewards
+  })
   public rewards: Map<string, CLValueUInt512[]>;
 
   @jsonMember({ name: 'next_era_gas_price', constructor: Number })

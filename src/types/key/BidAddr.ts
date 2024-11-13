@@ -54,16 +54,31 @@ const CreditAddrLen = 41;
 
 @jsonObject
 export class DelegatorInfo {
-  @jsonMember({ name: 'validator', constructor: Hash })
+  @jsonMember({
+    name: 'validator',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validator: Hash;
 
-  @jsonMember({ name: 'delegator', constructor: Hash })
+  @jsonMember({
+    name: 'delegator',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   delegator: Hash;
 }
 
 @jsonObject
 export class CreditInfo {
-  @jsonMember({ name: 'validator', constructor: Hash })
+  @jsonMember({
+    name: 'validator',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validator: Hash;
 
   @jsonMember({ name: 'eraId', constructor: Number })

@@ -22,7 +22,12 @@ class FutureEraScheduling {
 
 @jsonObject
 class FutureTimestampScheduling {
-  @jsonMember({ name: 'FutureTimestamp', constructor: Timestamp })
+  @jsonMember({
+    name: 'FutureTimestamp',
+    constructor: Timestamp,
+    deserializer: json => Timestamp.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   timestamp: Timestamp;
 
   constructor(timestamp: Timestamp) {
@@ -77,51 +82,25 @@ export class TransactionScheduling {
     return tagBytes;
   }
 
-  static fromJSON(json: string): TransactionScheduling {
-    const parsed = JSON.parse(json);
-    if (parsed === 'Standard') {
+  static fromJSON(json: any): TransactionScheduling {
+    if (json === 'Standard') {
       return new TransactionScheduling({});
     }
-    if (typeof parsed === 'object') {
-      if ('FutureEra' in parsed) {
+    if (typeof json === 'object') {
+      if ('FutureEra' in json) {
         return new TransactionScheduling(
           undefined,
-          new FutureEraScheduling(parsed.FutureEra)
+          new FutureEraScheduling(json.FutureEra)
         );
       }
-      if ('FutureTimestamp' in parsed) {
+      if ('FutureTimestamp' in json) {
         return new TransactionScheduling(
           undefined,
           undefined,
-          new FutureTimestampScheduling(parsed.FutureEra)
+          new FutureTimestampScheduling(json.FutureEra)
         );
       }
     }
-    throw new Error('Invalid JSON format for TransactionScheduling');
-  }
-
-  fromJSON(json: string): TransactionScheduling {
-    const data = JSON.parse(json);
-
-    if (typeof data === 'object' && data !== null) {
-      if ('FutureTimestamp' in data) {
-        return new TransactionScheduling(
-          undefined,
-          undefined,
-          new FutureTimestampScheduling(data.FutureTimestamp)
-        );
-      }
-
-      if ('FutureEra' in data) {
-        return new TransactionScheduling(
-          undefined,
-          new FutureEraScheduling(data.FutureEra)
-        );
-      }
-    } else if (data === 'Standard') {
-      return new TransactionScheduling({});
-    }
-
     throw new Error('Invalid JSON format for TransactionScheduling');
   }
 

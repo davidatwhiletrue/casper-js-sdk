@@ -1,8 +1,8 @@
-import { jsonObject, jsonArrayMember } from 'typedjson';
+import { jsonObject, jsonMember } from 'typedjson';
 
 @jsonObject
 export class HexBytes {
-  @jsonArrayMember(Uint8Array)
+  @jsonMember(Uint8Array)
   bytes: Uint8Array;
 
   constructor(bytes: Uint8Array) {

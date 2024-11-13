@@ -6,13 +6,26 @@ import { CLValueUInt512 } from './clvalue';
 
 @jsonObject
 export class TransferV1 {
-  @jsonMember({ constructor: CLValueUInt512 })
+  @jsonMember({
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public amount: CLValueUInt512;
 
-  @jsonMember({ name: 'deploy_hash', constructor: Hash })
+  @jsonMember({
+    name: 'deploy_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public deployHash: Hash;
 
-  @jsonMember({ constructor: AccountHash })
+  @jsonMember({
+    constructor: AccountHash,
+    deserializer: json => AccountHash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public from: AccountHash;
 
   @jsonMember({ constructor: Number })
@@ -21,25 +34,53 @@ export class TransferV1 {
   @jsonMember({ constructor: Number })
   public id?: number;
 
-  @jsonMember({ constructor: URef })
+  @jsonMember({
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public source: URef;
 
-  @jsonMember({ constructor: URef })
+  @jsonMember({
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public target: URef;
 
-  @jsonMember({ constructor: AccountHash })
+  @jsonMember({
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+
+      return AccountHash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+
+      return value.toJSON();
+    }
+  })
   public to?: AccountHash;
 }
 
 @jsonObject
 export class TransferV2 {
-  @jsonMember({ constructor: CLValueUInt512 })
+  @jsonMember({
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public amount: CLValueUInt512;
 
   @jsonMember({ name: 'transaction_hash', constructor: TransactionHash })
   public transactionHash: TransactionHash;
 
-  @jsonMember({ constructor: InitiatorAddr })
+  @jsonMember({
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public from: InitiatorAddr;
 
   @jsonMember({ constructor: Number })
@@ -48,13 +89,31 @@ export class TransferV2 {
   @jsonMember({ constructor: Number })
   public id?: number;
 
-  @jsonMember({ constructor: URef })
+  @jsonMember({
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public source: URef;
 
-  @jsonMember({ constructor: URef })
+  @jsonMember({
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public target: URef;
 
-  @jsonMember({ constructor: AccountHash })
+  @jsonMember({
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public to?: AccountHash;
 }
 
@@ -69,13 +128,21 @@ class TransferVersioned {
 
 @jsonObject
 export class Transfer {
-  @jsonMember({ constructor: CLValueUInt512 })
+  @jsonMember({
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public amount: CLValueUInt512;
 
   @jsonMember({ name: 'transaction_hash', constructor: TransactionHash })
   public transactionHash: TransactionHash;
 
-  @jsonMember({ constructor: InitiatorAddr })
+  @jsonMember({
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public from: InitiatorAddr;
 
   @jsonMember({ constructor: Number })
@@ -84,13 +151,32 @@ export class Transfer {
   @jsonMember({ constructor: Number })
   public id?: number;
 
-  @jsonMember({ constructor: URef })
+  @jsonMember({
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public source: URef;
 
-  @jsonMember({ constructor: URef })
+  @jsonMember({
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public target: URef;
 
-  @jsonMember({ constructor: AccountHash })
+  @jsonMember({
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+
+      return value.toJSON();
+    }
+  })
   public to?: AccountHash;
 
   private originTransferV1?: TransferV1;

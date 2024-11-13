@@ -128,21 +128,14 @@ export class TransactionEntryPoint {
     throw new Error('Unknown entry point');
   }
 
-  static fromJSON(json: string): TransactionEntryPoint {
-    let parsed;
-    try {
-      parsed = JSON.parse(json);
-    } catch {
-      throw new Error('Invalid JSON input for TransactionEntryPoint');
-    }
-
+  static fromJSON(json: any): TransactionEntryPoint {
     const entryPoint = new TransactionEntryPoint();
-    if (parsed instanceof Object && parsed.Custom) {
-      entryPoint.custom = parsed.Custom;
+    if (json instanceof Object && json.Custom) {
+      entryPoint.custom = json.Custom;
       return entryPoint;
     }
 
-    switch (parsed) {
+    switch (json) {
       case TransactionEntryPointEnum.Transfer:
         entryPoint.transfer = {};
         break;

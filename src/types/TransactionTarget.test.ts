@@ -6,7 +6,7 @@ import assert from 'assert';
 @jsonObject
 class UnderTest {
   @jsonMember({
-    deserializer: json => TransactionTarget.fromJSON(JSON.stringify(json)),
+    deserializer: json => TransactionTarget.fromJSON(json),
     serializer: value => value.toJSON()
   })
   public a: TransactionTarget;

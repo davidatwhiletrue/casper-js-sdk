@@ -5,7 +5,9 @@ import { AddressableEntityHash, URef } from './key';
 export class EntityVersionAndHash {
   @jsonMember({
     name: 'addressable_entity_hash',
-    constructor: AddressableEntityHash
+    constructor: AddressableEntityHash,
+    deserializer: json => AddressableEntityHash.fromJSON(json),
+    serializer: (value: AddressableEntityHash) => value.toJSON()
   })
   addressableEntityHash: AddressableEntityHash;
 
@@ -58,7 +60,11 @@ export class NamedUserGroup {
   @jsonMember({ name: 'group_name', constructor: String })
   groupName: string;
 
-  @jsonArrayMember(URef, { name: 'group_users' })
+  @jsonArrayMember(URef, {
+    name: 'group_users',
+    serializer: (value: URef[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => URef.fromJSON(it))
+  })
   groupUsers: URef[];
 
   constructor(groupName: string, groupUsers: URef[]) {

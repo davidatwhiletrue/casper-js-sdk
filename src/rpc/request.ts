@@ -44,7 +44,12 @@ export class RpcRequest {
   @jsonMember({ constructor: String })
   version: string;
 
-  @jsonMember(() => ({ constructor: IDValue, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: IDValue,
+    isRequired: false,
+    deserializer: (json: string) => IDValue.fromJSON(json),
+    serializer: (value: IDValue) => value.toJSON()
+  }))
   id?: IDValue;
 
   @jsonMember({ constructor: String })
@@ -199,10 +204,32 @@ export class ParamGetStateEntity {
 
 @jsonObject
 export class AccountIdentifier {
-  @jsonMember(() => ({ constructor: AccountHash, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: AccountHash,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   accountHash?: AccountHash;
 
-  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: PublicKey,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: (value: PublicKey) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   publicKey?: PublicKey;
 
   constructor(accountHash?: AccountHash, publicKey?: PublicKey) {
@@ -213,13 +240,46 @@ export class AccountIdentifier {
 
 @jsonObject
 export class EntityIdentifier {
-  @jsonMember(() => ({ constructor: AccountHash, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: AccountHash,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   accountHash?: AccountHash;
 
-  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: PublicKey,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: (value: PublicKey) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   publicKey?: PublicKey;
 
-  @jsonMember(() => ({ constructor: EntityAddr, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: EntityAddr,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return EntityAddr.fromJSON(json);
+    },
+    serializer: (value: EntityAddr) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   entityAddr?: EntityAddr;
 
   constructor(
@@ -428,16 +488,60 @@ export class SpeculativeExecParams {
 
 @jsonObject
 export class PurseIdentifier {
-  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: PublicKey,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: (value: PublicKey) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   mainPurseUnderPublicKey?: PublicKey;
 
-  @jsonMember(() => ({ constructor: AccountHash, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: AccountHash,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   mainPurseUnderAccountHash?: AccountHash;
 
-  @jsonMember(() => ({ constructor: EntityAddr, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: EntityAddr,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return EntityAddr.fromJSON(json);
+    },
+    serializer: (value: EntityAddr) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   mainPurseUnderEntityAddr?: EntityAddr;
 
-  @jsonMember(() => ({ constructor: URef, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: URef,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
+    serializer: (value: URef) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  }))
   purseUref?: URef;
 
   constructor(
@@ -505,10 +609,26 @@ export class QueryBalanceDetailsRequest {
 
 @jsonObject
 export class InfoGetRewardRequest {
-  @jsonMember(() => ({ constructor: PublicKey, isRequired: false }))
+  @jsonMember(() => ({
+    constructor: PublicKey,
+    isRequired: false,
+    deserializer: (json: string) => PublicKey.fromJSON(json),
+    serializer: (value: PublicKey) => value.toJSON()
+  }))
   validator: PublicKey;
 
-  @jsonMember({ isRequired: false, constructor: PublicKey })
+  @jsonMember({
+    isRequired: false,
+    constructor: PublicKey,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: (value: PublicKey) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   delegator?: PublicKey;
 
   @jsonMember({ isRequired: false, constructor: EraIdentifier })

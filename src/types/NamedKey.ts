@@ -9,7 +9,12 @@ export class NamedKey {
   @jsonMember({ name: 'name', constructor: String })
   name: string;
 
-  @jsonMember({ name: 'key', constructor: Key })
+  @jsonMember({
+    name: 'key',
+    constructor: Key,
+    deserializer: json => Key.fromJSON(json),
+    serializer: (value: Key) => value.toJSON()
+  })
   key: Key;
 
   constructor(name: string, key: Key) {

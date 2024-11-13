@@ -6,7 +6,7 @@ import { InitiatorAddr } from './InitiatorAddr';
 @jsonObject
 class UnderTest {
   @jsonMember({
-    deserializer: json => InitiatorAddr.fromJSON(JSON.stringify(json)),
+    deserializer: json => InitiatorAddr.fromJSON(json),
     serializer: value => value.toJSON()
   })
   public a: InitiatorAddr;

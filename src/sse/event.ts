@@ -234,10 +234,20 @@ export class BlockAddedEventWrapper {
 
 @jsonObject
 export class DeployProcessedPayload {
-  @jsonMember({ name: 'deploy_hash', constructor: Hash })
+  @jsonMember({
+    name: 'deploy_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   deployHash: Hash;
 
-  @jsonMember({ name: 'account', constructor: PublicKey })
+  @jsonMember({
+    name: 'account',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   account: PublicKey;
 
   @jsonMember({ name: 'timestamp', constructor: Date })
@@ -246,7 +256,12 @@ export class DeployProcessedPayload {
   @jsonMember({ name: 'ttl', constructor: String })
   ttl: string;
 
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   blockHash: Hash;
 
   @jsonMember({ name: 'execution_result', constructor: ExecutionResultV1 })
@@ -270,7 +285,12 @@ export class DeployAcceptedEvent {
 
 @jsonObject
 export class DeployExpiredPayload {
-  @jsonMember({ name: 'deploy_hash', constructor: Hash })
+  @jsonMember({
+    name: 'deploy_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   deployHash: Hash;
 }
 
@@ -390,13 +410,23 @@ export class TransactionExpiredEvent {
 
 @jsonObject
 export class TransactionProcessedPayload {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   blockHash: Hash;
 
   @jsonMember({ name: 'transaction_hash', constructor: TransactionHash })
   transactionHash: TransactionHash;
 
-  @jsonMember({ name: 'initiator_addr', constructor: InitiatorAddr })
+  @jsonMember({
+    name: 'initiator_addr',
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   initiatorAddr: InitiatorAddr;
 
   @jsonMember({ name: 'timestamp', constructor: Date })
@@ -467,37 +497,79 @@ export class TransactionProcessedEvent {
 
 @jsonObject
 export class FinalitySignatureV1 {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   blockHash: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'signature', constructor: HexBytes })
+  @jsonMember({
+    name: 'signature',
+    constructor: HexBytes,
+    deserializer: json => HexBytes.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   signature: HexBytes;
 
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   publicKey: PublicKey;
 }
 
 @jsonObject
 export class FinalitySignatureV2 {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   blockHash: Hash;
 
   @jsonMember({ isRequired: false, name: 'block_height', constructor: Number })
   blockHeight?: number;
 
-  @jsonMember({ isRequired: false, name: 'chain_name_hash', constructor: Hash })
+  @jsonMember({
+    isRequired: false,
+    name: 'chain_name_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   chainNameHash?: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'signature', constructor: HexBytes })
+  @jsonMember({
+    name: 'signature',
+    constructor: HexBytes,
+    deserializer: json => HexBytes.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   signature: HexBytes;
 
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   publicKey: PublicKey;
 }
 
@@ -520,7 +592,12 @@ export class FinalitySignatureWrapper {
 
 @jsonObject
 export class FinalitySignature {
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   blockHash: Hash;
 
   @jsonMember({
@@ -533,17 +610,35 @@ export class FinalitySignature {
   @jsonMember({
     isRequired: false,
     name: 'chain_name_hash',
-    constructor: Hash
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   chainNameHash?: Hash;
 
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'signature', constructor: HexBytes })
+  @jsonMember({
+    name: 'signature',
+    constructor: HexBytes,
+    deserializer: json => HexBytes.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   signature: HexBytes;
 
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   publicKey: PublicKey;
 
   @jsonMember(FinalitySignatureV1, {
@@ -626,10 +721,20 @@ export class FaultPayload {
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   publicKey: PublicKey;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: json => Timestamp.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   timestamp: Timestamp;
 }
 

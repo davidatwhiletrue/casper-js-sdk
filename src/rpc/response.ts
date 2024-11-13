@@ -67,7 +67,12 @@ export class StateGetBalanceResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember(() => ({ name: 'balance_value', constructor: CLValueUInt512 }))
+  @jsonMember(() => ({
+    name: 'balance_value',
+    constructor: CLValueUInt512,
+    deserializer: (json: string) => CLValueUInt512.fromJSON(json),
+    serializer: (value: CLValueUInt512) => value.toJSON()
+  }))
   balanceValue: CLValueUInt512;
 
   public rawJSON: string;
@@ -194,7 +199,10 @@ export class ChainGetBlockTransfersResult {
   @jsonMember({ name: 'block_hash', constructor: String })
   public blockHash: string;
 
-  @jsonArrayMember(Transfer, { name: 'transfers' })
+  @jsonArrayMember(Transfer, {
+    name: 'transfers',
+    deserializer: (json: any) => json.map((it: string) => Transfer.fromJSON(it))
+  })
   public transfers: Transfer[];
 
   public rawJSON?: string;
@@ -289,7 +297,18 @@ export class InfoGetDeployResultV1Compatible {
   @jsonArrayMember(DeployExecutionResult, { name: 'execution_results' })
   executionResults: DeployExecutionResult[];
 
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   blockHash?: Hash;
 
   @jsonMember({ name: 'block_height', constructor: Number })
@@ -315,7 +334,17 @@ export class InfoGetTransactionResultV1Compatible {
   @jsonArrayMember(DeployExecutionResult)
   executionResults: DeployExecutionResult[] = [];
 
-  @jsonMember({ constructor: Hash })
+  @jsonMember({
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   blockHash?: Hash;
 
   @jsonMember({ constructor: Number })
@@ -475,7 +504,18 @@ export class ChainGetStateRootHashResult {
   @jsonMember({ name: 'api_version', constructor: String })
   version: string;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   stateRootHash: Hash;
 
   rawJSON?: string;
@@ -502,7 +542,18 @@ export class StatusChanges {
 
 @jsonObject
 export class ValidatorChanges {
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   publicKey: PublicKey;
 
   @jsonArrayMember(StatusChanges, { name: 'status_changes' })
@@ -560,10 +611,32 @@ export class InfoGetStatusResult {
   @jsonMember({ name: 'reactor_state', constructor: String })
   reactorState: string;
 
-  @jsonMember({ name: 'last_progress', constructor: Timestamp })
+  @jsonMember({
+    name: 'last_progress',
+    constructor: Timestamp,
+    deserializer: json => {
+      if (!json) return;
+      return Timestamp.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   lastProgress: Timestamp;
 
-  @jsonMember({ name: 'latest_switch_block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'latest_switch_block_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   latestSwitchBlockHash: Hash;
 
   @jsonMember({
@@ -607,7 +680,18 @@ export class PutDeployResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember({ name: 'deploy_hash', constructor: Hash })
+  @jsonMember({
+    name: 'deploy_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   deployHash: Hash;
 
   rawJSON?: string;
@@ -629,7 +713,18 @@ export class SpeculativeExecResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember({ name: 'block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   blockHash: Hash;
 
   @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
@@ -643,7 +738,18 @@ export class QueryBalanceResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember({ name: 'balance', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'balance',
+    constructor: CLValueUInt512,
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   balance: CLValueUInt512;
 
   rawJSON?: string;
@@ -654,10 +760,32 @@ export class QueryBalanceDetailsResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember({ name: 'total_balance', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'total_balance',
+    constructor: CLValueUInt512,
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   totalBalance: CLValueUInt512;
 
-  @jsonMember({ name: 'available_balance', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'available_balance',
+    constructor: CLValueUInt512,
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   availableBalance: CLValueUInt512;
 
   @jsonMember({ name: 'total_balance_proof', constructor: String })
@@ -680,10 +808,32 @@ export class InfoGetRewardResult {
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'reward_amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'reward_amount',
+    constructor: CLValueUInt512,
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   rewardAmount: CLValueUInt512;
 
-  @jsonMember({ name: 'switch_block_hash', constructor: Hash })
+  @jsonMember({
+    name: 'switch_block_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   switchBlockHash: Hash;
 
   rawJSON?: string;
@@ -691,7 +841,18 @@ export class InfoGetRewardResult {
 
 @jsonObject
 export class BalanceHoldWithProof {
-  @jsonMember({ name: 'amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   amount: CLValueUInt512;
 
   @jsonMember({ name: 'proof', constructor: String })

@@ -73,7 +73,18 @@ export class StoredValue {
   @jsonMember({ name: 'Package', constructor: Package })
   package?: Package;
 
-  @jsonMember({ name: 'ByteCode', constructor: ByteCode })
+  @jsonMember({
+    name: 'ByteCode',
+    constructor: ByteCode,
+    deserializer: json => {
+      if (!json) return;
+      return ByteCode.fromJSON(json);
+    },
+    serializer: (value: ByteCode) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   byteCode?: ByteCode;
 
   @jsonMember({ name: 'MessageTopic', constructor: MessageTopicSummary })

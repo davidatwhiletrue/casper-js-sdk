@@ -45,10 +45,20 @@ export enum TransactionVersion {
 
 @jsonObject
 export class Approval {
-  @jsonMember({ name: 'signer', constructor: PublicKey })
+  @jsonMember({
+    name: 'signer',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public signer: PublicKey;
 
-  @jsonMember({ name: 'signature', constructor: HexBytes })
+  @jsonMember({
+    name: 'signature',
+    constructor: HexBytes,
+    deserializer: json => HexBytes.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public signature: HexBytes;
 
   constructor(signer: PublicKey, signature: HexBytes) {
@@ -62,19 +72,39 @@ export class TransactionV1Header {
   @jsonMember({ name: 'chain_name', constructor: String })
   public chainName: string;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: json => Timestamp.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public timestamp: Timestamp;
 
-  @jsonMember({ name: 'ttl', constructor: Duration })
+  @jsonMember({
+    name: 'ttl',
+    constructor: Duration,
+    deserializer: json => Duration.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public ttl: Duration;
 
-  @jsonMember({ name: 'initiator_addr', constructor: InitiatorAddr })
+  @jsonMember({
+    name: 'initiator_addr',
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public initiatorAddr: InitiatorAddr;
 
   @jsonMember({ name: 'pricing_mode', constructor: PricingMode })
   public pricingMode: PricingMode;
 
-  @jsonMember({ name: 'body_hash', constructor: Hash })
+  @jsonMember({
+    name: 'body_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public bodyHash: Hash;
 
   static build({
@@ -134,16 +164,31 @@ export class TransactionV1Body {
   })
   public args: Args;
 
-  @jsonMember({ name: 'target', constructor: TransactionTarget })
+  @jsonMember({
+    name: 'target',
+    constructor: TransactionTarget,
+    deserializer: json => TransactionTarget.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public target: TransactionTarget;
 
-  @jsonMember({ name: 'entry_point', constructor: TransactionEntryPoint })
+  @jsonMember({
+    name: 'entry_point',
+    constructor: TransactionEntryPoint,
+    deserializer: json => TransactionEntryPoint.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public entryPoint: TransactionEntryPoint;
 
   @jsonMember({ name: 'transaction_category', constructor: Number })
   public category: number;
 
-  @jsonMember({ name: 'scheduling', constructor: TransactionScheduling })
+  @jsonMember({
+    name: 'scheduling',
+    constructor: TransactionScheduling,
+    deserializer: json => TransactionScheduling.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public scheduling: TransactionScheduling;
 
   static build({
@@ -187,7 +232,12 @@ export class TransactionV1Body {
 
 @jsonObject
 export class TransactionV1 {
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public hash: Hash;
 
   @jsonMember({ name: 'header', constructor: TransactionV1Header })
@@ -196,7 +246,7 @@ export class TransactionV1 {
   @jsonMember({ name: 'body', constructor: TransactionV1Body })
   public body: TransactionV1Body;
 
-  @jsonArrayMember(Approval)
+  @jsonArrayMember(() => Approval)
   public approvals: Approval[];
 
   constructor(
@@ -243,17 +293,14 @@ export class TransactionV1 {
   }
 
   async sign(keys: PrivateKey): Promise<void> {
-    const signature = await keys.sign(this.hash.toBytes());
-    const approval: Approval = {
-      signer: keys.publicKey,
-      signature: new HexBytes(signature)
-    };
+    const signatureBytes = await keys.sign(this.hash.toBytes());
+    const signature = new HexBytes(signatureBytes);
 
     if (!this.approvals) {
       this.approvals = [];
     }
 
-    this.approvals.push(approval);
+    this.approvals.push(new Approval(keys.publicKey, signature));
   }
 
   /**
@@ -352,13 +399,28 @@ export class TransactionHeader {
   @jsonMember({ name: 'chain_name', constructor: String })
   public chainName: string;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: json => Timestamp.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public timestamp: Timestamp;
 
-  @jsonMember({ name: 'ttl', constructor: Duration })
+  @jsonMember({
+    name: 'ttl',
+    constructor: Duration,
+    deserializer: json => Duration.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public ttl: Duration;
 
-  @jsonMember({ name: 'initiator_addr', constructor: InitiatorAddr })
+  @jsonMember({
+    name: 'initiator_addr',
+    constructor: InitiatorAddr,
+    deserializer: json => InitiatorAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public initiatorAddr: InitiatorAddr;
 
   @jsonMember({ name: 'pricing_mode', constructor: PricingMode })
@@ -389,13 +451,28 @@ export class TransactionBody {
   })
   public args: Args;
 
-  @jsonMember({ name: 'target', constructor: TransactionTarget })
+  @jsonMember({
+    name: 'target',
+    constructor: TransactionTarget,
+    serializer: value => value.toJSON(),
+    deserializer: json => TransactionTarget.fromJSON(json)
+  })
   public target: TransactionTarget;
 
-  @jsonMember({ name: 'entry_point', constructor: TransactionEntryPoint })
+  @jsonMember({
+    name: 'entry_point',
+    constructor: TransactionEntryPoint,
+    serializer: value => value.toJSON(),
+    deserializer: json => TransactionEntryPoint.fromJSON(json)
+  })
   public entryPoint: TransactionEntryPoint;
 
-  @jsonMember({ name: 'scheduling', constructor: TransactionScheduling })
+  @jsonMember({
+    name: 'scheduling',
+    constructor: TransactionScheduling,
+    serializer: value => value.toJSON(),
+    deserializer: json => TransactionScheduling.fromJSON(json)
+  })
   public scheduling: TransactionScheduling;
 
   @jsonMember({ name: 'transaction_category', constructor: Number })
@@ -418,7 +495,12 @@ export class TransactionBody {
 
 @jsonObject
 export class Transaction {
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public hash: Hash;
 
   @jsonMember({ name: 'header', constructor: TransactionHeader })
@@ -496,10 +578,29 @@ export class TransactionWrapper {
 
 @jsonObject
 export class TransactionHash {
-  @jsonMember({ name: 'Deploy', constructor: Hash })
+  @jsonMember({
+    name: 'Deploy',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public deploy?: Hash;
 
-  @jsonMember({ name: 'Version1', constructor: Hash })
+  @jsonMember({
+    name: 'Version1',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => value.toJSON()
+  })
   public transactionV1?: Hash;
 
   constructor(deploy?: Hash, transactionV1?: Hash) {

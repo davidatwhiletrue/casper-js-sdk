@@ -29,6 +29,7 @@ enum ExecutableDeployItemType {
 export class ModuleBytes {
   @jsonMember({ name: 'module_bytes', constructor: String })
   moduleBytes: string;
+
   @jsonMember({
     constructor: Args,
     name: 'args',
@@ -64,7 +65,13 @@ export class ModuleBytes {
 
 @jsonObject
 export class StoredContractByHash {
-  @jsonMember({ name: 'hash', constructor: ContractHash }) hash: ContractHash;
+  @jsonMember({
+    name: 'hash',
+    constructor: ContractHash,
+    deserializer: json => ContractHash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  hash: ContractHash;
   @jsonMember({ name: 'entry_point', constructor: String }) entryPoint: string;
   @jsonMember({
     constructor: Args,
@@ -118,7 +125,13 @@ export class StoredContractByName {
 
 @jsonObject
 export class StoredVersionedContractByHash {
-  @jsonMember({ name: 'hash', constructor: ContractHash }) hash: ContractHash;
+  @jsonMember({
+    name: 'hash',
+    constructor: ContractHash,
+    deserializer: json => ContractHash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  hash: ContractHash;
   @jsonMember({ name: 'entry_point', constructor: String }) entryPoint: string;
   @jsonMember({
     constructor: Args,
@@ -264,6 +277,16 @@ export class ExecutableDeployItem {
   @jsonMember({ name: 'Transfer', constructor: TransferDeployItem })
   transfer?: TransferDeployItem;
 
+  public getArgByName(name: string): CLValue | undefined {
+    const deployItemArgs = this.getArgs();
+    return deployItemArgs.args.get(name);
+  }
+
+  public setArg(name: string, value: CLValue) {
+    const deployItemArgs = this.getArgs();
+    deployItemArgs.insert(name, value);
+  }
+
   getArgs(): Args {
     if (this.moduleBytes) return this.moduleBytes.args;
     if (this.storedContractByHash) return this.storedContractByHash.args;
@@ -326,5 +349,61 @@ export class ExecutableDeployItem {
       Args.fromMap({ amount: CLValueUInt512.newCLUInt512(amount) })
     );
     return executableDeployItem;
+  }
+
+  /**
+   * Casts the `ExecutableDeployItem` to `ModuleBytes` if possible
+   * @returns `ModuleBytes` representation of `ExecutableDeployItem`, or `undefined` if the `ExecutableDeployItem` cannot be cast
+   */
+  public asModuleBytes(): ModuleBytes | undefined {
+    return this.moduleBytes;
+  }
+
+  /**
+   * Identifies whether the `ExecutableDeployItem` is of the original type `Transfer`
+   * @returns `true` is the `ExecutableDeployItem` conforms to `Transfer`, and `false` otherwise.
+   */
+  public isTransfer() {
+    return !!this.transfer;
+  }
+
+  /**
+   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredVersionedContractByHash`
+   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredVersionedContractByHash`, and `false` otherwise.
+   */
+  public isStoredVersionContractByHash(): boolean {
+    return !!this.storedVersionedContractByHash;
+  }
+
+  /**
+   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredVersionedContractByName`
+   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredVersionedContractByName`, and `false` otherwise.
+   */
+  public isStoredVersionContractByName(): boolean {
+    return !!this.storedVersionedContractByName;
+  }
+
+  /**
+   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredContractByName`
+   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredContractByName`, and `false` otherwise.
+   */
+  public isStoredContractByName(): boolean {
+    return !!this.storedContractByName;
+  }
+
+  /**
+   * Identifies whether the `ExecutableDeployItem` is of the original type `StoredContractByHash`
+   * @returns `true` is the `ExecutableDeployItem` conforms to `StoredContractByHash`, and `false` otherwise.
+   */
+  public isStoredContractByHash(): boolean {
+    return !!this.storedContractByHash;
+  }
+
+  /**
+   * Identifies whether the `ExecutableDeployItem` is of the original type `ModuleBytes`
+   * @returns `true` is the `ExecutableDeployItem` conforms to `ModuleBytes`, and `false` otherwise.
+   */
+  public isModuleBytes(): boolean {
+    return !!this.moduleBytes;
   }
 }

@@ -1,4 +1,5 @@
 import { jsonObject, jsonMember } from 'typedjson';
+import { dehumanizerTTL, humanizerTTL } from './SerializationUtils';
 
 @jsonObject
 export class Timestamp {
@@ -37,32 +38,21 @@ export class Duration {
   }
 
   toJSON(): string {
-    let durationStr = this.toDurationString();
-    if (durationStr === '24h0m0s') {
-      durationStr = '1day';
-    }
-    if (durationStr.endsWith('h0m0s')) {
-      durationStr = durationStr.replace('0m0s', '');
-    } else if (durationStr.endsWith('m0s')) {
-      durationStr = durationStr.replace('0s', '');
-    }
-    return durationStr;
+    return humanizerTTL(this.duration);
   }
 
   static fromJSON(data: string): Duration {
-    let parsedData = data.replace(' ', '');
-    if (parsedData === '1day') {
-      parsedData = '24h';
-    }
-    const ms = Duration.parseDurationString(parsedData);
-    return new Duration(ms);
+    const duration = dehumanizerTTL(data);
+
+    return new Duration(duration);
   }
 
-  private toDurationString(): string {
+  toDurationString(): string {
     return new Date(this.duration).toISOString().substring(11, 19);
   }
 
-  private static parseDurationString(durationStr: string): number {
+  static parseDurationString(durationStr: string): number {
+    console.log(durationStr);
     const parts = durationStr.match(/(\d+)([smhd])/g);
     if (!parts) throw new Error('Invalid duration format');
 

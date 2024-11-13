@@ -30,7 +30,12 @@ export class FixedMode {
 
 @jsonObject
 export class ReservedMode {
-  @jsonMember({ name: 'receipt', constructor: Hash })
+  @jsonMember({
+    name: 'receipt',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   receipt: Hash;
 }
 

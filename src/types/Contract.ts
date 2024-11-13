@@ -8,11 +8,18 @@ import { NamedKeys } from './NamedKey';
 export class Contract {
   @jsonMember({
     name: 'contract_package_hash',
-    constructor: ContractPackageHash
+    constructor: ContractPackageHash,
+    deserializer: json => ContractPackageHash.fromJSON(json),
+    serializer: (value: ContractPackageHash) => value.toJSON()
   })
   contractPackageHash: ContractPackageHash;
 
-  @jsonMember({ name: 'contract_wasm_hash', constructor: ContractHash })
+  @jsonMember({
+    name: 'contract_wasm_hash',
+    constructor: ContractHash,
+    deserializer: json => ContractHash.fromJSON(json),
+    serializer: (value: ContractHash) => value.toJSON()
+  })
   contractWasmHash: ContractHash;
 
   @jsonArrayMember(EntryPointV1, { name: 'entry_points' })

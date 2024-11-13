@@ -53,7 +53,12 @@ export class Hold {
   /**
    * The block time of the hold.
    */
-  @jsonMember({ name: 'BlockTime', constructor: Date })
+  @jsonMember({
+    name: 'BlockTime',
+    constructor: Date,
+    serializer: (n: number) => new Date(n).toISOString(),
+    deserializer: (s: string) => Date.parse(s)
+  })
   blockTime: Date;
 
   constructor(purseAddr: URefAddr, blockTime: Date) {

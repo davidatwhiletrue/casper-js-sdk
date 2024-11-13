@@ -63,10 +63,6 @@ export class AccountHash extends Hash {
    * @throws {Error} If the input is not a valid JSON string.
    */
   public static fromJSON(data: string): AccountHash {
-    const parsed = JSON.parse(data);
-    if (typeof parsed !== 'string') {
-      throw new Error('Invalid JSON data for AccountHash');
-    }
     return AccountHash.fromString(data);
   }
 }

@@ -49,7 +49,12 @@ const SelectorBytesLen = 4;
  */
 @jsonObject
 class VmCasperV1 {
-  @jsonMember({ name: 'EntityAddr', constructor: EntityAddr })
+  @jsonMember({
+    name: 'EntityAddr',
+    constructor: EntityAddr,
+    deserializer: json => EntityAddr.fromJSON(json),
+    serializer: (value: EntityAddr) => value.toJSON()
+  })
   entityAddr: EntityAddr;
 
   @jsonArrayMember(Uint8Array, { name: 'NameBytes' })
@@ -66,7 +71,12 @@ class VmCasperV1 {
  */
 @jsonObject
 class VmCasperV2 {
-  @jsonMember({ name: 'EntityAddr', constructor: EntityAddr })
+  @jsonMember({
+    name: 'EntityAddr',
+    constructor: EntityAddr,
+    deserializer: json => EntityAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   entityAddr: EntityAddr;
 
   @jsonMember({ name: 'Selector', constructor: Number })

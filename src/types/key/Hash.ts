@@ -110,6 +110,22 @@ export class Hash {
     return new Hash(new Uint8Array(buffer.slice(0, Hash.ByteHashLen)));
   }
 
+  public static createHashArray(byteArray: Uint8Array): Hash[] {
+    if (byteArray.length % Hash.ByteHashLen !== 0) {
+      throw new Error(
+        `Byte array length must be a multiple of ${Hash.ByteHashLen}.`
+      );
+    }
+
+    const hashes: Hash[] = [];
+    for (let i = 0; i < byteArray.length; i += Hash.ByteHashLen) {
+      const chunk = byteArray.subarray(i, i + Hash.ByteHashLen);
+      hashes.push(new Hash(chunk));
+    }
+
+    return hashes;
+  }
+
   /**
    * Compares this Hash with another Hash for equality.
    * @param other - The other Hash to compare with.

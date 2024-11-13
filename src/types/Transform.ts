@@ -16,8 +16,14 @@ export class RawWriteCLValue {
   @jsonMember({
     constructor: Args,
     name: 'WriteCLValue',
-    deserializer: deserializeArgs,
-    serializer: serializeArgs
+    deserializer: json => {
+      if (!json) return;
+      return deserializeArgs(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return serializeArgs(value);
+    }
   })
   writeCLValue?: Args;
 }
@@ -27,8 +33,14 @@ class Write {
   @jsonMember({
     constructor: Args,
     name: 'CLValue',
-    deserializer: deserializeArgs,
-    serializer: serializeArgs
+    deserializer: json => {
+      if (!json) return;
+      return deserializeArgs(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return serializeArgs(value);
+    }
   })
   clValue?: Args;
 }
@@ -295,7 +307,12 @@ export class TransformKind {
 
 @jsonObject
 export class Transform {
-  @jsonMember({ name: 'key', constructor: Key })
+  @jsonMember({
+    name: 'key',
+    constructor: Key,
+    deserializer: json => Key.fromJSON(json),
+    serializer: (value: Key) => value.toJSON()
+  })
   public key: Key;
 
   @jsonMember({ name: 'kind', constructor: TransformKind })
@@ -309,7 +326,12 @@ export class Transform {
 
 @jsonObject
 export class TransformKey {
-  @jsonMember({ name: 'key', constructor: Key })
+  @jsonMember({
+    name: 'key',
+    constructor: Key,
+    deserializer: json => Key.fromJSON(json),
+    serializer: (value: Key) => value.toJSON()
+  })
   public key: Key;
 
   @jsonMember({ name: 'transform', constructor: TransformKind })
@@ -340,22 +362,53 @@ export class WriteTransfer {
   @jsonMember({ name: 'id', constructor: Number })
   public id?: number;
 
-  @jsonMember({ name: 'to', constructor: AccountHash })
+  @jsonMember({
+    name: 'to',
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public to?: AccountHash;
 
   @jsonMember({ name: 'deploy_hash', constructor: Hash })
   public deployHash: Hash;
 
-  @jsonMember({ name: 'from', constructor: AccountHash })
+  @jsonMember({
+    name: 'from',
+    constructor: AccountHash,
+    deserializer: json => AccountHash.fromJSON(json),
+    serializer: (value: AccountHash) => value.toJSON()
+  })
   public from: AccountHash;
 
-  @jsonMember({ name: 'amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: (value: CLValueUInt512) => value.toJSON()
+  })
   public amount: CLValueUInt512;
 
-  @jsonMember({ name: 'source', constructor: URef })
+  @jsonMember({
+    name: 'source',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public source: URef;
 
-  @jsonMember({ name: 'target', constructor: URef })
+  @jsonMember({
+    name: 'target',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
   public target: URef;
 
   @jsonMember({ name: 'gas', constructor: Number })

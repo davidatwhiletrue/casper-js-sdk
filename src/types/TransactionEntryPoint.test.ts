@@ -7,7 +7,7 @@ import { TransactionEntryPoint } from './TransactionEntryPoint';
 class UnderTest {
   @jsonMember({
     serializer: value => value.toJSON(),
-    deserializer: json => TransactionEntryPoint.fromJSON(JSON.stringify(json))
+    deserializer: json => TransactionEntryPoint.fromJSON(json)
   })
   public a: TransactionEntryPoint;
 }

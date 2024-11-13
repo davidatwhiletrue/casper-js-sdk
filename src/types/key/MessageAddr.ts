@@ -37,7 +37,12 @@ export class MessageAddr {
   }
 
   /** The address of the associated entity. */
-  @jsonMember({ name: 'EntityAddr', constructor: EntityAddr })
+  @jsonMember({
+    name: 'EntityAddr',
+    constructor: EntityAddr,
+    deserializer: json => EntityAddr.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public entityAddr: EntityAddr;
 
   /** The hash of the topic name. */

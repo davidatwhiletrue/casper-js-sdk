@@ -4,13 +4,28 @@ import { CLValueUInt512 } from './clvalue';
 
 @jsonObject
 export class DelegatorAllocation {
-  @jsonMember({ name: 'delegator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'delegator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   delegatorPublicKey: PublicKey;
 
-  @jsonMember({ name: 'validator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validatorPublicKey: PublicKey;
 
-  @jsonMember({ name: 'amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   amount: CLValueUInt512;
 
   constructor(
@@ -26,10 +41,20 @@ export class DelegatorAllocation {
 
 @jsonObject
 export class ValidatorAllocation {
-  @jsonMember({ name: 'validator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validatorPublicKey: PublicKey;
 
-  @jsonMember({ name: 'amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   amount: CLValueUInt512;
 
   constructor(validatorPublicKey: PublicKey, amount: CLValueUInt512) {

@@ -6,7 +6,9 @@ import { NamedKeys } from './NamedKey';
 export class AssociatedKey {
   @jsonMember({
     name: 'account_hash',
-    constructor: AccountHash
+    constructor: AccountHash,
+    deserializer: json => AccountHash.fromJSON(json),
+    serializer: value => value.toJSON()
   })
   accountHash: AccountHash;
 
@@ -36,6 +38,8 @@ export class ActionThresholds {
 export class Account {
   @jsonMember({
     name: 'account_hash',
+    deserializer: json => AccountHash.fromJSON(json),
+    serializer: value => value.toJSON(),
     constructor: AccountHash
   })
   accountHash: AccountHash;
@@ -48,7 +52,9 @@ export class Account {
 
   @jsonMember({
     name: 'main_purse',
-    constructor: URef
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
   })
   mainPurse: URef;
 

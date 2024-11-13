@@ -5,21 +5,41 @@ import { Timestamp } from './Time';
 
 @jsonObject
 export class MinimalBlockInfo {
-  @jsonMember({ name: 'creator', constructor: PublicKey })
+  @jsonMember({
+    name: 'creator',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   creator: PublicKey;
 
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   hash: Hash;
 
   @jsonMember({ name: 'height', constructor: Number })
   height: number;
 
-  @jsonMember({ name: 'state_root_hash', constructor: Hash })
+  @jsonMember({
+    name: 'state_root_hash',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   stateRootHash: Hash;
 
-  @jsonMember({ name: 'timestamp', constructor: Timestamp })
+  @jsonMember({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: json => Timestamp.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   timestamp: Timestamp;
 }

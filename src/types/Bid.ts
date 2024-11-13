@@ -8,13 +8,23 @@ export class VestingSchedule {
   @jsonMember({ name: 'initial_release_timestamp_millis', constructor: Number })
   initialReleaseTimestampMillis: number;
 
-  @jsonArrayMember(CLValueUInt512, { name: 'locked_amounts' })
+  @jsonArrayMember(CLValueUInt512, {
+    name: 'locked_amounts',
+    serializer: (value: CLValueUInt512[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) =>
+      json.map((it: string) => CLValueUInt512.fromJSON(it))
+  })
   lockedAmounts: CLValueUInt512[];
 }
 
 @jsonObject
 export class ValidatorBid {
-  @jsonMember({ name: 'bonding_purse', constructor: URef })
+  @jsonMember({
+    name: 'bonding_purse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   bondingPurse: URef;
 
   @jsonMember({ name: 'delegation_rate', constructor: Number })
@@ -23,7 +33,12 @@ export class ValidatorBid {
   @jsonMember({ name: 'inactive', constructor: Boolean })
   inactive: boolean;
 
-  @jsonMember({ name: 'staked_amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'staked_amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   stakedAmount: CLValueUInt512;
 
   @jsonMember({ name: 'minimum_delegation_amount', constructor: Number })
@@ -62,16 +77,36 @@ export class Delegator {
     );
   }
 
-  @jsonMember({ name: 'bonding_purse', constructor: URef })
+  @jsonMember({
+    name: 'bonding_purse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   bondingPurse: URef;
 
-  @jsonMember({ name: 'staked_amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'staked_amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   stakedAmount: CLValueUInt512;
 
-  @jsonMember({ name: 'delegator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'delegator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   delegatorPublicKey: PublicKey;
 
-  @jsonMember({ name: 'validator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validatorPublicKey: PublicKey;
 
   @jsonMember({ name: 'vesting_schedule', constructor: VestingSchedule })
@@ -80,7 +115,12 @@ export class Delegator {
 
 @jsonObject
 export class Bid {
-  @jsonMember({ name: 'bonding_purse', constructor: URef })
+  @jsonMember({
+    name: 'bonding_purse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   bondingPurse: URef;
 
   @jsonMember({ name: 'delegation_rate', constructor: Number })
@@ -89,9 +129,20 @@ export class Bid {
   @jsonMember({ name: 'inactive', constructor: Boolean })
   inactive: boolean;
 
-  @jsonMember({ name: 'staked_amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'staked_amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   stakedAmount: CLValueUInt512;
-  @jsonMember({ name: 'validator_public_key', constructor: PublicKey })
+
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validatorPublicKey: PublicKey;
 
   @jsonArrayMember(Delegator, { name: 'delegators' })
@@ -103,16 +154,36 @@ export class Bid {
 
 @jsonObject
 export class DelegatorV1 {
-  @jsonMember({ name: 'bonding_purse', constructor: URef })
+  @jsonMember({
+    name: 'bonding_purse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   bondingPurse: URef;
 
-  @jsonMember({ name: 'staked_amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'staked_amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   stakedAmount: CLValueUInt512;
 
-  @jsonMember({ name: 'delegatee', constructor: PublicKey })
+  @jsonMember({
+    name: 'delegatee',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   delegatee: PublicKey;
 
-  @jsonMember({ name: 'public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   publicKey: PublicKey;
 
   @jsonMember({ name: 'vesting_schedule', constructor: VestingSchedule })
@@ -124,10 +195,20 @@ export class Credit {
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'validator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   validatorPublicKey: PublicKey;
 
-  @jsonMember({ name: 'amount', constructor: CLValueUInt512 })
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   amount: CLValueUInt512;
 }
 
@@ -136,9 +217,19 @@ export class Bridge {
   @jsonMember({ name: 'era_id', constructor: Number })
   eraID: number;
 
-  @jsonMember({ name: 'old_validator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'old_validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   oldValidatorPublicKey: PublicKey;
 
-  @jsonMember({ name: 'new_validator_public_key', constructor: PublicKey })
+  @jsonMember({
+    name: 'new_validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   newValidatorPublicKey: PublicKey;
 }

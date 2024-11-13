@@ -59,7 +59,7 @@ export class EntryPointV1 {
 
   @jsonMember({
     name: 'entry_point_payment',
-    constructor: () => EntryPointPayment
+    constructor: String
   })
   entryPointPayment: EntryPointPayment;
 

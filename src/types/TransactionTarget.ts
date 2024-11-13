@@ -22,7 +22,12 @@ enum InvocationTargetTag {
 
 @jsonObject
 export class ByPackageHashInvocationTarget {
-  @jsonMember({ name: 'addr', constructor: Hash })
+  @jsonMember({
+    name: 'addr',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   addr: Hash;
 
   @jsonMember({ name: 'version', isRequired: false, constructor: Number })
@@ -40,7 +45,19 @@ export class ByPackageNameInvocationTarget {
 
 @jsonObject
 export class TransactionInvocationTarget {
-  @jsonMember({ name: 'ByHash', isRequired: false, constructor: Hash })
+  @jsonMember({
+    name: 'ByHash',
+    isRequired: false,
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   byHash?: Hash;
 
   @jsonMember({ name: 'ByName', isRequired: false, constructor: String })
@@ -180,48 +197,40 @@ export class TransactionTarget {
     return result;
   }
 
-  static fromJSON(json: string): TransactionTarget {
-    let parsed;
-    try {
-      parsed = JSON.parse(json);
-    } catch {
-      throw new Error('Invalid JSON input for TransactionTarget');
-    }
-
+  static fromJSON(json: any): TransactionTarget {
     const target = new TransactionTarget();
 
-    if (typeof parsed === 'string' && parsed === 'Native') {
+    if (typeof json === 'string' && json === 'Native') {
       target.native = {};
-    } else if (parsed.Stored) {
+    } else if (json.Stored) {
       const storedTarget = new StoredTarget();
-      storedTarget.runtime = parsed.Stored.runtime;
+      storedTarget.runtime = json.Stored.runtime;
 
       const invocationTarget = new TransactionInvocationTarget();
-      if (parsed.Stored.id.byHash) {
-        invocationTarget.byHash = Hash.fromHex(parsed.Stored.id.byHash);
-      } else if (parsed.Stored.id.byName) {
-        invocationTarget.byName = parsed.Stored.id.byName;
-      } else if (parsed.Stored.id.byPackageHash) {
+      if (json.Stored.id.byHash) {
+        invocationTarget.byHash = Hash.fromHex(json.Stored.id.byHash);
+      } else if (json.Stored.id.byName) {
+        invocationTarget.byName = json.Stored.id.byName;
+      } else if (json.Stored.id.byPackageHash) {
         invocationTarget.byPackageHash = new ByPackageHashInvocationTarget();
         invocationTarget.byPackageHash.addr = Hash.fromHex(
-          parsed.Stored.id.byPackageHash.addr
+          json.Stored.id.byPackageHash.addr
         );
         invocationTarget.byPackageHash.version =
-          parsed.Stored.id.byPackageHash.version;
-      } else if (parsed.Stored.id.byPackageName) {
+          json.Stored.id.byPackageHash.version;
+      } else if (json.Stored.id.byPackageName) {
         invocationTarget.byPackageName = new ByPackageNameInvocationTarget();
-        invocationTarget.byPackageName.name =
-          parsed.Stored.id.byPackageName.name;
+        invocationTarget.byPackageName.name = json.Stored.id.byPackageName.name;
         invocationTarget.byPackageName.version =
-          parsed.Stored.id.byPackageName.version;
+          json.Stored.id.byPackageName.version;
       }
 
       storedTarget.id = invocationTarget;
       target.stored = storedTarget;
-    } else if (parsed.Session) {
+    } else if (json.Session) {
       const sessionTarget = new SessionTarget();
-      sessionTarget.runtime = parsed.Session.runtime;
-      sessionTarget.moduleBytes = parsed.Session.module_bytes;
+      sessionTarget.runtime = json.Session.runtime;
+      sessionTarget.moduleBytes = json.Session.module_bytes;
       target.session = sessionTarget;
     }
 

@@ -14,7 +14,15 @@ export class EntityKind {
 
   @jsonMember({
     name: 'Account',
-    constructor: AccountHash
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   account?: AccountHash;
 
@@ -62,7 +70,9 @@ export class AddressableEntity {
 
   @jsonMember({
     name: 'main_purse',
-    constructor: URef
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
   })
   mainPurse: URef;
 

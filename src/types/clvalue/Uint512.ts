@@ -9,8 +9,8 @@ import { toBytesU512 } from '../ByteConverters';
  * Represents a 512-bit unsigned integer value in the CasperLabs type system.
  */
 export class CLValueUInt512 {
-  private val: BigNumber;
-  private isStringFmt: boolean;
+  public val: BigNumber;
+  public isStringFmt: boolean;
 
   /**
    * Constructs a new CLValueUInt512 instance.
@@ -97,3 +97,27 @@ export class CLValueUInt512 {
     return res;
   }
 }
+
+export const deserializeRewards = (arr: any) => {
+  const parsed = new Map(
+    Array.from(arr, ([key, value]) => {
+      const valuesArray = value.map((item: any) =>
+        CLValueUInt512.fromJSON(item)
+      );
+      return [key, valuesArray];
+    })
+  );
+
+  if (parsed.size !== Array.from(arr).length) {
+    throw Error(`Duplicate key exists.`);
+  }
+
+  return parsed;
+};
+
+export const serializeRewards = (map: Map<string, CLValueUInt512[]>) => {
+  return Array.from(map, ([key, value]) => {
+    const serializedValue = value.map(item => item.toJSON());
+    return [key, serializedValue];
+  });
+};

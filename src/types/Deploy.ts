@@ -20,30 +20,62 @@ import { ClassicMode, PricingMode } from './PricingMode';
 import { TransactionTarget } from './TransactionTarget';
 import { TransactionScheduling } from './TransactionScheduling';
 import { ExecutableDeployItem } from './ExecutableDeployItem';
-import { byteHash } from './ByteConverters';
+import { byteHash, toBytesU32 } from './ByteConverters';
 import { Conversions } from './Conversions';
 
 @jsonObject
 export class DeployHeader {
-  @jsonMember({ constructor: PublicKey })
+  @jsonMember({
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public account?: PublicKey;
 
-  @jsonMember({ constructor: Hash })
+  @jsonMember({
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public bodyHash?: Hash;
 
   @jsonMember({ name: 'chain_name', constructor: String })
   public chainName = '';
 
-  @jsonArrayMember(Hash, { name: 'dependencies' })
+  @jsonArrayMember(Hash, {
+    name: 'dependencies',
+    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
+  })
   public dependencies: Hash[] = [];
 
   @jsonMember({ name: 'gas_price', constructor: Number })
   public gasPrice = 1;
 
-  @jsonMember({ constructor: Timestamp })
+  @jsonMember({
+    constructor: Timestamp,
+    deserializer: json => Timestamp.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public timestamp: Timestamp = new Timestamp(new Date());
 
-  @jsonMember({ constructor: Duration })
+  @jsonMember({
+    constructor: Duration,
+    deserializer: json => Duration.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public ttl: Duration = new Duration(30 * 60 * 1000);
 
   constructor(
@@ -123,7 +155,10 @@ export class Deploy {
   @jsonArrayMember(() => Approval)
   public approvals: Approval[] = [];
 
-  @jsonMember({ constructor: Hash })
+  @jsonMember({
+    deserializer: json => Hash.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
   public hash: Hash;
 
   @jsonMember({ constructor: DeployHeader })
@@ -191,6 +226,15 @@ export class Deploy {
     const signatureBytes = await keys.sign(this.hash.toBytes());
     const signature = new HexBytes(signatureBytes);
     this.approvals.push(new Approval(keys.publicKey, signature));
+  }
+
+  toBytes(): Uint8Array {
+    return concat([
+      this.header.toBytes(),
+      this.hash.toBytes(),
+      concat([this.payment.bytes(), this.session.bytes()]),
+      serializeApprovals(this.approvals)
+    ]);
   }
 
   /**
@@ -346,6 +390,25 @@ export class Deploy {
 
     return { deploy: serializer.toPlainJson(deploy) };
   };
+
+  /**
+   * Identifies whether this `Deploy` represents a transfer of CSPR
+   * @returns `true` if the `Deploy` is a `Transfer`, and `false` otherwise
+   */
+  public isTransfer(): boolean {
+    return this.session.isTransfer();
+  }
+
+  /**
+   * Identifies whether this `Deploy` represents a standard payment, like that of gas payment
+   * @returns `true` if the `Deploy` is a standard payment, and `false` otherwise
+   */
+  public isStandardPayment(): boolean {
+    if (this.payment.isModuleBytes()) {
+      return this.payment.asModuleBytes()?.moduleBytes.length === 0;
+    }
+    return false;
+  }
 }
 
 /**
@@ -391,6 +454,24 @@ export function makeDeploy(
 
   return Deploy.fromHeaderAndItems(header, payment, session);
 }
+
+/**
+ * Serializes an array of `Approval`s into a `Uint8Array` typed byte array
+ * @param approvals An array of `Approval`s to be serialized
+ * @returns `Uint8Array` typed byte array that can be deserialized to an array of `Approval`s
+ */
+export const serializeApprovals = (approvals: Approval[]): Uint8Array => {
+  const len = toBytesU32(approvals.length);
+  const bytes = concat(
+    approvals.map(approval => {
+      return concat([
+        Uint8Array.from(Buffer.from(approval.signer.toString(), 'hex')),
+        Uint8Array.from(Buffer.from(approval.signature.toString(), 'hex'))
+      ]);
+    })
+  );
+  return concat([len, bytes]);
+};
 
 /** @deprecated The parameters of a `Deploy` object. Use Deploy.fromHeaderAndItems */
 export class DeployParams {
