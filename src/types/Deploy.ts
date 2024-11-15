@@ -499,7 +499,7 @@ export class Deploy {
    */
   public static toJson = (deploy: Deploy) => {
     const serializer = new TypedJSON(Deploy);
-    return { deploy: serializer.toPlainJson(deploy) };
+    return serializer.toPlainJson(deploy);
   };
 
   /**

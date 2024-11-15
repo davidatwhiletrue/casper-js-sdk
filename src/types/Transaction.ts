@@ -536,7 +536,7 @@ export class TransactionV1 {
   public static toJson = (transaction: TransactionV1) => {
     const serializer = new TypedJSON(TransactionV1);
 
-    return { transaction: serializer.toPlainJson(transaction) };
+    return serializer.toPlainJson(transaction);
   };
 }
 
