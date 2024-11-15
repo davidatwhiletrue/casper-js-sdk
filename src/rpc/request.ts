@@ -41,15 +41,20 @@ export enum Method {
 
 @jsonObject
 export class RpcRequest {
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'jsonrpc' })
   version: string;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: IDValue,
     isRequired: false,
-    deserializer: (json: string) => IDValue.fromJSON(json),
-    serializer: (value: IDValue) => value.toJSON()
-  }))
+    deserializer: (json: string) => {
+      return IDValue.fromJSON(json);
+    },
+    serializer: (value: IDValue) => {
+      if (!value) return undefined;
+      return value.toJSON();
+    }
+  })
   id?: IDValue;
 
   @jsonMember({ constructor: String })
@@ -72,7 +77,7 @@ export class RpcRequest {
 
 @jsonObject
 export class ParamStateRootHash {
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'state_root_hash' })
   stateRootHash: string;
 
   @jsonMember({ constructor: String })
@@ -90,7 +95,11 @@ export class ParamStateRootHash {
 
 @jsonObject
 export class ParamQueryGlobalState {
-  @jsonMember({ isRequired: false, constructor: () => ParamQueryGlobalStateID })
+  @jsonMember({
+    isRequired: false,
+    constructor: () => ParamQueryGlobalStateID,
+    name: 'state_identifier'
+  })
   stateIdentifier?: ParamQueryGlobalStateID;
 
   @jsonMember({ constructor: String })
@@ -120,13 +129,13 @@ export class ParamQueryGlobalState {
 
 @jsonObject
 export class ParamQueryGlobalStateID {
-  @jsonMember({ isRequired: false, constructor: String })
+  @jsonMember({ isRequired: false, constructor: String, name: 'StateRootHash' })
   stateRootHash?: string;
 
-  @jsonMember({ isRequired: false, constructor: String })
+  @jsonMember({ isRequired: false, constructor: String, name: 'BlockHash' })
   blockHash?: string;
 
-  @jsonMember({ isRequired: false, constructor: Number })
+  @jsonMember({ isRequired: false, constructor: Number, name: 'BlockHeight' })
   blockHeight?: number;
 
   constructor(
@@ -142,10 +151,18 @@ export class ParamQueryGlobalStateID {
 
 @jsonObject
 export class ParamTransactionHash {
-  @jsonMember(() => ({ constructor: TransactionHash, isRequired: false }))
+  @jsonMember({
+    constructor: TransactionHash,
+    isRequired: false,
+    name: 'transaction_hash'
+  })
   transactionHash?: TransactionHash;
 
-  @jsonMember({ isRequired: false, constructor: Boolean })
+  @jsonMember({
+    isRequired: false,
+    constructor: Boolean,
+    name: 'finalized_approvals'
+  })
   finalizedApprovals?: boolean;
 
   constructor(transactionHash?: TransactionHash, finalizedApprovals?: boolean) {
@@ -159,7 +176,11 @@ export class ParamDeployHash {
   @jsonMember({ name: 'deploy_hash', constructor: String })
   deployHash?: string;
 
-  @jsonMember({ isRequired: false, constructor: Boolean })
+  @jsonMember({
+    isRequired: false,
+    constructor: Boolean,
+    name: 'finalized_approvals'
+  })
   finalizedApprovals?: boolean;
 
   constructor(deployHash?: string, finalizedApprovals?: boolean) {
@@ -170,7 +191,7 @@ export class ParamDeployHash {
 
 @jsonObject
 export class ParamGetAccountInfoBalance {
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'account_identifier' })
   accountIdentifier: string;
 
   @jsonMember({ constructor: () => ParamBlockIdentifier })
@@ -187,10 +208,17 @@ export class ParamGetAccountInfoBalance {
 
 @jsonObject
 export class ParamGetStateEntity {
-  @jsonMember({ constructor: () => EntityIdentifier })
+  @jsonMember({
+    constructor: () => EntityIdentifier,
+    name: 'entity_identifier'
+  })
   entityIdentifier: EntityIdentifier;
 
-  @jsonMember({ isRequired: false, constructor: () => BlockIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: () => BlockIdentifier,
+    name: 'block_identifier'
+  })
   blockIdentifier?: BlockIdentifier;
 
   constructor(
@@ -204,7 +232,7 @@ export class ParamGetStateEntity {
 
 @jsonObject
 export class AccountIdentifier {
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: AccountHash,
     isRequired: false,
     deserializer: (json: string) => {
@@ -215,10 +243,10 @@ export class AccountIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   accountHash?: AccountHash;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: PublicKey,
     isRequired: false,
     deserializer: (json: string) => {
@@ -229,7 +257,7 @@ export class AccountIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   publicKey?: PublicKey;
 
   constructor(accountHash?: AccountHash, publicKey?: PublicKey) {
@@ -240,8 +268,9 @@ export class AccountIdentifier {
 
 @jsonObject
 export class EntityIdentifier {
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: AccountHash,
+    name: 'AccountHash',
     isRequired: false,
     deserializer: (json: string) => {
       if (!json) return;
@@ -251,11 +280,12 @@ export class EntityIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   accountHash?: AccountHash;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: PublicKey,
+    name: 'PublicKey',
     isRequired: false,
     deserializer: (json: string) => {
       if (!json) return;
@@ -265,11 +295,12 @@ export class EntityIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   publicKey?: PublicKey;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: EntityAddr,
+    name: 'EntityAddr',
     isRequired: false,
     deserializer: (json: string) => {
       if (!json) return;
@@ -279,7 +310,7 @@ export class EntityIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   entityAddr?: EntityAddr;
 
   constructor(
@@ -307,7 +338,7 @@ export class EntityIdentifier {
 
 @jsonObject
 export class PutDeployRequest {
-  @jsonMember(() => ({ constructor: Deploy }))
+  @jsonMember({ constructor: Deploy })
   deploy: Deploy;
 
   constructor(deploy: Deploy) {
@@ -317,7 +348,7 @@ export class PutDeployRequest {
 
 @jsonObject
 export class PutTransactionRequest {
-  @jsonMember(() => ({ constructor: TransactionWrapper }))
+  @jsonMember({ constructor: TransactionWrapper })
   transaction: TransactionWrapper;
 
   constructor(transaction: TransactionWrapper) {
@@ -327,10 +358,10 @@ export class PutTransactionRequest {
 
 @jsonObject
 export class BlockIdentifier {
-  @jsonMember({ isRequired: false, constructor: String })
+  @jsonMember({ isRequired: false, constructor: String, name: 'Hash' })
   hash?: string;
 
-  @jsonMember({ isRequired: false, constructor: Number })
+  @jsonMember({ isRequired: false, constructor: Number, name: 'Height' })
   height?: number;
 
   constructor(hash?: string, height?: number) {
@@ -341,13 +372,13 @@ export class BlockIdentifier {
 
 @jsonObject
 export class GlobalStateIdentifier {
-  @jsonMember({ isRequired: false, constructor: String })
+  @jsonMember({ isRequired: false, constructor: String, name: 'BlockHash' })
   blockHash?: string;
 
-  @jsonMember({ isRequired: false, constructor: Number })
+  @jsonMember({ isRequired: false, constructor: Number, name: 'BlockHeight' })
   blockHeight?: number;
 
-  @jsonMember({ isRequired: false, constructor: String })
+  @jsonMember({ isRequired: false, constructor: String, name: 'StateRootHash' })
   stateRoot?: string;
 
   constructor(blockHash?: string, blockHeight?: number, stateRoot?: string) {
@@ -359,10 +390,14 @@ export class GlobalStateIdentifier {
 
 @jsonObject
 export class EraIdentifier {
-  @jsonMember({ isRequired: false, constructor: BlockIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: BlockIdentifier,
+    name: 'Block'
+  })
   block?: BlockIdentifier;
 
-  @jsonMember({ isRequired: false, constructor: Number })
+  @jsonMember({ isRequired: false, constructor: Number, name: 'Era' })
   era?: number;
 
   constructor(block?: BlockIdentifier, era?: number) {
@@ -373,7 +408,11 @@ export class EraIdentifier {
 
 @jsonObject
 export class ParamBlockIdentifier {
-  @jsonMember({ isRequired: false, constructor: BlockIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: BlockIdentifier,
+    name: 'block_identifier'
+  })
   blockIdentifier?: BlockIdentifier;
 
   constructor(blockIdentifier?: BlockIdentifier) {
@@ -391,22 +430,28 @@ export class ParamBlockIdentifier {
 
 @jsonObject
 export class ParamDictionaryIdentifier {
-  @jsonMember({ isRequired: false, constructor: () => AccountNamedKey })
+  @jsonMember({
+    isRequired: false,
+    constructor: () => AccountNamedKey,
+    name: 'AccountNamedKey'
+  })
   accountNamedKey?: AccountNamedKey;
 
   @jsonMember({
     isRequired: false,
-    constructor: () => ParamDictionaryIdentifierContractNamedKey
+    constructor: () => ParamDictionaryIdentifierContractNamedKey,
+    name: 'ContractNamedKey'
   })
   contractNamedKey?: ParamDictionaryIdentifierContractNamedKey;
 
   @jsonMember({
     isRequired: false,
-    constructor: () => ParamDictionaryIdentifierURef
+    constructor: () => ParamDictionaryIdentifierURef,
+    name: 'URef'
   })
   uRef?: ParamDictionaryIdentifierURef;
 
-  @jsonMember({ isRequired: false, constructor: String })
+  @jsonMember({ isRequired: false, constructor: String, name: 'Dictionary' })
   dictionary?: string;
 
   constructor(
@@ -427,10 +472,10 @@ export class AccountNamedKey {
   @jsonMember({ constructor: String })
   key: string;
 
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'dictionary_name' })
   dictionaryName: string;
 
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'dictionary_item_key' })
   dictionaryItemKey: string;
 
   constructor(key: string, dictionaryName: string, dictionaryItemKey: string) {
@@ -445,10 +490,10 @@ export class ParamDictionaryIdentifierContractNamedKey {
   @jsonMember({ constructor: String })
   key: string;
 
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'dictionary_name' })
   dictionaryName: string;
 
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'dictionary_item_key' })
   dictionaryItemKey: string;
 
   constructor(key: string, dictionaryName: string, dictionaryItemKey: string) {
@@ -460,10 +505,10 @@ export class ParamDictionaryIdentifierContractNamedKey {
 
 @jsonObject
 export class ParamDictionaryIdentifierURef {
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'dictionary_item_key' })
   dictionaryItemKey: string;
 
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'seed_uref' })
   seedUref: string;
 
   constructor(dictionaryItemKey: string, seedUref: string) {
@@ -474,10 +519,14 @@ export class ParamDictionaryIdentifierURef {
 
 @jsonObject
 export class SpeculativeExecParams {
-  @jsonMember(() => ({ constructor: Deploy }))
+  @jsonMember({ constructor: Deploy })
   deploy: Deploy;
 
-  @jsonMember({ isRequired: false, constructor: BlockIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: BlockIdentifier,
+    name: 'block_identifier'
+  })
   blockIdentifier?: BlockIdentifier;
 
   constructor(deploy: Deploy, blockIdentifier?: BlockIdentifier) {
@@ -488,8 +537,9 @@ export class SpeculativeExecParams {
 
 @jsonObject
 export class PurseIdentifier {
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: PublicKey,
+    name: 'main_purse_under_public_key',
     isRequired: false,
     deserializer: (json: string) => {
       if (!json) return;
@@ -499,11 +549,12 @@ export class PurseIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   mainPurseUnderPublicKey?: PublicKey;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: AccountHash,
+    name: 'main_purse_under_account_hash',
     isRequired: false,
     deserializer: (json: string) => {
       if (!json) return;
@@ -513,11 +564,12 @@ export class PurseIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   mainPurseUnderAccountHash?: AccountHash;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: EntityAddr,
+    name: 'main_purse_under_entity_addr',
     isRequired: false,
     deserializer: (json: string) => {
       if (!json) return;
@@ -527,12 +579,13 @@ export class PurseIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   mainPurseUnderEntityAddr?: EntityAddr;
 
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: URef,
     isRequired: false,
+    name: 'purse_uref',
     deserializer: (json: string) => {
       if (!json) return;
       return URef.fromJSON(json);
@@ -541,7 +594,7 @@ export class PurseIdentifier {
       if (!value) return;
       return value.toJSON();
     }
-  }))
+  })
   purseUref?: URef;
 
   constructor(
@@ -575,10 +628,14 @@ export class PurseIdentifier {
 
 @jsonObject
 export class QueryBalanceRequest {
-  @jsonMember({ constructor: PurseIdentifier })
+  @jsonMember({ constructor: PurseIdentifier, name: 'purse_identifier' })
   purseIdentifier: PurseIdentifier;
 
-  @jsonMember({ isRequired: false, constructor: GlobalStateIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: GlobalStateIdentifier,
+    name: 'state_identifier'
+  })
   stateIdentifier?: GlobalStateIdentifier;
 
   constructor(
@@ -592,10 +649,14 @@ export class QueryBalanceRequest {
 
 @jsonObject
 export class QueryBalanceDetailsRequest {
-  @jsonMember({ constructor: PurseIdentifier })
+  @jsonMember({ constructor: PurseIdentifier, name: 'purse_identifier' })
   purseIdentifier: PurseIdentifier;
 
-  @jsonMember({ isRequired: false, constructor: GlobalStateIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: GlobalStateIdentifier,
+    name: 'state_identifier'
+  })
   stateIdentifier?: GlobalStateIdentifier;
 
   constructor(
@@ -609,12 +670,12 @@ export class QueryBalanceDetailsRequest {
 
 @jsonObject
 export class InfoGetRewardRequest {
-  @jsonMember(() => ({
+  @jsonMember({
     constructor: PublicKey,
     isRequired: false,
     deserializer: (json: string) => PublicKey.fromJSON(json),
     serializer: (value: PublicKey) => value.toJSON()
-  }))
+  })
   validator: PublicKey;
 
   @jsonMember({
@@ -631,7 +692,11 @@ export class InfoGetRewardRequest {
   })
   delegator?: PublicKey;
 
-  @jsonMember({ isRequired: false, constructor: EraIdentifier })
+  @jsonMember({
+    isRequired: false,
+    constructor: EraIdentifier,
+    name: 'era_identifier'
+  })
   eraIdentifier?: EraIdentifier;
 
   constructor(

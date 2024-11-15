@@ -24,7 +24,7 @@ class FutureEraScheduling {
   /**
    * The ID of the future era when the transaction is scheduled to occur.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({ constructor: Number, name: 'EraID' })
   eraID: number;
 
   /**

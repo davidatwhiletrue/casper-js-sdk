@@ -44,61 +44,61 @@ export class TransactionEntryPoint {
   /**
    * Custom entry point, where the value can be a string representing a custom action.
    */
-  @jsonMember({ constructor: String })
+  @jsonMember({ constructor: String, name: 'Custom' })
   custom?: string;
 
   /**
    * The transfer action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'Transfer' })
   transfer?: Record<string, unknown>;
 
   /**
    * The add bid action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'AddBid' })
   addBid?: Record<string, unknown>;
 
   /**
    * The withdraw bid action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'WithdrawBid' })
   withdrawBid?: Record<string, unknown>;
 
   /**
    * The delegate action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'Delegate' })
   delegate?: Record<string, unknown>;
 
   /**
    * The undelegate action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'Undelegate' })
   undelegate?: Record<string, unknown>;
 
   /**
    * The redelegate action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'Redelegate' })
   redelegate?: Record<string, unknown>;
 
   /**
    * The activate bid action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'ActivateBid' })
   activateBid?: Record<string, unknown>;
 
   /**
    * The change bid public key action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'ChangeBidPublicKey' })
   changeBidPublicKey?: Record<string, unknown>;
 
   /**
    * The call action as a generic object.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'Call' })
   call?: Record<string, unknown>;
 
   /**

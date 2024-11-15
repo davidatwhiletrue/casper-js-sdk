@@ -73,6 +73,7 @@ export class Account {
 
   /**
    * The named keys associated with this account, mapping key names to `URef` values.
+   * TODO: Is it could be any type of keys or certain types?
    */
   @jsonMember({
     name: 'named_keys',

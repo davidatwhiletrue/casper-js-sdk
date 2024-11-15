@@ -5,6 +5,8 @@ import {
   jsonArrayMember,
   AnyT
 } from 'typedjson';
+import { BigNumber } from '@ethersproject/bignumber';
+
 import { Hash, TransferHash, Key } from './key';
 import { InitiatorAddr } from './InitiatorAddr';
 import { Transfer } from './Transfer';
@@ -22,8 +24,14 @@ export class Operation {
   @jsonMember({
     name: 'key',
     constructor: Key,
-    deserializer: json => Key.fromJSON(json),
-    serializer: (value: Key) => value.toJSON()
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Key.newKey(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toPrefixedString();
+    }
   })
   public key: Key;
 
@@ -36,6 +44,7 @@ export class Operation {
 
 /**
  * A collection of transformations applied during a transaction.
+ * A log of all transforms produced during execution, used only in 2.0+ Network
  */
 @jsonObject
 export class Effects extends Array<Transform> {}
@@ -48,13 +57,17 @@ export class Effect {
   /**
    * The operations performed as part of this effect.
    */
-  @jsonArrayMember(Operation, { name: 'operations' })
+  @jsonArrayMember(Operation, {
+    name: 'operations'
+  })
   public operations: Operation[] = [];
 
   /**
    * The transformations applied as part of this effect.
    */
-  @jsonArrayMember(TransformKey, { name: 'transforms' })
+  @jsonArrayMember(TransformKey, {
+    name: 'transforms'
+  })
   public transforms: TransformKey[] = [];
 }
 
@@ -66,7 +79,10 @@ export class ExecutionResultStatusData {
   /**
    * The effect of the transaction execution, including operations and transformations.
    */
-  @jsonMember({ name: 'effect', constructor: Effect })
+  @jsonMember({
+    name: 'effect',
+    constructor: Effect
+  })
   public effect: Effect;
 
   /**
@@ -83,7 +99,12 @@ export class ExecutionResultStatusData {
   /**
    * The cost of the transaction execution.
    */
-  @jsonMember({ name: 'cost', constructor: Number })
+  @jsonMember({
+    name: 'cost',
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public cost: number;
 
   /**
@@ -112,25 +133,44 @@ export class ExecutionResultV2 {
   /**
    * The error message, if any, generated during the execution.
    */
-  @jsonMember({ name: 'error_message', constructor: String })
+  @jsonMember({
+    name: 'error_message',
+    constructor: String,
+    preserveNull: true
+  })
   public errorMessage?: string;
 
   /**
    * The execution limit for the transaction.
    */
-  @jsonMember({ name: 'limit', constructor: Number })
+  @jsonMember({
+    name: 'limit',
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public limit: number;
 
   /**
    * The amount of resources consumed during the transaction execution.
    */
-  @jsonMember({ name: 'consumed', constructor: Number })
+  @jsonMember({
+    name: 'consumed',
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public consumed: number;
 
   /**
    * The cost associated with the transaction execution.
    */
-  @jsonMember({ name: 'cost', constructor: Number })
+  @jsonMember({
+    name: 'cost',
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public cost: number;
 
   /**
@@ -157,7 +197,9 @@ export class ExecutionResultV2 {
   /**
    * The effects applied during the transaction execution.
    */
-  @jsonArrayMember(Transform, { name: 'effects' })
+  @jsonArrayMember(Transform, {
+    name: 'effects'
+  })
   public effects: Transform[] = [];
 }
 
@@ -169,13 +211,19 @@ export class ExecutionResultV1 {
   /**
    * The status data for a successful execution.
    */
-  @jsonMember({ name: 'Success', constructor: ExecutionResultStatusData })
+  @jsonMember({
+    name: 'Success',
+    constructor: ExecutionResultStatusData
+  })
   public success?: ExecutionResultStatusData;
 
   /**
    * The status data for a failed execution.
    */
-  @jsonMember({ name: 'Failure', constructor: ExecutionResultStatusData })
+  @jsonMember({
+    name: 'Failure',
+    constructor: ExecutionResultStatusData
+  })
   public failure?: ExecutionResultStatusData;
 }
 
@@ -198,7 +246,10 @@ export class DeployExecutionResult {
   /**
    * The execution result for the deploy.
    */
-  @jsonMember({ name: 'result', constructor: ExecutionResultV1 })
+  @jsonMember({
+    name: 'result',
+    constructor: ExecutionResultV1
+  })
   public result: ExecutionResultV1;
 }
 
@@ -220,25 +271,41 @@ export class ExecutionResult {
   /**
    * The error message, if any, generated during the execution.
    */
-  @jsonMember({ name: 'error_message', constructor: String })
+  @jsonMember({
+    name: 'error_message',
+    constructor: String,
+    preserveNull: true
+  })
   public errorMessage?: string;
 
   /**
    * The execution limit for the transaction.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public limit: number;
 
   /**
    * The amount of resources consumed during the transaction execution.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public consumed: number;
 
   /**
    * The cost associated with the transaction execution.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public cost: number;
 
   /**
@@ -251,6 +318,7 @@ export class ExecutionResult {
    * The transfers included in the transaction execution.
    */
   @jsonArrayMember(Transfer, {
+    name: 'transfers',
     deserializer: (json: any) => json.map((it: string) => Transfer.fromJSON(it))
   })
   public transfers: Transfer[] = [];
@@ -264,7 +332,9 @@ export class ExecutionResult {
   /**
    * The effects applied during the transaction execution.
    */
-  @jsonArrayMember(Transform)
+  @jsonArrayMember(Transform, {
+    name: 'effects'
+  })
   public effects: Transform[] = [];
 
   /**
@@ -286,13 +356,12 @@ export class ExecutionResult {
    * @throws Error if the data format is invalid or unknown.
    */
   public static fromJSON(data: any): ExecutionResult {
-    const rawObject = JSON.parse(data);
-
-    if (rawObject?.Version2) {
+    if (data?.Version2) {
       const executionResultV2 = TypedJSON.parse(
-        rawObject.Version2,
+        data.Version2,
         ExecutionResultV2
       );
+
       if (executionResultV2) {
         const executionResult = new ExecutionResult();
         executionResult.initiator = executionResultV2.initiator;
@@ -307,9 +376,9 @@ export class ExecutionResult {
         executionResult.originExecutionResultV2 = executionResultV2;
         return executionResult;
       }
-    } else if (rawObject?.Version1) {
+    } else if (data?.Version1) {
       const executionResultV1 = TypedJSON.parse(
-        rawObject.Version1,
+        data.Version1,
         ExecutionResultV1
       );
       if (executionResultV1) {
@@ -415,17 +484,16 @@ export class ExecutionInfo {
   /**
    * The execution result associated with the deploy.
    */
-  @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
+  @jsonMember({
+    name: 'execution_result',
+    constructor: ExecutionResult,
+    deserializer: json => {
+      if (!json) return;
+      return ExecutionResult.fromJSON(json);
+    }
+  })
   public executionResult: ExecutionResult;
 
-  /**
-   * Creates an `ExecutionInfo` instance from version 1 data.
-   *
-   * @param results The results of the deploy execution.
-   * @param height The block height, if available.
-   * @returns The `ExecutionInfo` instance created from version 1 data.
-   * @throws Error if the results are empty or missing.
-   */
   constructor(
     blockHash: Hash,
     blockHeight: number,
@@ -480,7 +548,14 @@ export class DeployExecutionInfo {
   /**
    * The execution result associated with the deploy.
    */
-  @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
+  @jsonMember({
+    name: 'execution_result',
+    constructor: ExecutionResult,
+    deserializer: json => {
+      if (!json) return;
+      return ExecutionResult.fromJSON(json);
+    }
+  })
   public executionResult: ExecutionResult;
 
   /**

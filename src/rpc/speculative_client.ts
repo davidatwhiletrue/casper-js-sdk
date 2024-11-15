@@ -27,9 +27,12 @@ export class SpeculativeClient {
     deploy: Deploy,
     identifier?: BlockIdentifier
   ): Promise<SpeculativeExecResult> {
+    const serializer = new TypedJSON(SpeculativeExecParams);
+    const speculativeParams = new SpeculativeExecParams(deploy, identifier);
+
     const request = RpcRequest.defaultRpcRequest(
       Method.SpeculativeExec,
-      new SpeculativeExecParams(deploy, identifier)
+      serializer.toPlainJson(speculativeParams)
     );
 
     if (reqID && reqID !== '0') {

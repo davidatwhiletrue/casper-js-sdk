@@ -175,7 +175,7 @@ export class TransactionTarget {
   /**
    * Native transaction target, representing a transaction with no specific target.
    */
-  @jsonMember({ constructor: Object })
+  @jsonMember({ constructor: Object, name: 'Native' })
   native?: object;
 
   /**

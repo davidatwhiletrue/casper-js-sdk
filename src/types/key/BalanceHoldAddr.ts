@@ -1,6 +1,7 @@
 import { jsonMember, jsonObject } from 'typedjson';
 import { Conversions } from '../Conversions';
 import { IResultWithBytes } from '../clvalue';
+import { PrefixName } from './Key';
 
 /**
  * Enum representing the types of balance hold addresses.
@@ -38,7 +39,6 @@ export function getBalanceHoldAddrTag(tag: number): BalanceHoldAddrTag {
  */
 const ByteHashLen = 32;
 const BlockTypeBytesLen = 8;
-const PrefixNameBalanceHold = 'balance-hold-';
 
 type URefAddr = Uint8Array;
 
@@ -110,7 +110,7 @@ export class BalanceHoldAddr {
    */
   toPrefixedString(): string {
     const bytes = this.toBytes();
-    return PrefixNameBalanceHold + Conversions.encodeBase16(bytes);
+    return PrefixName.BalanceHold + Conversions.encodeBase16(bytes);
   }
 
   /**

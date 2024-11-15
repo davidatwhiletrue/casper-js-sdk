@@ -1,4 +1,5 @@
 import { AnyT, jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
+
 import { Account } from './Account';
 import { TransferV1 } from './Transfer';
 import { DeployInfo } from './DeployInfo';
@@ -12,11 +13,10 @@ import { MessageChecksum, MessageTopicSummary } from './MessageTopic';
 import { NamedKeyValue } from './NamedKey';
 import { EntryPointValue } from './EntryPoint';
 import { ReservationKind } from './Reservation';
-
-import { ByteCode } from './key';
 import { Contract } from './Contract';
 import { ContractPackage } from './ContractPackage';
 import { CLValue, CLValueParser } from './clvalue';
+import { SystemByteCode } from './ByteCode';
 
 /**
  * Represents a stored value in a decentralized system. The value can be of different types
@@ -125,17 +125,13 @@ export class StoredValue {
    */
   @jsonMember({
     name: 'ByteCode',
-    constructor: ByteCode,
-    deserializer: json => {
-      if (!json) return;
-      return ByteCode.fromJSON(json);
-    },
-    serializer: (value: ByteCode) => {
+    constructor: SystemByteCode,
+    serializer: (value: SystemByteCode) => {
       if (!value) return;
-      return value.toJSON();
+      return value.toString();
     }
   })
-  byteCode?: ByteCode;
+  byteCode?: SystemByteCode;
 
   /**
    * The stored message topic summary, containing a summary of the message topic.

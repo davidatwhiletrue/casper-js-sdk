@@ -51,6 +51,7 @@ export class DeployHeader {
    * The body contains the session logic and payment logic of the deploy.
    */
   @jsonMember({
+    name: 'body_hash',
     constructor: Hash,
     deserializer: json => {
       if (!json) return;

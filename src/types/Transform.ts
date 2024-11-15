@@ -1,4 +1,6 @@
 import { jsonObject, jsonMember, TypedJSON } from 'typedjson';
+import { BigNumber } from '@ethersproject/bignumber';
+
 import { AccountHash, Key, Hash, URef } from './key';
 import { UnbondingPurse } from './UnbondingPurse';
 import { AddressableEntity } from './AddressableEntity';
@@ -9,65 +11,21 @@ import { DeployInfo } from './DeployInfo';
 import { CLValueUInt512 } from './clvalue';
 import { Args } from './Args';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
-
-/**
- * Represents raw write data for a CLValue.
- * Used for serializing and deserializing the arguments of a CLValue write operation.
- */
-@jsonObject
-export class RawWriteCLValue {
-  /**
-   * The write operation on a CLValue represented as `Args`.
-   */
-  @jsonMember({
-    constructor: Args,
-    name: 'WriteCLValue',
-    deserializer: json => {
-      if (!json) return;
-      return deserializeArgs(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return serializeArgs(value);
-    }
-  })
-  writeCLValue?: Args;
-}
-
-/**
- * Represents a write operation in a transaction.
- */
-@jsonObject
-class Write {
-  /**
-   * The CLValue write operation represented as `Args`.
-   */
-  @jsonMember({
-    constructor: Args,
-    name: 'CLValue',
-    deserializer: json => {
-      if (!json) return;
-      return deserializeArgs(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return serializeArgs(value);
-    }
-  })
-  clValue?: Args;
-}
-
-/**
- * Represents raw write data for version 2 of a CLValue.
- */
-@jsonObject
-export class RawWriteCLValueV2 {
-  /**
-   * The write operation represented as `Write`.
-   */
-  @jsonMember({ name: 'Write', constructor: Write })
-  write?: Write;
-}
+import {
+  BidKindRawData,
+  PackageRawData,
+  RawDataMessage,
+  RawDataMessageTopic,
+  RawDataNamedKey,
+  RawUInt512,
+  RawWriteCLValue,
+  RawWriteCLValueV2,
+  RawWriteDeployInfo,
+  RawWriteTransferTransform,
+  RawWriteUnbonding,
+  RawWriteWithdrawals,
+  TranformAddressableEntityRawData
+} from './TransformRaw';
 
 /**
  * Represents different types of transformation that can be applied.
@@ -75,7 +33,7 @@ export class RawWriteCLValueV2 {
  */
 @jsonObject
 export class TransformKind {
-  private data: string;
+  private data: any;
 
   /**
    * Constructs a new `TransformKind` instance.
@@ -92,8 +50,11 @@ export class TransformKind {
    * @param data The transformation data as a string.
    * @returns The `TransformKind` instance.
    */
-  public static fromJSON(data: string): TransformKind {
-    return new TransformKind(data);
+  static fromJSON(json: any): TransformKind | undefined {
+    if (!json) {
+      throw new Error('TransformKind: fromJSON on empty string');
+    }
+    return new TransformKind(json);
   }
 
   /**
@@ -102,7 +63,7 @@ export class TransformKind {
    * @returns The transformation data as a string.
    */
   public toJSON(): string {
-    return this.data || 'null';
+    return this.data;
   }
 
   /**
@@ -243,238 +204,199 @@ export class TransformKind {
   /**
    * Attempts to parse the transformation as a WriteTransfer.
    *
-   * @returns A `WriteTransfer` object if the data matches, otherwise `null`.
+   * @returns A `WriteTransfer` object if the data matches, otherwise throw an error`.
    */
-  parseAsWriteTransfer(): WriteTransfer | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.WriteTransfer) {
-        return Object.assign(
-          new WriteTransfer(),
-          jsonObject.Write.WriteTransfer
-        );
-      }
-    } catch (e) {
-      return null;
+  public parseAsWriteTransfer(): WriteTransfer {
+    const serializer = new TypedJSON(RawWriteTransferTransform);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.WriteTransfer) {
+      throw new Error(`Error parsing as WriteTransfer`);
     }
 
-    return null;
+    return jsonRes.WriteTransfer;
   }
-
   /**
    * Attempts to parse the transformation as a WriteWithdraw.
    *
-   * @returns An array of `UnbondingPurse` objects if the data matches, otherwise `null`.
+   * @returns An array of `UnbondingPurse` objects if the data matches, otherwise `[]`.
    */
-  public parseAsWriteWithdraws(): UnbondingPurse[] | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.WriteWithdraw) {
-        return jsonObject.WriteWithdraw.map((item: any) =>
-          Object.assign(new UnbondingPurse(), item)
-        );
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteWithdraws:', error);
-      return null;
+  public parseAsWriteWithdraws(): UnbondingPurse[] {
+    const serializer = new TypedJSON(RawWriteWithdrawals);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.UnbondingPurses) {
+      return [];
     }
-    return null;
+
+    return jsonRes.UnbondingPurses;
   }
 
   /**
    * Attempts to parse the transformation as a WriteAddressableEntity.
    *
-   * @returns An `AddressableEntity` object if the data matches, otherwise `null`.
+   * @returns An `AddressableEntity` object if the data matches, otherwise throw an error`.
    */
-  public parseAsWriteAddressableEntity(): AddressableEntity | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.AddressableEntity) {
-        return Object.assign(
-          new AddressableEntity(),
-          jsonObject.Write.AddressableEntity
-        );
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteAddressableEntity:', error);
-      return null;
+  public parseAsWriteAddressableEntity(): AddressableEntity {
+    const serializer = new TypedJSON(TranformAddressableEntityRawData);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes?.Write?.AddressableEntity) {
+      throw new Error(`Error parsing as AddressableEntity`);
     }
-    return null;
+
+    return jsonRes.Write.AddressableEntity;
   }
 
   /**
    * Attempts to parse the transformation as a WritePackage.
    *
-   * @returns A `Package` object if the data matches, otherwise `null`.
+   * @returns A `Package` object if the data matches, otherwise `throw an error`.
    */
-  public parseAsWritePackage(): Package | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.Package) {
-        return Object.assign(new Package(), jsonObject.Write.Package);
-      }
-    } catch (error) {
-      console.error('Error parsing as WritePackage:', error);
-      return null;
+  public parseAsWritePackage(): Package {
+    const serializer = new TypedJSON(PackageRawData);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes?.Write?.Package) {
+      throw new Error(`Error parsing as Package`);
     }
-    return null;
+
+    return jsonRes.Write.Package;
   }
 
   /**
    * Attempts to parse the transformation as a WriteBidKind.
    *
-   * @returns A `BidKind` object if the data matches, otherwise `null`.
+   * @returns A `BidKind` object if the data matches, otherwise `throw an error`.
    */
-  public parseAsWriteBidKind(): BidKind | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.BidKind) {
-        return Object.assign(new BidKind(), jsonObject.Write.BidKind);
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteBidKind:', error);
-      return null;
+  public parseAsWriteBidKind(): BidKind {
+    const serializer = new TypedJSON(BidKindRawData);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes?.Write?.BidKind) {
+      throw new Error(`Error parsing as BidKind`);
     }
-    return null;
+
+    return jsonRes.Write.BidKind;
   }
 
   /**
    * Attempts to parse the transformation as a WriteNamedKey.
    *
-   * @returns A `NamedKeyKind` object if the data matches, otherwise `null`.
+   * @returns A `NamedKeyKind` object if the data matches, otherwise `throw an error`.
    */
   public parseAsWriteNamedKey(): NamedKeyKind | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.NamedKey) {
-        return Object.assign(new NamedKeyKind(), jsonObject.Write.NamedKey);
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteNamedKey:', error);
-      return null;
+    const serializer = new TypedJSON(RawDataNamedKey);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.Write || !jsonRes.Write.NamedKey) {
+      throw new Error(`Error parsing as NamedKeyKind`);
     }
-    return null;
+
+    return jsonRes.Write.NamedKey;
   }
 
   /**
    * Attempts to parse the transformation as a WriteMessage.
    *
-   * @returns A `MessageChecksum` if the data matches, otherwise `null`.
+   * @returns A `MessageChecksum` if the data matches, otherwise `throw an error`.
    */
-  public parseAsWriteMessage(): MessageChecksum | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.Message) {
-        return jsonObject.Write.Message;
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteMessage:', error);
-      return null;
+  public parseAsWriteMessage(): MessageChecksum {
+    const serializer = new TypedJSON(RawDataMessage);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.Write || !jsonRes.Write.Message) {
+      throw new Error(`Error parsing as MessageChecksum`);
     }
-    return null;
+
+    return jsonRes.Write.Message;
   }
 
   /**
    * Attempts to parse the transformation as a WriteMessageTopic.
    *
-   * @returns A `MessageTopicSummary` if the data matches, otherwise `null`.
+   * @returns A `MessageTopicSummary` if the data matches, otherwise `throw an error`.
    */
-  public parseAsWriteMessageTopic(): MessageTopicSummary | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.Write && jsonObject.Write.MessageTopic) {
-        return Object.assign(
-          new MessageTopicSummary(),
-          jsonObject.Write.MessageTopic
-        );
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteMessageTopic:', error);
-      return null;
+  public parseAsWriteMessageTopic(): MessageTopicSummary {
+    const serializer = new TypedJSON(RawDataMessageTopic);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.Write || !jsonRes.Write.MessageTopic) {
+      throw new Error(`Error parsing as MessageTopicSummary`);
     }
-    return null;
+
+    return jsonRes.Write.MessageTopic;
   }
 
   /**
    * Attempts to parse the transformation as a WriteUnbonding.
    *
-   * @returns An array of `UnbondingPurse` objects if the data matches, otherwise `null`.
+   * @returns An array of `UnbondingPurse` objects if the data matches, otherwise `throw an error`.
    */
   public parseAsWriteUnbondings(): UnbondingPurse[] | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.WriteUnbonding) {
-        return jsonObject.WriteUnbonding.map((item: any) =>
-          Object.assign(new UnbondingPurse(), item)
-        );
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteUnbonding:', error);
-      return null;
+    const serializer = new TypedJSON(RawWriteUnbonding);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.UnbondingPurses) {
+      throw new Error(`Error parsing as UnbondingPurse array`);
     }
-    return null;
+
+    return jsonRes.UnbondingPurses;
   }
 
   /**
    * Attempts to parse the transformation as a UInt512.
    *
-   * @returns A `CLValueUInt512` object if the data matches, otherwise `null`.
+   * @returns A `CLValueUInt512` object if the data matches, otherwise `throw an error`.
    */
-  public parseAsUInt512(): CLValueUInt512 | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.AddUInt512) {
-        return new CLValueUInt512(jsonObject.AddUInt512);
-      }
-    } catch (error) {
-      console.error('Error parsing as UInt512:', error);
-      return null;
+  public parseAsUInt512(): CLValueUInt512 {
+    const serializer = new TypedJSON(RawUInt512);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.UInt512) {
+      throw new Error(`Error parsing as CLValueUInt512`);
     }
-    return null;
+
+    return jsonRes.UInt512;
   }
 
   /**
    * Attempts to parse the transformation as a WriteDeployInfo.
    *
-   * @returns A `DeployInfo` object if the data matches, otherwise `null`.
+   * @returns A `DeployInfo` object if the data matches, otherwise `throw an error`.
    */
-  public parseAsWriteDeployInfo(): DeployInfo | null {
-    try {
-      const jsonObject = JSON.parse(this.data);
-      if (jsonObject.WriteDeployInfo) {
-        return Object.assign(new DeployInfo(), jsonObject.WriteDeployInfo);
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteDeployInfo:', error);
-      return null;
+  public parseAsWriteDeployInfo(): DeployInfo {
+    const serializer = new TypedJSON(RawWriteDeployInfo);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.WriteDeployInfo) {
+      throw new Error(`Error parsing as DeployInfo`);
     }
-    return null;
+
+    return jsonRes.WriteDeployInfo;
   }
 
   /**
    * Attempts to parse the transformation as a WriteCLValue.
    *
-   * @returns The `Args` object if the data matches, otherwise `null`.
+   * @returns The `Args` object if the data matches, otherwise `throw an error`.
    */
-  public parseAsWriteCLValue(): Args | null {
-    try {
-      const parser = new TypedJSON(RawWriteCLValue);
-      const jsonRes = parser.parse(this.data);
-      if (jsonRes && jsonRes.writeCLValue) {
-        return jsonRes.writeCLValue;
-      }
+  public parseAsWriteCLValue(): Args {
+    const serializer = new TypedJSON(RawWriteCLValue);
+    const jsonRes = serializer.parse(this.data);
 
-      const parserV2 = new TypedJSON(RawWriteCLValueV2);
-      const jsonResV2 = parserV2.parse(this.data);
-
-      if (jsonResV2?.write?.clValue) {
-        return jsonResV2.write.clValue;
-      }
-    } catch (error) {
-      console.error('Error parsing as WriteCLValue:', error);
+    if (jsonRes && jsonRes.WriteCLValue) {
+      return jsonRes.WriteCLValue;
     }
 
-    return null;
+    const serializer2 = new TypedJSON(RawWriteCLValueV2);
+    const jsonRes2 = serializer2.parse(this.data);
+
+    if (!jsonRes2 || !jsonRes2.Write || !jsonRes2?.Write.CLValue) {
+      throw new Error(`Error parsing as RawWriteCLValueV2`);
+    }
+
+    return jsonRes2.Write?.CLValue;
   }
 }
 
@@ -489,15 +411,32 @@ export class Transform {
   @jsonMember({
     name: 'key',
     constructor: Key,
-    deserializer: json => Key.fromJSON(json),
-    serializer: (value: Key) => value.toJSON()
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Key.newKey(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toPrefixedString();
+    }
   })
   public key: Key;
 
   /**
    * The kind of transformation being applied.
    */
-  @jsonMember({ name: 'kind', constructor: TransformKind })
+  @jsonMember({
+    name: 'kind',
+    constructor: TransformKind,
+    deserializer: json => {
+      if (!json) return;
+      return TransformKind.fromJSON(json);
+    },
+    serializer: (value: TransformKind) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public kind: TransformKind;
 
   /**
@@ -523,15 +462,32 @@ export class TransformKey {
   @jsonMember({
     name: 'key',
     constructor: Key,
-    deserializer: json => Key.fromJSON(json),
-    serializer: (value: Key) => value.toJSON()
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Key.newKey(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toPrefixedString();
+    }
   })
   public key: Key;
 
   /**
    * The transformation kind.
    */
-  @jsonMember({ name: 'transform', constructor: TransformKind })
+  @jsonMember({
+    name: 'transform',
+    constructor: TransformKind,
+    deserializer: json => {
+      if (!json) return;
+      return TransformKind.fromJSON(json);
+    },
+    serializer: (value: TransformKind) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public transform: TransformKind;
 }
 
@@ -594,7 +550,18 @@ export class WriteTransfer {
   /**
    * The deploy hash associated with the transfer.
    */
-  @jsonMember({ name: 'deploy_hash', constructor: Hash })
+  @jsonMember({
+    name: 'deploy_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
   public deployHash: Hash;
 
   /**
@@ -644,6 +611,11 @@ export class WriteTransfer {
   /**
    * The gas used for the transfer.
    */
-  @jsonMember({ name: 'gas', constructor: Number })
+  @jsonMember({
+    name: 'gas',
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public gas: number;
 }

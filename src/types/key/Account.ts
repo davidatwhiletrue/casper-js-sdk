@@ -1,5 +1,6 @@
 import { jsonObject } from 'typedjson';
 import { Hash } from './Hash';
+import { PrefixName } from './Key';
 
 /**
  * Represents an account hash in the Casper network.
@@ -33,8 +34,8 @@ export class AccountHash extends Hash {
     let originPrefix = '';
     if (source.length === 66 && source.startsWith('00')) {
       originPrefix = '00';
-    } else if (source.startsWith(PrefixNameAccount)) {
-      originPrefix = PrefixNameAccount;
+    } else if (source.startsWith(PrefixName.Account)) {
+      originPrefix = PrefixName.Account;
     }
 
     const hexString = source.slice(originPrefix.length);
@@ -48,7 +49,7 @@ export class AccountHash extends Hash {
    * @returns The account hash as a prefixed string.
    */
   public toPrefixedString(): string {
-    return PrefixNameAccount + this.toHex();
+    return PrefixName.Account + this.toHex();
   }
 
   /**
@@ -70,8 +71,3 @@ export class AccountHash extends Hash {
     return AccountHash.fromString(data);
   }
 }
-
-/**
- * Constant defining the prefix used for account hash strings in the Casper network.
- */
-const PrefixNameAccount = 'account-hash-';

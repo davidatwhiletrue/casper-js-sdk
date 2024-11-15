@@ -1,3 +1,5 @@
+import { TypedJSON } from 'typedjson';
+
 import { IClient, IHandler } from './client';
 import {
   ChainGetBlockResult,
@@ -54,7 +56,6 @@ import {
   StateGetDictionaryRequest
 } from './request';
 import { IDValue } from './id_value';
-import { TypedJSON } from 'typedjson';
 import {
   TransactionHash,
   TransactionV1,
@@ -72,9 +73,12 @@ export class RpcClient implements IClient {
   }
 
   async getDeploy(hash: string): Promise<InfoGetDeployResult> {
-    const resp = await this.processRequest<ParamDeployHash>(
+    const serializer = new TypedJSON(ParamDeployHash);
+    const paramDeployHash = new ParamDeployHash(hash);
+
+    const resp = await this.processRequest(
       Method.GetDeploy,
-      new ParamDeployHash(hash)
+      serializer.toPlainJson(paramDeployHash)
     );
 
     const result = this.parseResponse(InfoGetDeployResult, resp.result);
@@ -84,9 +88,12 @@ export class RpcClient implements IClient {
   }
 
   async getDeployFinalizedApproval(hash: string): Promise<InfoGetDeployResult> {
-    const resp = await this.processRequest<ParamDeployHash>(
+    const serializer = new TypedJSON(ParamDeployHash);
+    const paramDeployHash = new ParamDeployHash(hash, true);
+
+    const resp = await this.processRequest(
       Method.GetDeploy,
-      new ParamDeployHash(hash, true)
+      serializer.toPlainJson(paramDeployHash)
     );
 
     const result = this.parseResponse(InfoGetDeployResult, resp.result);
@@ -98,11 +105,15 @@ export class RpcClient implements IClient {
   async getTransactionByTransactionHash(
     transactionHash: string
   ): Promise<InfoGetTransactionResult> {
+    const serializer = new TypedJSON(ParamTransactionHash);
     const hash = Hash.fromHex(transactionHash);
+    const transactionHashParam = new ParamTransactionHash(
+      new TransactionHash(undefined, hash)
+    );
 
     const resp = await this.processRequest<ParamTransactionHash>(
       Method.GetTransaction,
-      new ParamTransactionHash(new TransactionHash(undefined, hash))
+      serializer.toPlainJson(transactionHashParam) as ParamTransactionHash
     );
 
     const result = this.parseResponse(
@@ -123,11 +134,15 @@ export class RpcClient implements IClient {
   async getTransactionByDeployHash(
     deployHash: string
   ): Promise<InfoGetTransactionResult> {
+    const serializer = new TypedJSON(ParamTransactionHash);
     const hash = Hash.fromHex(deployHash);
+    const transactionHashParam = new ParamTransactionHash(
+      new TransactionHash(hash)
+    );
 
     const resp = await this.processRequest<ParamTransactionHash>(
       Method.GetTransaction,
-      new ParamTransactionHash(new TransactionHash(hash))
+      serializer.toPlainJson(transactionHashParam) as ParamTransactionHash
     );
 
     const result = this.parseResponse(
@@ -148,11 +163,16 @@ export class RpcClient implements IClient {
   async getTransactionFinalizedApprovalByTransactionHash(
     transactionHash: string
   ): Promise<InfoGetTransactionResult> {
+    const serializer = new TypedJSON(ParamTransactionHash);
     const hash = Hash.fromHex(transactionHash);
+    const transactionHashParam = new ParamTransactionHash(
+      new TransactionHash(undefined, hash),
+      true
+    );
 
     const resp = await this.processRequest<ParamTransactionHash>(
       Method.GetTransaction,
-      new ParamTransactionHash(new TransactionHash(undefined, hash), true)
+      serializer.toPlainJson(transactionHashParam) as ParamTransactionHash
     );
 
     const result = this.parseResponse(
@@ -173,11 +193,16 @@ export class RpcClient implements IClient {
   async getTransactionFinalizedApprovalByDeployHash(
     deployHash: string
   ): Promise<InfoGetTransactionResult> {
+    const serializer = new TypedJSON(ParamTransactionHash);
     const hash = Hash.fromHex(deployHash);
+    const transactionHashParam = new ParamTransactionHash(
+      new TransactionHash(hash),
+      true
+    );
 
     const resp = await this.processRequest<ParamTransactionHash>(
       Method.GetTransaction,
-      new ParamTransactionHash(new TransactionHash(hash), true)
+      serializer.toPlainJson(transactionHashParam) as ParamTransactionHash
     );
 
     const result = this.parseResponse(
@@ -207,9 +232,12 @@ export class RpcClient implements IClient {
       rootHash = latestHashResult.stateRootHash.toHex();
     }
 
+    const serializer = new TypedJSON(ParamStateRootHash);
+    const stateRootHashParam = new ParamStateRootHash(rootHash, key, path);
+
     const resp = await this.processRequest<ParamStateRootHash>(
       Method.GetStateItem,
-      new ParamStateRootHash(rootHash, key, path)
+      serializer.toPlainJson(stateRootHashParam) as ParamStateRootHash
     );
 
     const result = this.parseResponse(StateGetItemResult, resp.result);
@@ -222,9 +250,15 @@ export class RpcClient implements IClient {
     key: string,
     path: string[]
   ): Promise<QueryGlobalStateResult> {
+    const serializer = new TypedJSON(ParamQueryGlobalState);
+    const queryGlobalStateParam = ParamQueryGlobalState.newQueryGlobalStateParam(
+      key,
+      path
+    );
+
     const resp = await this.processRequest(
       Method.QueryGlobalState,
-      ParamQueryGlobalState.newQueryGlobalStateParam(key, path)
+      serializer.toPlainJson(queryGlobalStateParam) as ParamQueryGlobalState
     );
 
     const result = this.parseResponse(QueryGlobalStateResult, resp.result);
@@ -238,9 +272,16 @@ export class RpcClient implements IClient {
     key: string,
     path: string[]
   ): Promise<QueryGlobalStateResult> {
+    const serializer = new TypedJSON(ParamQueryGlobalState);
+    const queryGlobalStateParam = ParamQueryGlobalState.newQueryGlobalStateParam(
+      key,
+      path,
+      { blockHash }
+    );
+
     const resp = await this.processRequest(
       Method.QueryGlobalState,
-      ParamQueryGlobalState.newQueryGlobalStateParam(key, path, { blockHash })
+      serializer.toPlainJson(queryGlobalStateParam) as ParamQueryGlobalState
     );
 
     const result = this.parseResponse(QueryGlobalStateResult, resp.result);
@@ -254,9 +295,16 @@ export class RpcClient implements IClient {
     key: string,
     path: string[]
   ): Promise<QueryGlobalStateResult> {
+    const serializer = new TypedJSON(ParamQueryGlobalState);
+    const queryGlobalStateParam = ParamQueryGlobalState.newQueryGlobalStateParam(
+      key,
+      path,
+      { blockHeight }
+    );
+
     const resp = await this.processRequest(
       Method.QueryGlobalState,
-      ParamQueryGlobalState.newQueryGlobalStateParam(key, path, { blockHeight })
+      serializer.toPlainJson(queryGlobalStateParam) as ParamQueryGlobalState
     );
 
     const result = this.parseResponse(QueryGlobalStateResult, resp.result);
@@ -270,19 +318,31 @@ export class RpcClient implements IClient {
     key: string,
     path: string[]
   ): Promise<QueryGlobalStateResult> {
+    const serializer = new TypedJSON(ParamQueryGlobalState);
     let resp: RpcResponse;
 
     if (!stateRootHash) {
+      const queryGlobalStateParamWithoutRootHash = ParamQueryGlobalState.newQueryGlobalStateParam(
+        key,
+        path
+      );
       resp = await this.processRequest(
         Method.QueryGlobalState,
-        ParamQueryGlobalState.newQueryGlobalStateParam(key, path)
+        serializer.toPlainJson(
+          queryGlobalStateParamWithoutRootHash
+        ) as ParamQueryGlobalState
       );
     } else {
+      const queryGlobalState = ParamQueryGlobalState.newQueryGlobalStateParam(
+        key,
+        path,
+        {
+          stateRootHash
+        }
+      );
       resp = await this.processRequest(
         Method.QueryGlobalState,
-        ParamQueryGlobalState.newQueryGlobalStateParam(key, path, {
-          stateRootHash
-        })
+        serializer.toPlainJson(queryGlobalState) as ParamQueryGlobalState
       );
     }
 
@@ -295,9 +355,12 @@ export class RpcClient implements IClient {
   async getLatestEntity(
     entityIdentifier: EntityIdentifier
   ): Promise<StateGetEntityResult> {
+    const serializer = new TypedJSON(ParamGetStateEntity);
+    const getStateEntityParam = new ParamGetStateEntity(entityIdentifier);
+
     const resp = await this.processRequest<ParamGetStateEntity>(
       Method.GetStateEntity,
-      new ParamGetStateEntity(entityIdentifier)
+      serializer.toPlainJson(getStateEntityParam) as ParamGetStateEntity
     );
 
     const result = this.parseResponse(StateGetEntityResult, resp.result);
@@ -310,9 +373,15 @@ export class RpcClient implements IClient {
     entityIdentifier: EntityIdentifier,
     hash: string
   ): Promise<StateGetEntityResult> {
+    const serializer = new TypedJSON(ParamGetStateEntity);
+    const getStateEntityParam = new ParamGetStateEntity(
+      entityIdentifier,
+      new BlockIdentifier(hash)
+    );
+
     const resp = await this.processRequest<ParamGetStateEntity>(
       Method.GetStateEntity,
-      new ParamGetStateEntity(entityIdentifier, new BlockIdentifier(hash))
+      serializer.toPlainJson(getStateEntityParam) as ParamGetStateEntity
     );
 
     const result = this.parseResponse(StateGetEntityResult, resp.result);
@@ -325,12 +394,15 @@ export class RpcClient implements IClient {
     entityIdentifier: EntityIdentifier,
     height: number
   ): Promise<StateGetEntityResult> {
+    const serializer = new TypedJSON(ParamGetStateEntity);
+    const getStateEntityParam = new ParamGetStateEntity(
+      entityIdentifier,
+      new BlockIdentifier(undefined, height)
+    );
+
     const resp = await this.processRequest<ParamGetStateEntity>(
       Method.GetStateEntity,
-      new ParamGetStateEntity(
-        entityIdentifier,
-        new BlockIdentifier(undefined, height)
-      )
+      serializer.toPlainJson(getStateEntityParam) as ParamGetStateEntity
     );
 
     const result = this.parseResponse(StateGetEntityResult, resp.result);
@@ -343,12 +415,15 @@ export class RpcClient implements IClient {
     blockHash: string,
     pub: PublicKey
   ): Promise<StateGetAccountInfo> {
+    const serializer = new TypedJSON(ParamGetAccountInfoBalance);
+    const accountInfoBalance = new ParamGetAccountInfoBalance(
+      pub.toHex(),
+      ParamBlockIdentifier.byHash(blockHash)
+    );
+
     const resp = await this.processRequest<ParamGetAccountInfoBalance>(
       Method.GetStateAccount,
-      new ParamGetAccountInfoBalance(
-        pub.toHex(),
-        ParamBlockIdentifier.byHash(blockHash)
-      )
+      serializer.toPlainJson(accountInfoBalance) as ParamGetAccountInfoBalance
     );
 
     const result = this.parseResponse(StateGetAccountInfo, resp.result);
@@ -361,12 +436,15 @@ export class RpcClient implements IClient {
     blockHeight: number,
     pub: PublicKey
   ): Promise<StateGetAccountInfo> {
+    const serializer = new TypedJSON(ParamGetAccountInfoBalance);
+    const accountInfoBalance = new ParamGetAccountInfoBalance(
+      pub.toHex(),
+      ParamBlockIdentifier.byHeight(blockHeight)
+    );
+
     const resp = await this.processRequest<ParamGetAccountInfoBalance>(
       Method.GetStateAccount,
-      new ParamGetAccountInfoBalance(
-        pub.toHex(),
-        ParamBlockIdentifier.byHeight(blockHeight)
-      )
+      serializer.toPlainJson(accountInfoBalance) as ParamGetAccountInfoBalance
     );
 
     const result = this.parseResponse(StateGetAccountInfo, resp.result);
@@ -379,6 +457,7 @@ export class RpcClient implements IClient {
     blockIdentifier: ParamBlockIdentifier | null,
     accountIdentifier: AccountIdentifier
   ): Promise<StateGetAccountInfo> {
+    const serializer = new TypedJSON(ParamGetAccountInfoBalance);
     let identifier = blockIdentifier;
 
     if (!identifier) {
@@ -395,9 +474,14 @@ export class RpcClient implements IClient {
       throw new Error('account identifier is empty');
     }
 
+    const accountInfoBalance = new ParamGetAccountInfoBalance(
+      accountParam,
+      identifier
+    );
+
     const resp = await this.processRequest<ParamGetAccountInfoBalance>(
       Method.GetStateAccount,
-      new ParamGetAccountInfoBalance(accountParam, identifier)
+      serializer.toPlainJson(accountInfoBalance) as ParamGetAccountInfoBalance
     );
 
     const result = this.parseResponse(StateGetAccountInfo, resp.result);
@@ -425,6 +509,7 @@ export class RpcClient implements IClient {
     stateRootHash: string | null,
     identifier: ParamDictionaryIdentifier
   ): Promise<StateGetDictionaryResult> {
+    const serializer = new TypedJSON(StateGetDictionaryRequest);
     let rootHash = stateRootHash;
 
     if (!rootHash) {
@@ -433,9 +518,13 @@ export class RpcClient implements IClient {
       rootHash = latestHashResult.stateRootHash.toHex();
     }
 
+    const stateDictionaryParam = new StateGetDictionaryRequest(
+      rootHash,
+      identifier
+    );
     const resp = await this.processRequest<StateGetDictionaryRequest>(
       Method.GetDictionaryItem,
-      new StateGetDictionaryRequest(rootHash, identifier)
+      serializer.toPlainJson(stateDictionaryParam) as StateGetDictionaryRequest
     );
 
     const result = this.parseResponse(StateGetDictionaryResult, resp.result);
@@ -445,14 +534,16 @@ export class RpcClient implements IClient {
   }
 
   async getLatestBalance(purseURef: string): Promise<StateGetBalanceResult> {
+    const serializer = new TypedJSON(StateGetBalanceRequest);
     const latestHashResult = await this.getStateRootHashLatest();
+    const stateBalance = new StateGetBalanceRequest(
+      latestHashResult.stateRootHash.toHex(),
+      purseURef
+    );
 
     const resp = await this.processRequest<StateGetBalanceRequest>(
       Method.GetStateBalance,
-      new StateGetBalanceRequest(
-        latestHashResult.stateRootHash.toHex(),
-        purseURef
-      )
+      serializer.toPlainJson(stateBalance) as StateGetBalanceRequest
     );
 
     const result = this.parseResponse(StateGetBalanceResult, resp.result);
@@ -465,9 +556,12 @@ export class RpcClient implements IClient {
     purseURef: string,
     stateRootHash: string
   ): Promise<StateGetBalanceResult> {
+    const serializer = new TypedJSON(StateGetBalanceRequest);
+    const stateBalance = new StateGetBalanceRequest(stateRootHash, purseURef);
+
     const resp = await this.processRequest<StateGetBalanceRequest>(
       Method.GetStateBalance,
-      new StateGetBalanceRequest(stateRootHash, purseURef)
+      serializer.toPlainJson(stateBalance) as StateGetBalanceRequest
     );
 
     const result = this.parseResponse(StateGetBalanceResult, resp.result);
@@ -488,9 +582,12 @@ export class RpcClient implements IClient {
   async getEraInfoByBlockHeight(
     height: number
   ): Promise<ChainGetEraInfoResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
     const resp = await this.processRequest(
       Method.GetEraInfo,
-      ParamBlockIdentifier.byHeight(height)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(ChainGetEraInfoResult, resp.result);
@@ -500,9 +597,12 @@ export class RpcClient implements IClient {
   }
 
   async getEraInfoByBlockHash(hash: string): Promise<ChainGetEraInfoResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(hash);
+
     const resp = await this.processRequest(
       Method.GetEraInfo,
-      ParamBlockIdentifier.byHash(hash)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(ChainGetEraInfoResult, resp.result);
@@ -530,9 +630,12 @@ export class RpcClient implements IClient {
   }
 
   async getBlockByHash(hash: string): Promise<ChainGetBlockResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(hash);
+
     const resp = await this.processRequest(
       Method.GetBlock,
-      ParamBlockIdentifier.byHash(hash)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(
@@ -551,9 +654,12 @@ export class RpcClient implements IClient {
   }
 
   async getBlockByHeight(height: number): Promise<ChainGetBlockResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
     const resp = await this.processRequest(
       Method.GetBlock,
-      ParamBlockIdentifier.byHeight(height)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(
@@ -586,9 +692,12 @@ export class RpcClient implements IClient {
   async getBlockTransfersByHash(
     blockHash: string
   ): Promise<ChainGetBlockTransfersResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(blockHash);
+
     const resp = await this.processRequest(
       Method.GetBlockTransfers,
-      ParamBlockIdentifier.byHash(blockHash)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(
@@ -603,9 +712,12 @@ export class RpcClient implements IClient {
   async getBlockTransfersByHeight(
     height: number
   ): Promise<ChainGetBlockTransfersResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
     const resp = await this.processRequest(
       Method.GetBlockTransfers,
-      ParamBlockIdentifier.byHeight(height)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(
@@ -629,9 +741,12 @@ export class RpcClient implements IClient {
   async getEraSummaryByHash(
     blockHash: string
   ): Promise<ChainGetEraSummaryResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(blockHash);
+
     const resp = await this.processRequest(
       Method.GetEraSummary,
-      ParamBlockIdentifier.byHash(blockHash)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(ChainGetEraSummaryResult, resp.result);
@@ -643,9 +758,12 @@ export class RpcClient implements IClient {
   async getEraSummaryByHeight(
     height: number
   ): Promise<ChainGetEraSummaryResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
     const resp = await this.processRequest(
       Method.GetEraSummary,
-      ParamBlockIdentifier.byHeight(height)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(ChainGetEraSummaryResult, resp.result);
@@ -666,9 +784,12 @@ export class RpcClient implements IClient {
   async getAuctionInfoByHash(
     blockHash: string
   ): Promise<StateGetAuctionInfoResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(blockHash);
+
     const resp = await this.processRequest(
       Method.GetAuctionInfo,
-      ParamBlockIdentifier.byHash(blockHash)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(StateGetAuctionInfoResult, resp.result);
@@ -680,9 +801,12 @@ export class RpcClient implements IClient {
   async getAuctionInfoByHeight(
     height: number
   ): Promise<StateGetAuctionInfoResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
     const resp = await this.processRequest(
       Method.GetAuctionInfo,
-      ParamBlockIdentifier.byHeight(height)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(StateGetAuctionInfoResult, resp.result);
@@ -703,9 +827,12 @@ export class RpcClient implements IClient {
   async getStateRootHashByHash(
     blockHash: string
   ): Promise<ChainGetStateRootHashResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(blockHash);
+
     const resp = await this.processRequest(
       Method.GetStateRootHash,
-      ParamBlockIdentifier.byHash(blockHash)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(ChainGetStateRootHashResult, resp.result);
@@ -717,9 +844,12 @@ export class RpcClient implements IClient {
   async getStateRootHashByHeight(
     height: number
   ): Promise<ChainGetStateRootHashResult> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
     const resp = await this.processRequest(
       Method.GetStateRootHash,
-      ParamBlockIdentifier.byHeight(height)
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
     const result = this.parseResponse(ChainGetStateRootHashResult, resp.result);
@@ -759,9 +889,12 @@ export class RpcClient implements IClient {
   }
 
   async putDeploy(deploy: Deploy): Promise<PutDeployResult> {
+    const serializer = new TypedJSON(PutDeployRequest);
+    const deployRequestParam = new PutDeployRequest(deploy);
+
     const resp = await this.processRequest<PutDeployRequest>(
       Method.PutDeploy,
-      new PutDeployRequest(deploy)
+      serializer.toPlainJson(deployRequestParam) as PutDeployRequest
     );
 
     const result = this.parseResponse(PutDeployResult, resp.result);
@@ -773,9 +906,14 @@ export class RpcClient implements IClient {
   async putTransactionV1(
     transaction: TransactionV1
   ): Promise<PutTransactionResult> {
+    const serializer = new TypedJSON(PutTransactionRequest);
+    const transactionRequestParam = new PutTransactionRequest(
+      new TransactionWrapper(undefined, transaction)
+    );
+
     const resp = await this.processRequest<PutTransactionRequest>(
       Method.PutTransaction,
-      new PutTransactionRequest(new TransactionWrapper(undefined, transaction))
+      serializer.toPlainJson(transactionRequestParam) as PutTransactionRequest
     );
 
     const result = this.parseResponse(PutTransactionResult, resp.result);
@@ -787,9 +925,12 @@ export class RpcClient implements IClient {
   async queryLatestBalance(
     identifier: PurseIdentifier
   ): Promise<QueryBalanceResult> {
+    const serializer = new TypedJSON(QueryBalanceRequest);
+    const queryBalanceParam = new QueryBalanceRequest(identifier);
+
     const resp = await this.processRequest<QueryBalanceRequest>(
       Method.QueryBalance,
-      new QueryBalanceRequest(identifier)
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceRequest
     );
 
     const result = this.parseResponse(QueryBalanceResult, resp.result);
@@ -802,12 +943,15 @@ export class RpcClient implements IClient {
     purseIdentifier: PurseIdentifier,
     height: number
   ): Promise<QueryBalanceResult> {
+    const serializer = new TypedJSON(QueryBalanceRequest);
+    const queryBalanceParam = new QueryBalanceRequest(
+      purseIdentifier,
+      new GlobalStateIdentifier(undefined, height)
+    );
+
     const resp = await this.processRequest<QueryBalanceRequest>(
       Method.QueryBalance,
-      new QueryBalanceRequest(
-        purseIdentifier,
-        new GlobalStateIdentifier(undefined, height)
-      )
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceRequest
     );
 
     const result = this.parseResponse(QueryBalanceResult, resp.result);
@@ -820,12 +964,15 @@ export class RpcClient implements IClient {
     purseIdentifier: PurseIdentifier,
     blockHash: string
   ): Promise<QueryBalanceResult> {
+    const serializer = new TypedJSON(QueryBalanceRequest);
+    const queryBalanceParam = new QueryBalanceRequest(
+      purseIdentifier,
+      new GlobalStateIdentifier(blockHash)
+    );
+
     const resp = await this.processRequest<QueryBalanceRequest>(
       Method.QueryBalance,
-      new QueryBalanceRequest(
-        purseIdentifier,
-        new GlobalStateIdentifier(blockHash)
-      )
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceRequest
     );
 
     const result = this.parseResponse(QueryBalanceResult, resp.result);
@@ -838,12 +985,15 @@ export class RpcClient implements IClient {
     purseIdentifier: PurseIdentifier,
     stateRootHash: string
   ): Promise<QueryBalanceResult> {
+    const serializer = new TypedJSON(QueryBalanceRequest);
+    const queryBalanceParam = new QueryBalanceRequest(
+      purseIdentifier,
+      new GlobalStateIdentifier(undefined, undefined, stateRootHash)
+    );
+
     const resp = await this.processRequest<QueryBalanceRequest>(
       Method.QueryBalance,
-      new QueryBalanceRequest(
-        purseIdentifier,
-        new GlobalStateIdentifier(undefined, undefined, stateRootHash)
-      )
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceRequest
     );
 
     const result = this.parseResponse(QueryBalanceResult, resp.result);
@@ -855,9 +1005,12 @@ export class RpcClient implements IClient {
   async queryLatestBalanceDetails(
     purseIdentifier: PurseIdentifier
   ): Promise<QueryBalanceDetailsResult> {
+    const serializer = new TypedJSON(QueryBalanceDetailsRequest);
+    const queryBalanceParam = new QueryBalanceDetailsRequest(purseIdentifier);
+
     const resp = await this.processRequest<QueryBalanceDetailsRequest>(
       Method.QueryBalanceDetails,
-      new QueryBalanceDetailsRequest(purseIdentifier)
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceDetailsRequest
     );
 
     const result = this.parseResponse(QueryBalanceDetailsResult, resp.result);
@@ -870,12 +1023,15 @@ export class RpcClient implements IClient {
     purseIdentifier: PurseIdentifier,
     stateRootHash: string
   ): Promise<QueryBalanceDetailsResult> {
+    const serializer = new TypedJSON(QueryBalanceDetailsRequest);
+    const queryBalanceParam = new QueryBalanceDetailsRequest(
+      purseIdentifier,
+      new GlobalStateIdentifier(undefined, undefined, stateRootHash)
+    );
+
     const resp = await this.processRequest<QueryBalanceDetailsRequest>(
       Method.QueryBalanceDetails,
-      new QueryBalanceDetailsRequest(
-        purseIdentifier,
-        new GlobalStateIdentifier(undefined, undefined, stateRootHash)
-      )
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceDetailsRequest
     );
 
     const result = this.parseResponse(QueryBalanceDetailsResult, resp.result);
@@ -888,12 +1044,15 @@ export class RpcClient implements IClient {
     purseIdentifier: PurseIdentifier,
     height: number
   ): Promise<QueryBalanceDetailsResult> {
+    const serializer = new TypedJSON(QueryBalanceDetailsRequest);
+    const queryBalanceParam = new QueryBalanceDetailsRequest(
+      purseIdentifier,
+      new GlobalStateIdentifier(undefined, height)
+    );
+
     const resp = await this.processRequest<QueryBalanceDetailsRequest>(
       Method.QueryBalanceDetails,
-      new QueryBalanceDetailsRequest(
-        purseIdentifier,
-        new GlobalStateIdentifier(undefined, height)
-      )
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceDetailsRequest
     );
 
     const result = this.parseResponse(QueryBalanceDetailsResult, resp.result);
@@ -906,12 +1065,15 @@ export class RpcClient implements IClient {
     purseIdentifier: PurseIdentifier,
     blockHash: string
   ): Promise<QueryBalanceDetailsResult> {
+    const serializer = new TypedJSON(QueryBalanceDetailsRequest);
+    const queryBalanceParam = new QueryBalanceDetailsRequest(
+      purseIdentifier,
+      new GlobalStateIdentifier(blockHash)
+    );
+
     const resp = await this.processRequest<QueryBalanceDetailsRequest>(
       Method.QueryBalanceDetails,
-      new QueryBalanceDetailsRequest(
-        purseIdentifier,
-        new GlobalStateIdentifier(blockHash)
-      )
+      serializer.toPlainJson(queryBalanceParam) as QueryBalanceDetailsRequest
     );
 
     const result = this.parseResponse(QueryBalanceDetailsResult, resp.result);
@@ -930,16 +1092,19 @@ export class RpcClient implements IClient {
   }
 
   async getValidatorRewardByEraID(
-    validator: any,
+    validator: PublicKey,
     eraID: number
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(
+      validator,
+      undefined,
+      new EraIdentifier(undefined, eraID)
+    );
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(
-        validator,
-        undefined,
-        new EraIdentifier(undefined, eraID)
-      )
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -949,16 +1114,19 @@ export class RpcClient implements IClient {
   }
 
   async getValidatorRewardByBlockHash(
-    validator: any,
+    validator: PublicKey,
     blockHash: string
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(
+      validator,
+      undefined,
+      new EraIdentifier(new BlockIdentifier(blockHash))
+    );
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(
-        validator,
-        undefined,
-        new EraIdentifier(new BlockIdentifier(blockHash))
-      )
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -968,16 +1136,19 @@ export class RpcClient implements IClient {
   }
 
   async getValidatorRewardByBlockHeight(
-    validator: any,
+    validator: PublicKey,
     height: number
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(
+      validator,
+      undefined,
+      new EraIdentifier(new BlockIdentifier(undefined, height))
+    );
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(
-        validator,
-        undefined,
-        new EraIdentifier(new BlockIdentifier(undefined, height))
-      )
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -987,17 +1158,20 @@ export class RpcClient implements IClient {
   }
 
   async getDelegatorRewardByEraID(
-    validator: any,
-    delegator: any,
+    validator: PublicKey,
+    delegator: PublicKey,
     eraID: number
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(
+      validator,
+      delegator,
+      new EraIdentifier(undefined, eraID)
+    );
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(
-        validator,
-        delegator,
-        new EraIdentifier(undefined, eraID)
-      )
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -1007,17 +1181,20 @@ export class RpcClient implements IClient {
   }
 
   async getDelegatorRewardByBlockHash(
-    validator: any,
-    delegator: any,
+    validator: PublicKey,
+    delegator: PublicKey,
     blockHash: string
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(
+      validator,
+      delegator,
+      new EraIdentifier(new BlockIdentifier(blockHash))
+    );
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(
-        validator,
-        delegator,
-        new EraIdentifier(new BlockIdentifier(blockHash))
-      )
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -1031,13 +1208,16 @@ export class RpcClient implements IClient {
     delegator: PublicKey,
     height: number
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(
+      validator,
+      delegator,
+      new EraIdentifier(new BlockIdentifier(undefined, height))
+    );
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(
-        validator,
-        delegator,
-        new EraIdentifier(new BlockIdentifier(undefined, height))
-      )
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -1049,9 +1229,12 @@ export class RpcClient implements IClient {
   async getLatestValidatorReward(
     validator: PublicKey
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(validator);
+
     const resp = await this.processRequest(
       Method.GetReward,
-      new InfoGetRewardRequest(validator)
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -1064,9 +1247,12 @@ export class RpcClient implements IClient {
     validator: PublicKey,
     delegator: PublicKey
   ): Promise<InfoGetRewardResult> {
+    const serializer = new TypedJSON(InfoGetRewardRequest);
+    const rewardParam = new InfoGetRewardRequest(validator, delegator);
+
     const resp = await this.processRequest<InfoGetRewardRequest>(
       Method.GetReward,
-      new InfoGetRewardRequest(validator, delegator)
+      serializer.toPlainJson(rewardParam) as InfoGetRewardRequest
     );
 
     const result = this.parseResponse(InfoGetRewardResult, resp.result);
@@ -1075,7 +1261,7 @@ export class RpcClient implements IClient {
     return result;
   }
 
-  private parseResponse<T>(type: new (params: any) => T, response: string): T {
+  private parseResponse<T>(type: new (params: any) => T, response: any): T {
     const serializer = new TypedJSON(type);
     const parsed = serializer.parse(response);
 

@@ -1,4 +1,4 @@
-import { jsonMember, jsonObject } from 'typedjson';
+import { AnyT, jsonMember, jsonObject } from 'typedjson';
 import { CLType } from './CLType';
 import { CLTypeParser } from './Parser';
 
@@ -11,14 +11,14 @@ export class CLTypeRaw {
   /**
    * The raw message string representation of a CLType.
    */
-  @jsonMember({ constructor: String })
-  rawMessage: string;
+  @jsonMember({ constructor: AnyT, name: 'RawMessage' })
+  rawMessage: any;
 
   /**
    * Initializes a new instance of the CLTypeRaw class.
    * @param rawMessage - A string representing the raw CLType message.
    */
-  constructor(rawMessage: string) {
+  constructor(rawMessage: any) {
     this.rawMessage = rawMessage;
   }
 

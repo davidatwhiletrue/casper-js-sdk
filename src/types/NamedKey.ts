@@ -1,4 +1,4 @@
-import { jsonMember, jsonObject } from 'typedjson';
+import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
 import { Key } from './key';
 import { CLValue, CLValueParser } from './clvalue';
 
@@ -21,8 +21,14 @@ export class NamedKey {
   @jsonMember({
     name: 'key',
     constructor: Key,
-    deserializer: json => Key.fromJSON(json),
-    serializer: (value: Key) => value.toJSON()
+    deserializer: (json: string) => {
+      if (!json) return;
+      return Key.newKey(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toPrefixedString();
+    }
   })
   key: Key;
 
@@ -96,6 +102,7 @@ export class NamedKeys {
   /**
    * A list of `NamedKey` objects that are part of this collection.
    */
+  @jsonArrayMember(NamedKey)
   keys: NamedKey[];
 
   /**

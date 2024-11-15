@@ -1,7 +1,15 @@
+import { jsonMember, jsonObject } from 'typedjson';
+
+@jsonObject
 export class IDValue {
-  private intValue: number | null = null;
-  private strValue: string | null = null;
-  private isIntValue: boolean;
+  @jsonMember({ constructor: Number, isRequired: false, preserveNull: true })
+  intValue: number | null = null;
+
+  @jsonMember({ constructor: String, isRequired: false, preserveNull: true })
+  strValue: string | null = null;
+
+  @jsonMember({ constructor: Boolean })
+  isIntValue: boolean;
 
   constructor(value: string | number) {
     if (typeof value === 'number') {
@@ -41,25 +49,12 @@ export class IDValue {
     return this.toString();
   }
 
-  static fromJSON(data: string): IDValue {
-    try {
-      const parsedInt = JSON.parse(data) as number;
-      if (typeof parsedInt === 'number') {
-        return IDValue.fromInt(parsedInt);
-      }
-    } catch (e) {
-      // Not a number, continue to try parsing as a string
+  static fromJSON(data: string | number): IDValue {
+    if (typeof data === 'number') {
+      return IDValue.fromInt(data);
+    } else if (typeof data === 'string') {
+      return IDValue.fromString(data);
     }
-
-    try {
-      const parsedStr = JSON.parse(data) as string;
-      if (typeof parsedStr === 'string') {
-        return IDValue.fromString(parsedStr);
-      }
-    } catch (e) {
-      throw new Error('IDValue should be an int or string');
-    }
-
     throw new Error('IDValue should be an int or string');
   }
 }

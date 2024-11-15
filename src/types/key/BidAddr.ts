@@ -60,7 +60,7 @@ const CreditAddrLen = 41;
 export class DelegatorInfo {
   /** The validator hash associated with this delegator. */
   @jsonMember({
-    name: 'validator',
+    name: 'Validator',
     constructor: Hash,
     deserializer: json => Hash.fromJSON(json),
     serializer: value => value.toJSON()
@@ -69,7 +69,7 @@ export class DelegatorInfo {
 
   /** The delegator's hash. */
   @jsonMember({
-    name: 'delegator',
+    name: 'Delegator',
     constructor: Hash,
     deserializer: json => Hash.fromJSON(json),
     serializer: value => value.toJSON()
@@ -84,7 +84,7 @@ export class DelegatorInfo {
 export class CreditInfo {
   /** The validator associated with this credit. */
   @jsonMember({
-    name: 'validator',
+    name: 'Validator',
     constructor: Hash,
     deserializer: json => Hash.fromJSON(json),
     serializer: value => value.toJSON()
@@ -92,7 +92,7 @@ export class CreditInfo {
   validator: Hash;
 
   /** The era ID for this credit. */
-  @jsonMember({ name: 'eraId', constructor: Number })
+  @jsonMember({ name: 'EraId', constructor: Number })
   eraId: number;
 }
 

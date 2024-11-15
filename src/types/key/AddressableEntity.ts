@@ -1,10 +1,6 @@
 import { jsonObject, jsonMember } from 'typedjson';
 import { Hash } from './Hash';
-
-/**
- * The prefix used for addressable entity hashes.
- */
-const PrefixAddressableEntity = 'addressable-entity-';
+import { PrefixName } from './Key';
 
 /**
  * Represents an addressable entity hash in the Casper network.
@@ -26,7 +22,7 @@ export class AddressableEntityHash extends Hash {
    */
   constructor(
     hashBytes: Uint8Array,
-    originPrefix: string = PrefixAddressableEntity
+    originPrefix: string = PrefixName.AddressableEntity
   ) {
     super(hashBytes);
     this.originPrefix = originPrefix;
@@ -39,8 +35,8 @@ export class AddressableEntityHash extends Hash {
    * @returns A new AddressableEntityHash instance.
    */
   static fromHex(source: string): AddressableEntityHash {
-    const originPrefix = source.startsWith(PrefixAddressableEntity)
-      ? PrefixAddressableEntity
+    const originPrefix = source.startsWith(PrefixName.AddressableEntity)
+      ? PrefixName.AddressableEntity
       : '';
     const hexBytes = Hash.fromHex(source.replace(originPrefix, ''));
     return new AddressableEntityHash(hexBytes.toBytes(), originPrefix);
@@ -52,7 +48,7 @@ export class AddressableEntityHash extends Hash {
    * @returns The prefixed hexadecimal string representation of the hash.
    */
   toPrefixedString(): string {
-    return `${PrefixAddressableEntity}${this.toHex()}`;
+    return `${PrefixName.AddressableEntity}${this.toHex()}`;
   }
 
   /**

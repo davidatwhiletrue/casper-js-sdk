@@ -3,6 +3,7 @@ import { TransactionHash } from './Transaction';
 import { InitiatorAddr } from './InitiatorAddr';
 import { AccountHash, Hash, URef } from './key';
 import { CLValueUInt512 } from './clvalue';
+import { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Represents the details of a version 1 (V1) transfer transaction.
@@ -43,7 +44,11 @@ export class TransferV1 {
   /**
    * The gas used for the transfer.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public gas: number;
 
   /**
@@ -123,7 +128,11 @@ export class TransferV2 {
   /**
    * The gas used for the transfer.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public gas: number;
 
   /**
@@ -221,7 +230,11 @@ export class Transfer {
   /**
    * The gas used for the transfer.
    */
-  @jsonMember({ constructor: Number })
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
   public gas: number;
 
   /**

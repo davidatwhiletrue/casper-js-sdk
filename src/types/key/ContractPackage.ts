@@ -10,7 +10,7 @@ export class ContractPackageHash {
   /**
    * The hash object representing the contract package.
    */
-  @jsonMember({ name: 'hash', constructor: Hash })
+  @jsonMember({ name: 'Hash', constructor: Hash })
   hash: Hash;
 
   /**

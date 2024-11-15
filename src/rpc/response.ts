@@ -41,13 +41,13 @@ export class RpcResponse {
   @jsonMember({ name: 'jsonrpc', constructor: String })
   version: string;
 
-  @jsonMember(() => ({ constructor: IDValue, name: 'id' }))
+  @jsonMember({ constructor: IDValue, name: 'id' })
   id?: IDValue;
 
-  @jsonMember({ name: 'result', constructor: String })
-  result: string;
+  @jsonMember({ name: 'result', constructor: AnyT })
+  result: any;
 
-  @jsonMember(() => ({ name: 'error', constructor: RpcError }))
+  @jsonMember({ name: 'error', constructor: RpcError })
   error?: RpcError;
 }
 
@@ -56,10 +56,10 @@ export class StateGetAuctionInfoResult {
   @jsonMember({ name: 'api_version', constructor: String })
   version: string;
 
-  @jsonMember(() => ({ name: 'auction_state', constructor: AuctionState }))
+  @jsonMember({ name: 'auction_state', constructor: AuctionState })
   auctionState: AuctionState;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -67,15 +67,15 @@ export class StateGetBalanceResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember(() => ({
+  @jsonMember({
     name: 'balance_value',
     constructor: CLValueUInt512,
     deserializer: (json: string) => CLValueUInt512.fromJSON(json),
     serializer: (value: CLValueUInt512) => value.toJSON()
-  }))
+  })
   balanceValue: CLValueUInt512;
 
-  public rawJSON: string;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -86,7 +86,7 @@ export class StateGetAccountInfo {
   @jsonMember({ name: 'account', constructor: Account })
   account: Account;
 
-  public rawJSON: string;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -127,8 +127,7 @@ export class StateGetEntityResult {
   @jsonMember({ name: 'merkle_proof', constructor: AnyT })
   merkleProof: any;
 
-  @jsonMember({ name: 'rawJSON', constructor: AnyT })
-  rawJSON: any;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -145,7 +144,7 @@ export class ChainGetBlockResultV1Compatible {
   @jsonMember({ name: 'block', constructor: BlockV1 })
   blockV1?: BlockV1;
 
-  public rawJSON?: string;
+  public rawJSON?: any;
 }
 
 @jsonObject
@@ -156,7 +155,7 @@ export class ChainGetBlockResult {
   @jsonMember({ constructor: Block })
   public block: Block;
 
-  public rawJSON?: string;
+  public rawJSON?: any;
 
   public static fromJSON(data: any): ChainGetBlockResult {
     const parsedResult = TypedJSON.parse(data, ChainGetBlockResult);
@@ -170,7 +169,7 @@ export class ChainGetBlockResult {
 
   public static newChainGetBlockResultFromV1Compatible(
     result: ChainGetBlockResultV1Compatible,
-    rawJSON: string
+    rawJSON: any
   ): ChainGetBlockResult {
     const chainGetBlockResult = new ChainGetBlockResult();
     chainGetBlockResult.apiVersion = result.apiVersion;
@@ -205,7 +204,7 @@ export class ChainGetBlockTransfersResult {
   })
   public transfers: Transfer[];
 
-  public rawJSON?: string;
+  public rawJSON?: any;
 }
 
 @jsonObject
@@ -216,7 +215,7 @@ export class ChainGetEraSummaryResult {
   @jsonMember({ name: 'era_summary', constructor: EraSummary })
   public eraSummary: EraSummary;
 
-  public rawJSON?: string;
+  public rawJSON?: any;
 }
 
 @jsonObject
@@ -227,10 +226,13 @@ export class InfoGetDeployResult {
   @jsonMember({ name: 'deploy', constructor: Deploy })
   deploy: Deploy;
 
-  @jsonMember({ name: 'execution_info', constructor: DeployExecutionInfo })
+  @jsonMember({
+    name: 'execution_info',
+    constructor: DeployExecutionInfo
+  })
   executionResults: DeployExecutionInfo;
 
-  rawJSON: string;
+  rawJSON: any;
 
   toInfoGetTransactionResult(): InfoGetTransactionResult {
     return new InfoGetTransactionResult(
@@ -257,7 +259,7 @@ export class InfoGetTransactionResult {
   @jsonMember({ name: 'execution_info', constructor: ExecutionInfo })
   executionInfo?: ExecutionInfo;
 
-  public rawJSON: string;
+  public rawJSON: any;
 
   constructor(
     apiVersion: string,
@@ -314,7 +316,7 @@ export class InfoGetDeployResultV1Compatible {
   @jsonMember({ name: 'block_height', constructor: Number })
   blockHeight?: number;
 
-  public rawJSON: string;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -328,14 +330,15 @@ export class InfoGetTransactionResultV1Compatible {
   @jsonMember({ constructor: Deploy })
   deploy?: Deploy;
 
-  @jsonMember({ constructor: ExecutionInfo })
+  @jsonMember({ constructor: ExecutionInfo, name: 'execution_info' })
   executionInfo?: ExecutionInfo;
 
-  @jsonArrayMember(DeployExecutionResult)
+  @jsonArrayMember(DeployExecutionResult, { name: 'execution_results' })
   executionResults: DeployExecutionResult[] = [];
 
   @jsonMember({
     constructor: Hash,
+    name: 'block_hash',
     deserializer: json => {
       if (!json) return;
       return Hash.fromJSON(json);
@@ -347,14 +350,14 @@ export class InfoGetTransactionResultV1Compatible {
   })
   blockHash?: Hash;
 
-  @jsonMember({ constructor: Number })
+  @jsonMember({ constructor: Number, name: 'block_height' })
   blockHeight?: number;
 
-  rawJSON?: string;
+  rawJSON?: any;
 
   public static newInfoGetTransactionResultFromV1Compatible(
     result: InfoGetTransactionResultV1Compatible,
-    rawJSON: string
+    rawJSON: any
   ): InfoGetTransactionResult {
     const parsedResult = TypedJSON.parse(
       result,
@@ -431,7 +434,7 @@ export class ChainGetEraInfoResult {
   @jsonMember({ name: 'era_summary', constructor: EraSummary })
   eraSummary: EraSummary;
 
-  public rawJSON: string;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -442,7 +445,7 @@ export class StateGetItemResult {
   @jsonMember({ name: 'merkle_proof', constructor: String })
   merkleProof: string;
 
-  public rawJSON: string;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -459,7 +462,7 @@ export class StateGetDictionaryResult {
   @jsonMember({ name: 'merkle_proof', constructor: String })
   merkleProof: string;
 
-  public rawJSON: string;
+  public rawJSON: any;
 }
 
 @jsonObject
@@ -476,7 +479,7 @@ export class QueryGlobalStateResult {
   @jsonMember({ name: 'merkle_proof', constructor: String })
   merkleProof: string;
 
-  public rawJSON?: string;
+  public rawJSON?: any;
 }
 
 @jsonObject
@@ -487,7 +490,7 @@ export class InfoGetPeerResult {
   @jsonArrayMember(() => NodePeer, { name: 'peers' })
   peers: NodePeer[];
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -518,7 +521,7 @@ export class ChainGetStateRootHashResult {
   })
   stateRootHash: Hash;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 export enum ValidatorState {
@@ -537,7 +540,7 @@ export class StatusChanges {
   @jsonMember({ name: 'validator_change', constructor: String })
   validatorState: ValidatorState;
 
-  rawJSON: string;
+  rawJSON: any;
 }
 
 @jsonObject
@@ -559,7 +562,7 @@ export class ValidatorChanges {
   @jsonArrayMember(StatusChanges, { name: 'status_changes' })
   statusChanges: StatusChanges[];
 
-  rawJSON: string;
+  rawJSON: any;
 }
 
 @jsonObject
@@ -570,7 +573,7 @@ export class InfoGetValidatorChangesResult {
   @jsonArrayMember(ValidatorChanges, { name: 'changes' })
   changes: ValidatorChanges[];
 
-  rawJSON: string;
+  rawJSON: any;
 }
 
 @jsonObject
@@ -654,7 +657,7 @@ export class InfoGetStatusResult {
   })
   blockSync: BlockSync;
 
-  rawJSON: string;
+  rawJSON: any;
 }
 
 @jsonObject
@@ -694,7 +697,7 @@ export class PutDeployResult {
   })
   deployHash: Hash;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -705,7 +708,7 @@ export class PutTransactionResult {
   @jsonMember({ name: 'transaction_hash', constructor: TransactionHash })
   transactionHash: TransactionHash;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -730,7 +733,7 @@ export class SpeculativeExecResult {
   @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
   executionResult: ExecutionResult;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -752,7 +755,7 @@ export class QueryBalanceResult {
   })
   balance: CLValueUInt512;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -794,7 +797,7 @@ export class QueryBalanceDetailsResult {
   @jsonArrayMember(() => BalanceHoldWithProof, { name: 'holds' })
   holds: BalanceHoldWithProof[];
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -836,7 +839,7 @@ export class InfoGetRewardResult {
   })
   switchBlockHash: Hash;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject
@@ -879,7 +882,7 @@ export class InfoGetChainspecResult {
   @jsonMember({ name: 'chainspec_bytes', constructor: ChainspecBytes })
   chainspecBytes: ChainspecBytes;
 
-  rawJSON?: string;
+  rawJSON?: any;
 }
 
 @jsonObject

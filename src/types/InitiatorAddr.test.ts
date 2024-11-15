@@ -17,7 +17,7 @@ describe('InitiatorAddr', () => {
   it('should parse InitiatorAddr::PublicKey correctly', () => {
     const mockJson = {
       a: {
-        publicKey:
+        PublicKey:
           '01f0b77e728673aef7f984fd41d38a9424fd1796e07968534625c5b24b997ab34b'
       }
     };
@@ -32,7 +32,7 @@ describe('InitiatorAddr', () => {
   it('should parse InitiatorAddr::AccountHash correctly', () => {
     const mockJson = {
       a: {
-        accountHash:
+        AccountHash:
           'account-hash-032816afac5b702a899ff861f4192b2bea3cd4f109a8b90140a318054b97c139'
       }
     };

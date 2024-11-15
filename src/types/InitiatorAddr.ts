@@ -70,11 +70,13 @@ export class InitiatorAddr {
    */
   static fromJSON(json: any): InitiatorAddr {
     const initiatorAddr = new InitiatorAddr();
+    const jsonPubKey = json?.publicKey || json?.PublicKey;
+    const jsonAccountHash = json?.accountHash || json?.AccountHash;
 
-    if (json.publicKey) {
-      initiatorAddr.publicKey = PublicKey.fromHex(json.publicKey);
-    } else if (json.accountHash) {
-      initiatorAddr.accountHash = AccountHash.fromString(json.accountHash);
+    if (jsonPubKey) {
+      initiatorAddr.publicKey = PublicKey.fromHex(jsonPubKey);
+    } else if (jsonAccountHash) {
+      initiatorAddr.accountHash = AccountHash.fromString(jsonAccountHash);
     }
 
     return initiatorAddr;
@@ -89,11 +91,11 @@ export class InitiatorAddr {
   public toJSON(): unknown {
     if (this.accountHash) {
       return {
-        accountHash: this.accountHash.toPrefixedString()
+        AccountHash: this.accountHash.toPrefixedString()
       };
     } else if (this.publicKey) {
       return {
-        publicKey: this.publicKey.toHex()
+        PublicKey: this.publicKey.toHex()
       };
     }
     return undefined;

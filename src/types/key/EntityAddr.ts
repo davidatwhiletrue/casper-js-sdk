@@ -3,6 +3,7 @@ import { concat } from '@ethersproject/bytes';
 
 import { Hash } from './Hash';
 import { IResultWithBytes } from '../clvalue';
+import { PrefixName } from './Key';
 
 /**
  * Enum representing the types of entities within the system.
@@ -28,15 +29,15 @@ export const ErrInvalidEntityKind = new Error('invalid EntityKind');
 @jsonObject
 export class EntityAddr {
   /** The system hash, if this is a system entity. */
-  @jsonMember({ constructor: Hash })
+  @jsonMember({ constructor: Hash, name: 'System' })
   system?: Hash;
 
   /** The account hash, if this is an account entity. */
-  @jsonMember({ constructor: Hash })
+  @jsonMember({ constructor: Hash, name: 'Account' })
   account?: Hash;
 
   /** The smart contract hash, if this is a smart contract entity. */
-  @jsonMember({ constructor: Hash })
+  @jsonMember({ constructor: Hash, name: 'SmartContract' })
   smartContract?: Hash;
 
   /**
@@ -53,16 +54,15 @@ export class EntityAddr {
 
   /**
    * Returns a prefixed string representation of the EntityAddr, with different prefixes for each entity type.
-   * @returns The prefixed string representation, with "prefix-system-", "prefix-account-", or "prefix-contract-" based on entity type.
+   * @returns The prefixed string representation, with "entity-system-", "entity-account-", or "entity-contract-" based on entity type.
    */
   toPrefixedString(): string {
-    const PrefixNameAddressableEntity = 'prefix-';
     if (this.system) {
-      return `${PrefixNameAddressableEntity}system-${this.system.toHex()}`;
+      return `${PrefixName.Entity}system-${this.system.toHex()}`;
     } else if (this.account) {
-      return `${PrefixNameAddressableEntity}account-${this.account.toHex()}`;
+      return `${PrefixName.Entity}account-${this.account.toHex()}`;
     } else if (this.smartContract) {
-      return `${PrefixNameAddressableEntity}contract-${this.smartContract.toHex()}`;
+      return `${PrefixName.Entity}contract-${this.smartContract.toHex()}`;
     }
     return '';
   }
@@ -74,8 +74,7 @@ export class EntityAddr {
    * @throws {ErrInvalidEntityAddrFormat} If the format is invalid.
    */
   static fromPrefixedString(source: string): EntityAddr {
-    const PrefixNameAddressableEntity = 'prefix-';
-    source = source.replace(PrefixNameAddressableEntity, '');
+    source = source.replace(PrefixName.Entity, '');
 
     if (source.startsWith('system-')) {
       const hash = Hash.fromHex(source.replace('system-', ''));

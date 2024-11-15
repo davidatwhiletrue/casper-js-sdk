@@ -1,4 +1,4 @@
-import { jsonObject, jsonMember, TypedJSON } from 'typedjson';
+import { jsonObject, jsonMember } from 'typedjson';
 import { AccountHash } from './Account';
 import { Hash } from './Hash';
 import { TransferHash } from './Transfer';
@@ -40,6 +40,7 @@ export enum PrefixName {
   ChecksumRegistry = 'checksum-registry-',
   BidAddr = 'bid-addr-',
   Package = 'package-',
+  Entity = 'entity-',
   ByteCode = 'byte-code-',
   Message = 'message-',
   NamedKey = 'named-key-',
@@ -141,7 +142,7 @@ export const keyIDbyPrefix = new Map<PrefixName, TypeID>([
   [PrefixName.ChecksumRegistry, TypeID.ChecksumRegistry],
   [PrefixName.BidAddr, TypeID.BidAddr],
   [PrefixName.Package, TypeID.Package],
-  [PrefixName.AddressableEntity, TypeID.AddressableEntity],
+  [PrefixName.Entity, TypeID.AddressableEntity],
   [PrefixName.ByteCode, TypeID.ByteCode],
   [PrefixName.Message, TypeID.Message],
   [PrefixName.NamedKey, TypeID.NamedKey],
@@ -165,337 +166,145 @@ export class Key {
 
   @jsonMember({
     name: 'Account',
-    constructor: AccountHash,
-    deserializer: json => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: () => AccountHash
   })
   account?: AccountHash;
 
   @jsonMember({
     name: 'Hash',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   hash?: Hash;
 
   @jsonMember({
     name: 'URef',
-    constructor: URef,
-    deserializer: json => {
-      if (!json) return;
-      return URef.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: URef
   })
   uRef?: URef;
 
   @jsonMember({
     name: 'Transfer',
-    constructor: TransferHash,
-    deserializer: json => {
-      if (!json) return;
-      return TransferHash.fromJSON(json);
-    },
-    serializer: (value: TransferHash) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: TransferHash
   })
   transfer?: TransferHash;
 
   @jsonMember({
     name: 'Deploy',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   deploy?: Hash;
 
   @jsonMember({
     name: 'Era',
-    constructor: Era,
-    deserializer: json => {
-      if (!json) return;
-      return Era.fromJSON(json);
-    },
-    serializer: (value: Era) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Era
   })
   era?: Era;
 
   @jsonMember({
     name: 'Balance',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   balance?: Hash;
 
   @jsonMember({
     name: 'Bid',
-    constructor: AccountHash,
-    deserializer: json => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: () => AccountHash
   })
   bid?: AccountHash;
 
   @jsonMember({
     name: 'Withdraw',
-    constructor: AccountHash,
-    deserializer: json => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: () => AccountHash
   })
   withdraw?: AccountHash;
 
   @jsonMember({
     name: 'Dictionary',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   dictionary?: Hash;
 
   @jsonMember({
     name: 'SystemContactRegistry',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   systemContactRegistry?: Hash;
 
   @jsonMember({
     name: 'EraSummary',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   eraSummary?: Hash;
 
   @jsonMember({
     name: 'Unbond',
-    constructor: AccountHash,
-    deserializer: json => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: () => AccountHash
   })
   unbond?: AccountHash;
 
   @jsonMember({
     name: 'ChainspecRegistry',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   chainspecRegistry?: Hash;
 
   @jsonMember({
     name: 'ChecksumRegistry',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   checksumRegistry?: Hash;
 
   @jsonMember({
     name: 'BidAddr',
-    constructor: BidAddr,
-    deserializer: json => {
-      if (!json) return;
-      return BidAddr.fromJSON(json);
-    },
-    serializer: (value: BidAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: BidAddr
   })
   bidAddr?: BidAddr;
 
   @jsonMember({
     name: 'Package',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: Hash
   })
   package?: Hash;
 
   @jsonMember({
     name: 'AddressableEntity',
-    constructor: EntityAddr,
-    deserializer: json => {
-      if (!json) return;
-      return EntityAddr.fromJSON(json);
-    },
-    serializer: (value: EntityAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: EntityAddr
   })
   addressableEntity?: EntityAddr;
 
   @jsonMember({
     name: 'ByteCode',
-    constructor: ByteCode,
-    deserializer: json => {
-      if (!json) return;
-      return ByteCode.fromJSON(json);
-    },
-    serializer: (value: ByteCode) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: ByteCode
   })
   byteCode?: ByteCode;
 
   @jsonMember({
     name: 'Message',
-    constructor: MessageAddr,
-    deserializer: json => {
-      if (!json) return;
-      return MessageAddr.fromString(json);
-    },
-    serializer: (value: MessageAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: MessageAddr
   })
   message?: MessageAddr;
 
   @jsonMember({
     name: 'NamedKey',
-    constructor: NamedKeyAddr,
-    deserializer: json => {
-      if (!json) return;
-      return NamedKeyAddr.fromString(json);
-    },
-    serializer: (value: NamedKeyAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: NamedKeyAddr
   })
   namedKey?: NamedKeyAddr;
 
   @jsonMember({
     name: 'BlockGlobal',
-    constructor: BlockGlobalAddr,
-    deserializer: json => {
-      if (!json) return;
-      return BlockGlobalAddr.fromJSON(json);
-    },
-    serializer: (value: BlockGlobalAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: BlockGlobalAddr
   })
   blockGlobal?: BlockGlobalAddr;
 
   @jsonMember({
     name: 'BalanceHold',
-    constructor: BalanceHoldAddr,
-    deserializer: json => {
-      if (!json) return;
-      return BalanceHoldAddr.fromJSON(json);
-    },
-    serializer: (value: BalanceHoldAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: BalanceHoldAddr
   })
   balanceHold?: BalanceHoldAddr;
 
   @jsonMember({
     name: 'EntryPoint',
-    constructor: EntryPointAddr,
-    deserializer: json => {
-      if (!json) return;
-      return EntryPointAddr.fromJSON(json);
-    },
-    serializer: (value: EntryPointAddr) => {
-      if (!value) return;
-      return value.toJSON();
-    }
+    constructor: EntryPointAddr
   })
   entryPoint?: EntryPointAddr;
 
@@ -839,8 +648,8 @@ export class Key {
   static findPrefixByMap(
     source: string,
     prefixes: Map<PrefixName, TypeID>
-  ): PrefixName | undefined {
-    let result: PrefixName | undefined = undefined;
+  ): PrefixName {
+    let result: PrefixName = '' as PrefixName;
 
     prefixes.forEach((_, prefix) => {
       if (source.startsWith(prefix)) {
@@ -985,7 +794,7 @@ export class Key {
         );
         break;
       default:
-        throw new Error('type is not found');
+        throw new Error(`type is not found -> source: ${source}`);
     }
     return result;
   }
@@ -1037,35 +846,11 @@ export class Key {
     }
 
     const prefix = Key.findPrefixByMap(source, keyIDbyPrefix);
-    if (prefix === undefined) {
+    if (!prefix) {
       throw new Error(`prefix is not found, source: ${source}`);
     }
 
     return Key.createByType(source, keyIDbyPrefix.get(prefix)!);
-  }
-
-  /**
-   * Converts the Key instance to a JSON object.
-   * @returns The JSON representation of the Key instance.
-   */
-  toJSON(): object {
-    return TypedJSON.toPlainJson(this, Key) as object;
-  }
-
-  /**
-   * Creates a Key instance from a JSON object.
-   * @param json - The JSON object representing the Key instance.
-   * @returns A new Key instance.
-   */
-  static fromJSON(json: object): Key {
-    const serializer = new TypedJSON(Key);
-    const keyInstance = serializer.parse(json);
-
-    if (!keyInstance) {
-      throw new Error('Failed to parse JSON into Key');
-    }
-
-    return keyInstance;
   }
 }
 
