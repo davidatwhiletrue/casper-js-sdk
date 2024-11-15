@@ -73,7 +73,7 @@ describe('Test Transaction', () => {
     await transaction.sign(keys);
 
     const toJson = TransactionV1.toJson(transaction);
-    const parsed = TransactionV1.fromJSON(toJson.transaction);
+    const parsed = TransactionV1.fromJSON(toJson);
 
     const transactionPaymentAmount = parsed.body.args.args
       .get('amount')!
