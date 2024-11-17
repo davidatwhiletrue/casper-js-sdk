@@ -1,6 +1,5 @@
 import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from 'typedjson';
 import { concat } from '@ethersproject/bytes';
-import { BigNumber } from '@ethersproject/bignumber';
 
 import { Hash } from './key';
 import { PrivateKey } from './keypair/PrivateKey';
@@ -473,7 +472,7 @@ export class Deploy {
       }
 
       const serializer = new TypedJSON(Deploy);
-      deploy = serializer.parse(JSON.stringify(deployJson));
+      deploy = serializer.parse(deployJson);
 
       if (!deploy) {
         throw new Error("The JSON can't be parsed as a Deploy.");
@@ -523,22 +522,6 @@ export class Deploy {
     return false;
   }
 }
-
-/**
- * Creates an instance of standard payment logic for use in a `Deploy` object.
- * This method is deprecated. It is recommended to use the `ExecutableDeployItem.standardPayment` method instead.
- *
- * @deprecated Use {ExecutableDeployItem.standardPayment} instead
- * @param paymentAmount The amount of motes to be used to pay for gas. This value should be expressed in motes, where 1 mote = 1 * 10^-9 CSPR.
- * @returns An `ExecutableDeployItem` representing the standard payment logic, to be attached to a `Deploy`.
- *
- * @example
- * const paymentAmount = BigNumber.from('1000000');
- * const paymentItem = standardPayment(paymentAmount);
- */
-export const standardPayment = (paymentAmount: BigNumber) => {
-  return ExecutableDeployItem.standardPayment(paymentAmount);
-};
 
 /**
  * Builds a `Deploy` object from the given parameters, session logic, and payment logic.

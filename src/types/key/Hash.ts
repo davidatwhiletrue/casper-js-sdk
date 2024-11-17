@@ -1,5 +1,4 @@
 import { jsonObject } from 'typedjson';
-import { Conversions } from '../Conversions';
 import { IResultWithBytes } from '../clvalue';
 
 /**
@@ -51,7 +50,7 @@ export class Hash {
    * @returns The hexadecimal string representation of the hash.
    */
   toHex(): string {
-    return Conversions.encodeBase16(this.hashBytes);
+    return Buffer.from(this.hashBytes).toString('hex');
   }
 
   /**

@@ -15,6 +15,7 @@ import {
 import { ContractHash, URef } from './key';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
 import { PublicKey } from './keypair';
+import { Conversions } from './Conversions';
 
 /**
  * Enum representing the different types of executable deploy items.
@@ -37,14 +38,12 @@ export class ModuleBytes {
    * The module bytes in hexadecimal format.
    */
   @jsonMember({ name: 'module_bytes', constructor: String })
-  moduleBytes: string;
+  moduleBytes!: string;
 
   /**
    * The arguments passed to the module.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -109,9 +108,7 @@ export class StoredContractByHash {
   /**
    * The arguments for the contract call.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -162,9 +159,7 @@ export class StoredContractByName {
   /**
    * The arguments for the contract call.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -220,9 +215,7 @@ export class StoredVersionedContractByHash {
   /**
    * The arguments for the contract call.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -297,9 +290,7 @@ export class StoredVersionedContractByName {
   /**
    * The arguments for the contract call.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -345,9 +336,7 @@ export class TransferDeployItem {
   /**
    * The arguments for the transfer.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -612,5 +601,24 @@ export class ExecutableDeployItem {
    */
   public isModuleBytes(): boolean {
     return !!this.moduleBytes;
+  }
+
+  /**
+   * Creates a new `ModuleBytes` object from a `Uint8Array` of module bytes and a set of `RuntimeArgs`
+   * @param moduleBytes A set of module bytes as a `Uint8Array`
+   * @param args The runtime arguments for the new `ModuleBytes` object
+   * @returns A new `ExecutableDeployItem` created from a new `ModuleBytes` object built using `moduleBytes` and `args`
+   */
+  public static newModuleBytes(
+    moduleBytes: Uint8Array,
+    args: Args
+  ): ExecutableDeployItem {
+    const executableDeployItem = new ExecutableDeployItem();
+    executableDeployItem.moduleBytes = new ModuleBytes(
+      Conversions.encodeBase16(moduleBytes),
+      args
+    );
+
+    return executableDeployItem;
   }
 }

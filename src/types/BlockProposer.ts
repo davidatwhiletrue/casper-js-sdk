@@ -89,7 +89,7 @@ export class Proposer {
    * @returns A JSON string representing the proposer.
    */
   toJSON(): string {
-    return this.isSystem ? '00' : JSON.stringify(this.publicKey);
+    return this.isSystem ? '00' : this?.publicKey!.toJSON();
   }
 
   /**

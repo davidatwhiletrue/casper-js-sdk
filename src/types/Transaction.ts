@@ -14,7 +14,11 @@ import { HexBytes } from './HexBytes';
 import { PrivateKey } from './keypair/PrivateKey';
 import { CLValueString, CLValueUInt64 } from './clvalue';
 import { Args } from './Args';
-import { deserializeArgs, serializeArgs } from './SerializationUtils';
+import {
+  arrayEquals,
+  deserializeArgs,
+  serializeArgs
+} from './SerializationUtils';
 import { byteHash } from './ByteConverters';
 
 /**
@@ -235,9 +239,7 @@ export class TransactionV1Body {
   /**
    * The arguments for the transaction.
    */
-  @jsonMember({
-    name: 'args',
-    constructor: Args,
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -387,12 +389,12 @@ export class TransactionV1 {
   public validate(): void {
     const bodyBytes = this.body.toBytes();
 
-    if (!this.arrayEquals(byteHash(bodyBytes), this.header.bodyHash.toBytes()))
+    if (!arrayEquals(byteHash(bodyBytes), this.header.bodyHash.toBytes()))
       throw ErrInvalidBodyHash;
 
     const headerBytes = this.header.toBytes();
 
-    if (!this.arrayEquals(byteHash(headerBytes), this.hash.toBytes()))
+    if (!arrayEquals(byteHash(headerBytes), this.hash.toBytes()))
       throw ErrInvalidTransactionHash;
 
     for (const approval of this.approvals) {
@@ -405,20 +407,6 @@ export class TransactionV1 {
         throw ErrInvalidApprovalSignature;
       }
     }
-  }
-
-  /**
-   * Compares two arrays for equality.
-   * @param a The first array.
-   * @param b The second array.
-   * @returns `true` if the arrays are equal, `false` otherwise.
-   */
-  private arrayEquals(a: Uint8Array, b: Uint8Array): boolean {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return false;
-    }
-    return true;
   }
 
   /**
@@ -514,7 +502,7 @@ export class TransactionV1 {
       }
 
       const serializer = new TypedJSON(TransactionV1);
-      tx = serializer.parse(JSON.stringify(txData));
+      tx = serializer.parse(txData);
 
       if (!tx) {
         throw ErrTransactionV1FromJson;
@@ -623,9 +611,7 @@ export class TransactionBody {
   /**
    * The arguments for the transaction, which can be a map of values required by the entry point.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'args',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -875,7 +861,10 @@ export class TransactionHash {
       if (!json) return;
       return Hash.fromJSON(json);
     },
-    serializer: value => value.toJSON()
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   public transactionV1?: Hash;
 

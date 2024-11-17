@@ -31,7 +31,7 @@ export class RawWriteTransferTransform {
   /**
    * The write transfer operation.
    */
-  @jsonMember({ name: 'WriteTransfer', constructor: WriteTransfer })
+  @jsonMember({ name: 'WriteTransfer', constructor: () => WriteTransfer })
   WriteTransfer?: WriteTransfer;
 }
 
@@ -91,7 +91,7 @@ export class TranformBidKindData {
   /**
    * The bid kind data in the transform.
    */
-  @jsonMember({ name: 'BidKind', constructor: BidKind })
+  @jsonMember({ name: 'BidKind', constructor: () => BidKind })
   BidKind?: BidKind;
 }
 
@@ -103,7 +103,7 @@ export class BidKindRawData {
   /**
    * The write operation containing bid kind data.
    */
-  @jsonMember({ name: 'Write' })
+  @jsonMember({ name: 'Write', constructor: TranformBidKindData })
   Write?: TranformBidKindData;
 }
 
@@ -115,7 +115,7 @@ class WriteNamedKey {
   /**
    * The named key in the write operation.
    */
-  @jsonMember({ constructor: NamedKeyKind, name: 'NamedKey' })
+  @jsonMember({ constructor: () => NamedKeyKind, name: 'NamedKey' })
   NamedKey?: NamedKeyKind;
 }
 
@@ -235,17 +235,10 @@ export class RawWriteCLValue {
   /**
    * The write operation on a CLValue represented as `Args`.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'WriteCLValue',
-    deserializer: json => {
-      if (!json) return;
-      return deserializeArgs(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return serializeArgs(value);
-    }
+  @jsonMember(() => Args, {
+    deserializer: deserializeArgs,
+    serializer: serializeArgs,
+    name: 'WriteCLValue'
   })
   WriteCLValue?: Args;
 }
@@ -258,17 +251,10 @@ export class WriteCLValue {
   /**
    * The CLValue write operation represented as `Args`.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'CLValue',
-    deserializer: json => {
-      if (!json) return;
-      return deserializeArgs(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return serializeArgs(value);
-    }
+  @jsonMember(() => Args, {
+    deserializer: deserializeArgs,
+    serializer: serializeArgs,
+    name: 'CLValue'
   })
   CLValue?: Args;
 }

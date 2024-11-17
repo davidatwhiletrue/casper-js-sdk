@@ -92,16 +92,6 @@ export const toBytesU256 = toBytesNumber(256, false);
 export const toBytesU512 = toBytesNumber(512, false);
 
 /**
- * Converts a deploy hash to bytes.
- * @param deployHash - A `Uint8Array` representing the deploy hash.
- * @returns The `Uint8Array` representation of the deploy hash.
- * @deprecated This function will be removed in future versions.
- */
-export const toBytesDeployHash = (deployHash: Uint8Array): Uint8Array => {
-  return deployHash;
-};
-
-/**
  * Serializes a string into a byte array.
  * @param str - The string to be converted.
  * @returns A `Uint8Array` representation of the string, including its length as a `u32` prefix.

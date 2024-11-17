@@ -27,8 +27,8 @@ interface PrivateKeyInternal {
  * Enum representing supported cryptographic key algorithms.
  */
 enum KeyAlgorithm {
-  ED25519,
-  SECP256K1
+  ED25519 = 1,
+  SECP256K1 = 2
 }
 
 /**

@@ -158,11 +158,12 @@ export class ChainGetBlockResult {
   public rawJSON?: any;
 
   public static fromJSON(data: any): ChainGetBlockResult {
-    const parsedResult = TypedJSON.parse(data, ChainGetBlockResult);
+    const serializer = new TypedJSON(ChainGetBlockResult);
+    const parsedResult = serializer.parse(data);
 
     if (!parsedResult) throw new Error('Failed to parse ChainGetBlockResult');
 
-    parsedResult.rawJSON = JSON.stringify(data);
+    parsedResult.rawJSON = data;
 
     return parsedResult;
   }
@@ -273,8 +274,9 @@ export class InfoGetTransactionResult {
     this.rawJSON = rawJSON;
   }
 
-  static fromJSON(json: string): InfoGetTransactionResult | null {
-    const temp = TypedJSON.parse(json, InfoGetTransactionResultV1Compatible);
+  static fromJSON(json: any): InfoGetTransactionResult | null {
+    const serializer = new TypedJSON(InfoGetTransactionResultV1Compatible);
+    const temp = serializer.parse(json);
 
     if (temp) {
       const result = InfoGetTransactionResultV1Compatible.newInfoGetTransactionResultFromV1Compatible(
@@ -284,7 +286,8 @@ export class InfoGetTransactionResult {
       return result;
     }
 
-    return TypedJSON.parse(json, InfoGetTransactionResult) ?? null;
+    const transactionResultSerializer = new TypedJSON(InfoGetTransactionResult);
+    return transactionResultSerializer.parse(json) ?? null;
   }
 }
 
@@ -356,16 +359,9 @@ export class InfoGetTransactionResultV1Compatible {
   rawJSON?: any;
 
   public static newInfoGetTransactionResultFromV1Compatible(
-    result: InfoGetTransactionResultV1Compatible,
+    parsedResult: InfoGetTransactionResultV1Compatible,
     rawJSON: any
   ): InfoGetTransactionResult {
-    const parsedResult = TypedJSON.parse(
-      result,
-      InfoGetTransactionResultV1Compatible
-    );
-    if (!parsedResult)
-      throw new Error('Failed to parse InfoGetTransactionResultV1Compatible');
-
     if (parsedResult.transaction) {
       if (parsedResult.transaction.transactionV1) {
         return new InfoGetTransactionResult(

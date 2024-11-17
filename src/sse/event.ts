@@ -71,9 +71,12 @@ export class RawEvent {
     this.eventID = eventID;
   }
 
-  private parseEvent<T>(type: new (params: any) => T): T {
+  private parseEvent<T>(
+    type: new (params: any) => T,
+    parser?: (data: any) => T | Error
+  ): T {
     const serializer = new TypedJSON(type);
-    const parsed = serializer.parse(this.data);
+    const parsed = parser ? parser(this.data) : serializer.parse(this.data);
     if (!parsed) throw new Error('Error parsing event data');
     return parsed;
   }
@@ -87,7 +90,7 @@ export class RawEvent {
   }
 
   parseAsBlockAddedEvent(): BlockAddedEvent {
-    return this.parseEvent(BlockAddedEvent);
+    return this.parseEvent(BlockAddedEvent, BlockAddedEvent.fromJSON);
   }
 
   parseAsDeployAcceptedEvent(): DeployAcceptedEvent {
@@ -95,19 +98,31 @@ export class RawEvent {
   }
 
   parseAsFinalitySignatureEvent(): FinalitySignatureEvent {
-    return this.parseEvent(FinalitySignatureEvent);
+    return this.parseEvent(
+      FinalitySignatureEvent,
+      FinalitySignatureEvent.deserialize
+    );
   }
 
   parseAsTransactionExpiredEvent(): TransactionExpiredEvent {
-    return this.parseEvent(TransactionExpiredEvent);
+    return this.parseEvent(
+      TransactionExpiredEvent,
+      TransactionExpiredEvent.deserialize
+    );
   }
 
   parseAsTransactionProcessedEvent(): TransactionProcessedEvent {
-    return this.parseEvent(TransactionProcessedEvent);
+    return this.parseEvent(
+      TransactionProcessedEvent,
+      TransactionProcessedEvent.fromJson
+    );
   }
 
   parseAsTransactionAcceptedEvent(): TransactionAcceptedEvent {
-    return this.parseEvent(TransactionAcceptedEvent);
+    return this.parseEvent(
+      TransactionAcceptedEvent,
+      TransactionAcceptedEvent.fromJson
+    );
   }
 
   parseAsFaultEvent(): FaultEvent {
@@ -152,7 +167,7 @@ export class BlockAddedEvent {
     this.BlockAdded = blockAdded;
   }
 
-  static fromJSON(data: string): BlockAddedEvent {
+  static fromJSON(data: any): BlockAddedEvent {
     const parsedData = JSON.parse(data);
 
     if (!parsedData) {
@@ -319,13 +334,10 @@ export class TransactionAcceptedEvent {
 
   public static fromJson(data: unknown): TransactionAcceptedEvent | Error {
     try {
-      const transactionEvent = TypedJSON.parse(
-        data as string,
-        TransactionAcceptedEvent
-      );
+      const transactionEvent = TypedJSON.parse(data, TransactionAcceptedEvent);
       if (!transactionEvent) throw new Error('TransactionAcceptedEvent is nil');
 
-      const wrapper = TypedJSON.parse(data as string, TransactionWrapper);
+      const wrapper = TypedJSON.parse(data, TransactionWrapper);
 
       if (wrapper?.deploy) {
         transactionEvent.transactionAcceptedPayload = {
@@ -341,7 +353,7 @@ export class TransactionAcceptedEvent {
         return transactionEvent;
       }
 
-      const deployEvent = TypedJSON.parse(data as string, DeployAcceptedEvent);
+      const deployEvent = TypedJSON.parse(data, DeployAcceptedEvent);
       if (deployEvent?.deployAccepted) {
         transactionEvent.transactionAcceptedPayload = {
           transaction: Deploy.newTransactionFromDeploy(
@@ -374,12 +386,9 @@ export class TransactionExpiredEvent {
   })
   transactionExpiredPayload: TransactionExpiredPayload;
 
-  public static deserialize(data: unknown): TransactionExpiredEvent | Error {
+  public static deserialize(data: any): TransactionExpiredEvent | Error {
     try {
-      const transactionEvent = TypedJSON.parse(
-        data as string,
-        TransactionExpiredEvent
-      );
+      const transactionEvent = TypedJSON.parse(data, TransactionExpiredEvent);
       if (!transactionEvent) throw new Error('TransactionExpiredEvent is nil');
 
       const payload = transactionEvent.transactionExpiredPayload;
@@ -391,7 +400,7 @@ export class TransactionExpiredEvent {
         return transactionEvent;
       }
 
-      const deployEvent = TypedJSON.parse(data as string, DeployExpiredEvent);
+      const deployEvent = TypedJSON.parse(data, DeployExpiredEvent);
       if (deployEvent?.deployExpired) {
         transactionEvent.transactionExpiredPayload = {
           transactionHash: new TransactionHash(
@@ -450,12 +459,9 @@ export class TransactionProcessedEvent {
   })
   transactionProcessedPayload: TransactionProcessedPayload;
 
-  public static fromJson(data: unknown): TransactionProcessedEvent | Error {
+  public static fromJson(data: any): TransactionProcessedEvent | Error {
     try {
-      const transactionEvent = TypedJSON.parse(
-        data as string,
-        TransactionProcessedEvent
-      );
+      const transactionEvent = TypedJSON.parse(data, TransactionProcessedEvent);
       if (!transactionEvent)
         throw new Error('TransactionProcessedEvent is nil');
 
@@ -468,7 +474,7 @@ export class TransactionProcessedEvent {
         return transactionEvent;
       }
 
-      const deployEvent = TypedJSON.parse(data as string, DeployProcessedEvent);
+      const deployEvent = TypedJSON.parse(data, DeployProcessedEvent);
       if (deployEvent?.deployProcessed) {
         transactionEvent.transactionProcessedPayload = {
           blockHash: deployEvent.deployProcessed.blockHash,
@@ -669,9 +675,9 @@ export class FinalitySignatureEvent {
   @jsonMember({ name: 'FinalitySignature', constructor: FinalitySignature })
   finalitySignature: FinalitySignature;
 
-  public static deserialize(data: unknown): FinalitySignatureEvent | Error {
+  public static deserialize(data: any): FinalitySignatureEvent | Error {
     try {
-      const wrapped = TypedJSON.parse(data as string, FinalitySignatureWrapper);
+      const wrapped = TypedJSON.parse(data, FinalitySignatureWrapper);
       if (!wrapped) throw new Error('FinalitySignatureWrapper is nil');
 
       let finalitySignature: FinalitySignature;
@@ -693,7 +699,7 @@ export class FinalitySignatureEvent {
           publicKey: wrapped.v2.publicKey
         };
       } else {
-        const v1Event = TypedJSON.parse(data as string, FinalitySignatureV1);
+        const v1Event = TypedJSON.parse(data, FinalitySignatureV1);
         if (!v1Event) throw new Error('Failed to parse FinalitySignatureV1');
 
         finalitySignature = {

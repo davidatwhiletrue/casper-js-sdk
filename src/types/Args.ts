@@ -1,12 +1,12 @@
 import { concat } from '@ethersproject/bytes';
 
 import {
+  CLTypeString,
   CLValue,
   CLValueParser,
   CLValueString,
   CLValueUInt32,
-  IResultWithBytes,
-  CLTypeString
+  IResultWithBytes
 } from './clvalue';
 import { jsonMapMember, jsonObject } from 'typedjson';
 import { toBytesString, toBytesU32 } from './ByteConverters';
@@ -59,9 +59,7 @@ export class NamedArg {
  * @returns An array where each entry is a key-value pair in JSON format.
  */
 const serRA = (map: Map<string, CLValue>) => {
-  return Array.from(map, ([key, value]) => {
-    return [key, CLValueParser.toJSON(value)];
-  });
+  return Array.from(map, ([key, value]) => [key, CLValueParser.toJSON(value)]);
 };
 
 /**

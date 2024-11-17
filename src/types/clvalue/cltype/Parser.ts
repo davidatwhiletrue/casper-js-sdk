@@ -122,10 +122,9 @@ export class CLTypeParser {
    * @param source - The raw JSON string to parse.
    * @returns The parsed CLType.
    */
-  static fromRawJson(source: string): CLType {
+  static fromRawJson(source: any): CLType {
     try {
-      const rawData = JSON.parse(source);
-      return CLTypeParser.fromInterface(rawData);
+      return CLTypeParser.fromInterface(source);
     } catch (err) {
       return CLTypeParser.getSimpleTypeByName(source as TypeName);
     }

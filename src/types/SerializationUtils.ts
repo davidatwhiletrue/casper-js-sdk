@@ -148,3 +148,17 @@ export const serializeArgs = (ra: Args) => {
   const json = raSerializer.toPlainJson(ra);
   return Object.values(json as any)[0];
 };
+
+/**
+ * Compares two arrays for equality.
+ * @param a The first array.
+ * @param b The second array.
+ * @returns `true` if the arrays are equal, `false` otherwise.
+ */
+export const arrayEquals = (a: Uint8Array, b: Uint8Array): boolean => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+};

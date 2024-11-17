@@ -37,7 +37,15 @@ export class EntryPointArg {
    */
   @jsonMember({
     name: 'cl_type',
-    constructor: CLTypeRaw
+    constructor: CLTypeRaw,
+    deserializer: json => {
+      if (!json) return;
+      return CLTypeRaw.parseCLType(json);
+    },
+    serializer: (value: CLTypeRaw) => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   clType: CLTypeRaw;
 
@@ -117,7 +125,15 @@ export class EntryPointV1 {
    */
   @jsonMember({
     name: 'ret',
-    constructor: CLTypeRaw
+    constructor: CLTypeRaw,
+    deserializer: json => {
+      if (!json) return;
+      return CLTypeRaw.parseCLType(json);
+    },
+    serializer: (value: CLTypeRaw) => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   ret: CLTypeRaw;
 

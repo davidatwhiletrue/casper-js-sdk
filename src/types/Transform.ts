@@ -499,9 +499,7 @@ export class NamedKeyKind {
   /**
    * The named key transformation data represented as `Args`.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'named_key',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
@@ -510,9 +508,7 @@ export class NamedKeyKind {
   /**
    * The name of the key represented as `Args`.
    */
-  @jsonMember({
-    constructor: Args,
-    name: 'name',
+  @jsonMember(() => Args, {
     deserializer: deserializeArgs,
     serializer: serializeArgs
   })
