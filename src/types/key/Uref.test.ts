@@ -39,7 +39,7 @@ describe('CLUref', () => {
   it('toBytes() / fromBytes() proper values', () => {
     const expectedBytes = Uint8Array.from([...Array(32).fill(42), 7]);
     const urefValue = CLValue.newCLUref(RWExampleURef);
-    const toBytes = CLValueParser.toBytesWithType(urefValue);
+    const toBytes = urefValue.bytes();
     const fromBytes = CLValueParser.fromBytesByType(
       expectedBytes,
       urefValue.type

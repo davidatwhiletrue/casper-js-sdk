@@ -1,3 +1,5 @@
+import { concat } from '@ethersproject/bytes';
+
 import { CLValue, IResultWithBytes } from './CLValue';
 import { Key, URef } from '../key';
 import { PublicKey } from '../keypair';
@@ -35,6 +37,7 @@ import { CLValueTuple1 } from './Tuple1';
 import { CLValueTuple2 } from './Tuple2';
 import { CLValueTuple3 } from './Tuple3';
 import { Conversions } from '../Conversions';
+import { toBytesArrayU8 } from '../ByteConverters';
 
 /**
  * Error thrown when an unsupported CLType is encountered.
@@ -85,7 +88,9 @@ export class CLValueParser {
    * @returns A Uint8Array containing the serialized CLValue with type information.
    */
   static toBytesWithType(value: CLValue): Uint8Array {
-    return value.bytes();
+    const clTypeBytes = value.getType().toBytes();
+    const bytes = value.bytes();
+    return concat([toBytesArrayU8(bytes), clTypeBytes]);
   }
 
   /**

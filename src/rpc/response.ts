@@ -320,6 +320,13 @@ export class InfoGetDeployResultV1Compatible {
   blockHeight?: number;
 
   public rawJSON: any;
+
+  public static fromJSON(
+    json: any
+  ): InfoGetDeployResultV1Compatible | undefined {
+    const serializer = new TypedJSON(InfoGetDeployResultV1Compatible);
+    return serializer.parse(json);
+  }
 }
 
 @jsonObject

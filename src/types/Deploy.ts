@@ -19,7 +19,12 @@ import { ClassicMode, PricingMode } from './PricingMode';
 import { TransactionTarget } from './TransactionTarget';
 import { TransactionScheduling } from './TransactionScheduling';
 import { ExecutableDeployItem } from './ExecutableDeployItem';
-import { byteHash, toBytesU32 } from './ByteConverters';
+import {
+  byteHash,
+  toBytesString,
+  toBytesU32,
+  toBytesU64
+} from './ByteConverters';
 import { Conversions } from './Conversions';
 
 /**
@@ -143,52 +148,18 @@ export class DeployHeader {
    * @returns A `Uint8Array` representing the deploy header in byte format.
    */
   public toBytes(): Uint8Array {
-    const accountBytes = this.account?.bytes() ?? new Uint8Array();
-    const timestampBytes = new Uint8Array(
-      new BigUint64Array([BigInt(this.timestamp.toMilliseconds())]).buffer
-    );
-    const ttlBytes = new Uint8Array(
-      new BigUint64Array([BigInt(this.ttl.toMilliseconds())]).buffer
-    );
-    const gasPriceBytes = new Uint8Array(
-      new BigUint64Array([BigInt(this.gasPrice)]).buffer
-    );
-    const bodyHashBytes = this.bodyHash?.toBytes() ?? new Uint8Array();
-    const chainNameBytes = new TextEncoder().encode(this.chainName);
+    const dependenciesBytes = this.dependencies.map(e => e.toBytes());
+    dependenciesBytes.splice(0, 0, toBytesU32(this.dependencies?.length));
 
-    const totalLength =
-      accountBytes.length +
-      timestampBytes.length +
-      ttlBytes.length +
-      gasPriceBytes.length +
-      bodyHashBytes.length +
-      chainNameBytes.length;
-    const result = new Uint8Array(totalLength);
-
-    result.set(accountBytes, 0);
-    result.set(timestampBytes, accountBytes.length);
-    result.set(ttlBytes, accountBytes.length + timestampBytes.length);
-    result.set(
-      gasPriceBytes,
-      accountBytes.length + timestampBytes.length + ttlBytes.length
-    );
-    result.set(
-      bodyHashBytes,
-      accountBytes.length +
-        timestampBytes.length +
-        ttlBytes.length +
-        gasPriceBytes.length
-    );
-    result.set(
-      chainNameBytes,
-      accountBytes.length +
-        timestampBytes.length +
-        ttlBytes.length +
-        gasPriceBytes.length +
-        bodyHashBytes.length
-    );
-
-    return result;
+    return concat([
+      this.account!.bytes(),
+      toBytesU64(Date.parse(this.timestamp.toJSON())),
+      toBytesU64(this.ttl.duration),
+      toBytesU64(this.gasPrice),
+      this.bodyHash!.toBytes(),
+      concat(dependenciesBytes),
+      toBytesString(this.chainName)
+    ]);
   }
 
   /**

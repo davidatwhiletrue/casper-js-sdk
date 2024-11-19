@@ -13,10 +13,10 @@ describe('CLBool', () => {
   });
 
   it('toBytes() / fromBytes() do proper bytes serialization', () => {
-    const myBool = CLValueBool.fromBoolean(false);
-    const myBool2 = CLValueBool.fromBoolean(true);
-    const myBoolBytes = CLValueParser.toBytesWithType(myBool);
-    const myBool2Bytes = CLValueParser.toBytesWithType(myBool2);
+    const myBool = new CLValueBool(false);
+    const myBool2 = new CLValueBool(true);
+    const myBoolBytes = myBool.bytes();
+    const myBool2Bytes = myBool2.bytes();
 
     const fromBytes1 = CLValueParser.fromBytesByType(myBoolBytes, CLTypeBool)
       .result;
@@ -26,8 +26,8 @@ describe('CLBool', () => {
     expect(myBoolBytes).to.be.deep.eq(Uint8Array.from([0]));
     expect(myBool2Bytes).to.be.deep.eq(Uint8Array.from([1]));
 
-    expect(fromBytes1).to.be.deep.eq(myBool);
-    expect(fromBytes2).to.be.deep.eq(myBool2);
+    expect(fromBytes1.bool).to.be.deep.eq(myBool);
+    expect(fromBytes2.bool).to.be.deep.eq(myBool2);
   });
 
   it('toJSON() / fromJSON() do proper bytes serialization', () => {
