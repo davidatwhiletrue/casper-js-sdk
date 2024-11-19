@@ -13,6 +13,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+## [5.0.0-rc3] - 2024-11-19
+
+### Added
+
+- Deserializer function for InfoGetDeployResultV1Compatible - `fromJSON`
+- Annotate RPC request params
+
+### Fixed
+
+- Args and CLType / CLValue parsers
+- RPC serialization
+- Updated names for RPC response/request
+- Deserializer for Transform class
+- Removed unnecessary object declaration for deploy/transaction during serialization
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.0-rc2...5.0.0-rc3
+
 ## [5.0.0-rc1] - 2024-11-12
 
 ### Added
