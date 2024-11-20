@@ -64,7 +64,7 @@ sseClient.start(lastEventID).catch(error => {
 });
 ```
 
-### Creating a deploy
+### Creating a legacy deploy
 
 Example of how to construct a deploy and push it to the network:
 
