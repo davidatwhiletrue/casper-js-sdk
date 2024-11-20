@@ -4,7 +4,7 @@ import { EventType, RawEvent } from "./event";
 
 type Middleware = (handler: HandlerFunc) => HandlerFunc;
 
-export class Client {
+export class SseClient {
   private streamer: Streamer;
   private consumer: Consumer;
 
