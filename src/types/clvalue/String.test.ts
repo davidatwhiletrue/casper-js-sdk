@@ -10,7 +10,7 @@ describe('CLString', () => {
 
   it('toBytes() / fromBytes()', () => {
     const str = CLValueString.newCLString('ABC');
-    const bytes = CLValueParser.toBytesWithType(str);
+    const bytes = str.bytes();
     const parsed = CLValueParser.fromBytesByType(bytes, str.type);
     expect(parsed.result).to.be.deep.eq(str);
   });

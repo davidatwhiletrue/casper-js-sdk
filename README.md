@@ -107,11 +107,7 @@ const deployHeader = DeployHeader.default();
 deployHeader.account = senderKey.publicKey;
 deployHeader.chainName = 'casper-test';
 
-const deploy = Deploy.fromHeaderAndItems(
-  deployHeader,
-  payment,
-  session
-);
+const deploy = Deploy.makeDeploy(deployHeader, payment, session);
 await deploy.sign(senderKey);
 
 const result = await rpcClient.putDeploy(deploy);

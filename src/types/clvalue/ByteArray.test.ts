@@ -14,7 +14,7 @@ describe('CLByteArray', () => {
   it('Should be able to return proper byte array by calling toBytes() / fromBytes()', () => {
     const expectedBytes = Uint8Array.from(Array(32).fill(42));
     const hash = CLValueByteArray.newCLByteArray(expectedBytes);
-    const bytes = CLValueParser.toBytesWithType(hash);
+    const bytes = hash.bytes();
 
     expect(bytes).to.deep.eq(expectedBytes);
     expect(

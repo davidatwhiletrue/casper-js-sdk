@@ -386,7 +386,7 @@ export class TransactionV1 {
    * Validates the transaction by checking the body hash and the approval signatures.
    * @throws {TransactionError} Throws errors if validation fails.
    */
-  public validate(): void {
+  public validate(): boolean {
     const bodyBytes = this.body.toBytes();
 
     if (!arrayEquals(byteHash(bodyBytes), this.header.bodyHash.toBytes()))
@@ -407,6 +407,8 @@ export class TransactionV1 {
         throw ErrInvalidApprovalSignature;
       }
     }
+
+    return true;
   }
 
   /**
