@@ -64,7 +64,7 @@ sseClient.start(lastEventID).catch(error => {
 });
 ```
 
-### Work with Casper types
+### Creating a deploy
 
 Example of how to construct a deploy and push it to the network:
 
