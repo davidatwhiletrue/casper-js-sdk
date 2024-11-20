@@ -59,11 +59,7 @@ describe('Deploy', () => {
     );
 
     const payment = ExecutableDeployItem.standardPayment(paymentAmount);
-    let deploy = Deploy.fromHeaderAndItems(
-      deployHeader,
-      payment,
-      executableDeployItem
-    );
+    let deploy = Deploy.makeDeploy(deployHeader, payment, executableDeployItem);
     await deploy.sign(senderKey);
     await deploy.sign(recipientKey);
 
@@ -152,7 +148,7 @@ describe('Deploy', () => {
       transferId
     );
 
-    const firstDeploy = Deploy.fromHeaderAndItems(
+    const firstDeploy = Deploy.makeDeploy(
       deployHeader,
       payment,
       executableDeployItem
@@ -171,7 +167,7 @@ describe('Deploy', () => {
       senderKey.publicKey
     );
 
-    const secondDeploy = Deploy.fromHeaderAndItems(
+    const secondDeploy = Deploy.makeDeploy(
       secondDeployHeader,
       payment,
       executableDeployItem

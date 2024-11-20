@@ -25,7 +25,6 @@ import {
   toBytesU32,
   toBytesU64
 } from './ByteConverters';
-import { Conversions } from './Conversions';
 
 /**
  * Represents the header of a deploy in the blockchain.
@@ -339,7 +338,7 @@ export class Deploy {
    * @param session The session logic of the deploy.
    * @returns A new `Deploy` object.
    */
-  public static fromHeaderAndItems(
+  public static makeDeploy(
     deployHeader: DeployHeader,
     payment: ExecutableDeployItem,
     session: ExecutableDeployItem
@@ -495,42 +494,6 @@ export class Deploy {
 }
 
 /**
- * Builds a `Deploy` object from the given parameters, session logic, and payment logic.
- * This method is deprecated. It is recommended to use `Deploy.fromHeaderAndItems` instead.
- *
- * @deprecated Use `Deploy.fromHeaderAndItems` instead
- * @param deployParam The parameters used for creating the deploy. See [DeployParams](#L1323).
- * @param session The session logic of the deploy, represented as an `ExecutableDeployItem`.
- * @param payment The payment logic of the deploy, represented as an `ExecutableDeployItem`.
- * @returns A new `Deploy` object that represents the entire deploy.
- *
- */
-export function makeDeploy(
-  deployParam: DeployParams,
-  session: ExecutableDeployItem,
-  payment: ExecutableDeployItem
-): Deploy {
-  const serializedBody = concat([payment.bytes(), session.bytes()]);
-  const bodyHash = byteHash(serializedBody);
-
-  if (!deployParam.timestamp) {
-    deployParam.timestamp = Date.now();
-  }
-
-  const header: DeployHeader = new DeployHeader(
-    deployParam.chainName,
-    deployParam.dependencies.map(d => new Hash(d)),
-    deployParam.gasPrice,
-    new Timestamp(new Date(deployParam.timestamp)),
-    new Duration(deployParam.ttl),
-    deployParam.accountPublicKey,
-    new Hash(bodyHash)
-  );
-
-  return Deploy.fromHeaderAndItems(header, payment, session);
-}
-
-/**
  * Serializes an array of `Approval`s into a `Uint8Array` typed byte array.
  * This is used to store or transmit the approvals associated with a deploy.
  *
@@ -553,42 +516,6 @@ export const serializeApprovals = (approvals: Approval[]): Uint8Array => {
   );
   return concat([len, bytes]);
 };
-
-/**
- * The parameters of a `Deploy` object.
- * This class is deprecated. Use `Deploy.fromHeaderAndItems` instead.
- *
- * It is used to configure the construction of a `Deploy` object.
- *
- * @deprecated The parameters of a `Deploy` object. Use Deploy.fromHeaderAndItems
- */
-export class DeployParams {
-  /**
-   * Constructor for `DeployParams`.
-   *
-   * @param accountPublicKey The public key of the deploying account as a `PublicKey`.
-   * @param chainName The name of the blockchain chain to avoid the `Deploy` from being accidentally or maliciously included in another chain.
-   * @param gasPrice The conversion rate between the cost of Wasm opcodes and the motes sent by the payment code. 1 mote = 1 * 10^-9 CSPR.
-   * @param ttl The time-to-live (TTL) for the deploy, in milliseconds. The default value is 30 minutes (1800000 milliseconds).
-   * @param dependencies Hex-encoded `Deploy` hashes of deploys that must be executed before this one.
-   * @param timestamp The timestamp when the deploy is created, in UTC.
-   */
-  constructor(
-    public accountPublicKey: PublicKey,
-    public chainName: string,
-    public gasPrice: number = 1,
-    public ttl: number = DEFAULT_DEPLOY_TTL,
-    public dependencies: Uint8Array[] = [],
-    public timestamp?: number
-  ) {
-    this.dependencies = dependencies.filter(
-      d =>
-        dependencies.filter(
-          t => Conversions.encodeBase16(d) === Conversions.encodeBase16(t)
-        ).length < 2
-    );
-  }
-}
 
 /**
  * Default TTL value used for deploys (30 minutes).
