@@ -4,6 +4,8 @@ import { concat } from '@ethersproject/bytes';
 
 import { Args } from './Args';
 import {
+  CLTypeOption,
+  CLTypeUInt64,
   CLValue,
   CLValueByteArray,
   CLValueOption,
@@ -363,7 +365,7 @@ export class TransferDeployItem {
     amount: BigNumber | string,
     target: URef | PublicKey,
     sourcePurse: URef | null = null,
-    id: BigNumberish
+    id?: BigNumberish,
   ): TransferDeployItem {
     const runtimeArgs = Args.fromMap({});
     runtimeArgs.insert('amount', CLValueUInt512.newCLUInt512(amount));
@@ -377,14 +379,16 @@ export class TransferDeployItem {
     } else {
       throw new Error('Please specify target');
     }
-    if (id === undefined) {
-      throw new Error('transfer-id missing in new transfer.');
-    } else {
-      runtimeArgs.insert(
-        'id',
-        CLValueOption.newCLOption(CLValueUInt64.newCLUint64(id))
-      );
-    }
+
+    const optionType = new CLTypeOption(CLTypeUInt64);
+    const defaultClValue = new CLValue(optionType);
+    defaultClValue.option = new CLValueOption(null, optionType);
+
+    runtimeArgs.insert(
+      'id',
+      id ? CLValueOption.newCLOption(CLValueUInt64.newCLUint64(id)) : defaultClValue
+    );
+
     return new TransferDeployItem(runtimeArgs);
   }
 
