@@ -11,6 +11,34 @@ npm install casper-js-sdk --save
 
 ## Base usage
 
+### Public and private keys
+
+Provides functionality for working with public and private key cryptography in Casper. [See more details here](src/types/keypair/README.md)
+
+```ts
+import { KeyAlgorithm, PrivateKey, PublicKey } from 'casper-js-sdk';
+
+const privateKeyAlgoritm = KeyAlgorithm.SECP256K1;
+
+// Generate new
+const privateKey = await PrivateKey.generate(privateKeyAlgoritm);
+
+// Recreate from hex string
+const privateHex = 'PRIVATE-KEY-HEX...';
+const privateKeyFromHex = await PrivateKey.fromHex(
+  privateHex,
+  privateKeyAlgoritm
+);
+
+// Public key from PrivateKey
+const publicKey = privateKey.publicKey;
+
+// Public key from hex string
+const publicKeyHex =
+  '02039daee95ef2cd54a23bd201febc495dc1404bc300c572e77dc55cf8ff53ac4823';
+const publicKeyFromHex = PublicKey.fromHex(publicKeyHex);
+```
+
 ### RPC client
 
 Provides access to the exported methods of RPC Client and data structures where the response is serialized. [See more details here](src/rpc/README.md)
@@ -64,6 +92,89 @@ sseClient.start(lastEventID).catch(error => {
 });
 ```
 
+### Creating a transaction
+
+Example of how to construct a transaction and push it to the network:
+
+```ts
+import {
+  Args,
+  CLValue,
+  CLValueOption,
+  CLValueUInt64,
+  CLValueUInt512,
+  Duration,
+  FixedMode,
+  HttpHandler,
+  InitiatorAddr,
+  KeyAlgorithm,
+  PricingMode,
+  PrivateKey,
+  PublicKey,
+  RpcClient,
+  SessionTarget,
+  Timestamp,
+  TransactionEntryPoint,
+  TransactionScheduling,
+  TransactionTarget,
+  TransactionV1,
+  TransactionV1Body,
+  TransactionV1Header
+} from 'casper-js-sdk-new';
+
+const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
+const rpcClient = new RpcClient(rpcHandler);
+
+const privateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
+const timestamp = new Timestamp(new Date());
+const paymentAmount = '20000000000000';
+
+const pricingMode = new PricingMode();
+const fixedMode = new FixedMode();
+fixedMode.gasPriceTolerance = 3;
+pricingMode.fixed = fixedMode;
+
+const transactionHeader = TransactionV1Header.build({
+  chainName: 'casper-net-1',
+  timestamp,
+  ttl: new Duration(1800000),
+  initiatorAddr: new InitiatorAddr(privateKey.publicKey),
+  pricingMode
+});
+
+const args = Args.fromMap({
+  target: CLValue.newCLPublicKey(
+    PublicKey.fromHex(
+      '0202f5a92ab6da536e7b1a351406f3744224bec85d7acbab1497b65de48a1a707b64'
+    )
+  ),
+  amount: CLValueUInt512.newCLUInt512(paymentAmount),
+  id: CLValueOption.newCLOption(CLValueUInt64.newCLUint64(3))
+});
+
+const transactionTarget = new TransactionTarget(new SessionTarget());
+const entryPoint = new TransactionEntryPoint(undefined, {});
+const scheduling = new TransactionScheduling({});
+
+const transactionBody = TransactionV1Body.build({
+  args: args,
+  target: transactionTarget,
+  transactionEntryPoint: entryPoint,
+  transactionScheduling: scheduling,
+  transactionCategory: 2
+});
+
+const transaction = TransactionV1.makeTransactionV1(
+  transactionHeader,
+  transactionBody
+);
+await transaction.sign(privateKey);
+
+const result = await rpcClient.putTransactionV1(transaction);
+
+console.log(`Transaction Hash: ${result.transactionHash}`);
+```
+
 ### Creating a legacy deploy
 
 Example of how to construct a deploy and push it to the network:
@@ -75,11 +186,11 @@ import {
   ExecutableDeployItem,
   HttpHandler,
   PublicKey,
+  KeyAlgorithm,
+  PrivateKey,
   RpcClient,
   TransferDeployItem
 } from 'casper-js-sdk';
-import { KeyAlgorithm } from 'casper-js-sdk/dist/types/keypair/Algorithm';
-import { PrivateKey } from 'casper-js-sdk/dist/types/keypair/PrivateKey';
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
 const rpcClient = new RpcClient(rpcHandler);
