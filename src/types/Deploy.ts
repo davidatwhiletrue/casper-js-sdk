@@ -12,7 +12,10 @@ import {
   TransactionCategory,
   TransactionHeader
 } from './Transaction';
-import { TransactionEntryPoint } from './TransactionEntryPoint';
+import {
+  TransactionEntryPoint,
+  TransactionEntryPointEnum
+} from './TransactionEntryPoint';
 import { InitiatorAddr } from './InitiatorAddr';
 import { PaymentLimitedMode, PricingMode } from './PricingMode';
 import { TransactionTarget } from './TransactionTarget';
@@ -359,14 +362,18 @@ export class Deploy {
    */
   static newTransactionFromDeploy(deploy: Deploy): Transaction {
     let paymentAmount = 0;
-    const transactionEntryPoint: TransactionEntryPoint = new TransactionEntryPoint();
+    let transactionEntryPoint: TransactionEntryPoint;
     let transactionCategory = TransactionCategory.Large;
 
     if (deploy.session.transfer) {
       transactionCategory = TransactionCategory.Mint;
-      transactionEntryPoint.transfer = {};
+      transactionEntryPoint = new TransactionEntryPoint(
+        TransactionEntryPointEnum.Transfer
+      );
     } else if (deploy.session.moduleBytes) {
-      transactionEntryPoint.call = {};
+      transactionEntryPoint = new TransactionEntryPoint(
+        TransactionEntryPointEnum.Call
+      );
     } else {
       let entryPoint = '';
 
@@ -379,7 +386,10 @@ export class Deploy {
       } else if (deploy.session.storedVersionedContractByName) {
         entryPoint = deploy.session.storedVersionedContractByName.entryPoint;
       }
-      transactionEntryPoint.custom = entryPoint;
+      transactionEntryPoint = new TransactionEntryPoint(
+        TransactionEntryPointEnum.Custom,
+        entryPoint
+      );
     }
 
     const amountArgument = deploy.payment.getArgs();
