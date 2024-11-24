@@ -11,6 +11,20 @@ npm install casper-js-sdk --save
 
 ## Base usage
 
+- ### [Public and private keys](#public-and-private-keys)
+- ### [RPC client](#rpc-client)
+- ### [SSE](#sse)
+- ### [Creating a transaction](#creating-a-transaction)
+- ### [Creating a legacy deploy](#creating-a-legacy-deploy)
+- ### [Creating and sending CSPR transfer deploy](#creating-and-sending-cspr-transfer-deploy)
+- ### [Creating and sending Auction manager deploy](#creating-and-sending-auction-manager-deploy)
+
+## Migration guides
+
+### [v2 to v3](./migration-guide-v2-v3.md)
+
+## Usage examples
+
 ### Public and private keys
 
 Provides functionality for working with public and private key cryptography in Casper. [See more details here](src/types/keypair/README.md)
@@ -226,8 +240,74 @@ const result = await rpcClient.putDeploy(deploy);
 console.log(`Deploy Hash: ${result.deployHash}`);
 ```
 
-## Migration guides
+### Creating and sending CSPR transfer deploy
 
-### v2 to v3
+Example of how to construct a CSPR transfer deploy and push it to the network:
 
-In progress...
+```ts
+import {
+  HttpHandler,
+  RpcClient,
+  KeyAlgorithm,
+  PrivateKey,
+  makeCsprTransferDeploy
+} from 'casper-js-sdk';
+
+// get private key fromHex, fromPem or generate it
+const privateKey = await PrivateKey.fromHex(
+  'privateKeyHex',
+  KeyAlgorithm.SECP256K1 // or KeyAlgorithm.ED25519, depends on your private key
+);
+
+const deploy = makeCsprTransferDeploy({
+  senderPublicKeyHex: privateKey.publicKey.toHex(),
+  recipientPublicKeyHex: '0123456789abcdef...',
+  transferAmount: '2500000000' // 2.5 CSPR
+});
+
+await deploy.sign(privateKey);
+
+const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
+const rpcClient = new RpcClient(rpcHandler);
+
+const result = await rpcClient.putDeploy(deploy);
+
+console.log(`Deploy Hash: ${result.deployHash}`);
+```
+
+### Creating and sending Auction manager deploy
+
+Example of how to construct a Auction manager deploy (delegate/undelegate/redelegate CSPR) and push it to the network:
+
+```ts
+import {
+  HttpHandler,
+  RpcClient,
+  KeyAlgorithm,
+  PrivateKey,
+  makeAuctionManagerDeploy,
+  AuctionManagerEntryPoint
+} from 'casper-js-sdk';
+
+// get private key fromHex, fromPem or generate it
+const privateKey = await PrivateKey.fromHex(
+  'privateKeyHex',
+  KeyAlgorithm.SECP256K1 // or KeyAlgorithm.ED25519, depends on your private key
+);
+
+const deploy = makeAuctionManagerDeploy({
+  contractEntryPoint: AuctionManagerEntryPoint.delegate,
+  delegatorPublicKeyHex: privateKey.publicKey.toHex(),
+  validatorPublicKeyHex: '0123456789awedef...',
+  amount: '500000000000' // 500 CSPR
+});
+
+await deploy.sign(privateKey);
+
+const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
+const rpcClient = new RpcClient(rpcHandler);
+
+const result = await rpcClient.putDeploy(deploy);
+
+console.log(`Deploy Hash: ${result.deployHash}`);
+```
