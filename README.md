@@ -11,13 +11,13 @@ npm install casper-js-sdk --save
 
 ## Base usage
 
-- ### [Public and private keys](#public-and-private-keys)
-- ### [RPC client](#rpc-client)
-- ### [SSE](#sse)
-- ### [Creating a transaction](#creating-a-transaction)
-- ### [Creating a legacy deploy](#creating-a-legacy-deploy)
-- ### [Creating and sending CSPR transfer deploy](#creating-and-sending-cspr-transfer-deploy)
-- ### [Creating and sending Auction manager deploy](#creating-and-sending-auction-manager-deploy)
+- [Public and private keys](#public-and-private-keys)
+- [RPC client](#rpc-client)
+- [SSE](#sse)
+- [Creating a transaction](#creating-a-transaction)
+- [Creating a legacy deploy](#creating-a-legacy-deploy)
+- [Creating and sending CSPR transfer deploy](#creating-and-sending-cspr-transfer-deploy)
+- [Creating and sending Auction manager deploy](#creating-and-sending-auction-manager-deploy)
 
 ## Migration guides
 
