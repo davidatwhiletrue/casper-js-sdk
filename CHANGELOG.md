@@ -13,6 +13,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+## [5.0.0-rc4] - 2024-11-25
+
+### Added
+
+- `makeCsprTransferDeploy` and `makeAuctionManagerDeploy` utils
+- **README.md**: Introduced a comprehensive README file, including detailed information about the SDK, setup instructions, and usage examples.
+- **Migration Guide**: Added a basic migration guide to assist developers in transitioning to the new SDK version with updated types and RPC.
+- `getDeploySizeInBytes` static method for Deploy
+
+### Removed
+
+- DeployParams class due to deprecation, renamed `fromHeaderAndItems` function to the `makeDeploy` due to consistency with previous methods names
+
+### Changed
+
+- Made `id` optional in TransferDeployItem.newTransfer
+
 ## [5.0.0-rc3] - 2024-11-19
 
 ### Added

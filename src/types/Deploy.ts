@@ -2,9 +2,8 @@ import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from 'typedjson';
 import { concat } from '@ethersproject/bytes';
 
 import { Hash } from './key';
-import { PrivateKey } from './keypair/PrivateKey';
 import { HexBytes } from './HexBytes';
-import { PublicKey } from './keypair';
+import { PublicKey, PrivateKey } from './keypair';
 import { Duration, Timestamp } from './Time';
 import {
   Approval,
@@ -491,6 +490,27 @@ export class Deploy {
     }
     return false;
   }
+
+  /**
+   * Gets the byte-size of a deploy
+   * @param deploy The `Deploy` for which to calculate the size
+   * @returns The size of the `Deploy` in its serialized representation
+   */
+  public static getDeploySizeInBytes = (deploy: Deploy): number => {
+    const hashSize = deploy.hash.toBytes().length;
+    const bodySize = concat([deploy.payment.bytes(), deploy.session.bytes()])
+      .length;
+    const headerSize = deploy.header.toBytes().length;
+    const approvalsSize = deploy.approvals
+      .map(approval => {
+        return (
+          (approval.signature.bytes.length + approval.signer.bytes().length) / 2
+        );
+      })
+      .reduce((a, b) => a + b, 0);
+
+    return hashSize + headerSize + bodySize + approvalsSize;
+  };
 }
 
 /**

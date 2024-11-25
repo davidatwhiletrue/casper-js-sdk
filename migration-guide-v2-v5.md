@@ -1,6 +1,6 @@
-# V2 to V3 Migration Guide
+# V2 to V5 Migration Guide
 
-`Casper JS SDK V3` makes many **breaking changes** to the SDK behavior, effectively rewriting it from scratch.
+`Casper JS SDK V5` makes many **breaking changes** to the SDK behavior, effectively rewriting it from scratch.
 
 The purpose of these changes is to improve and simplify the SDK, as well as to bring the Casper JS SDK to the same look and behavior as the Casper SDK in other languages.
 
