@@ -3,23 +3,26 @@ import {
   CLValue,
   CLValueUInt512,
   ContractHash,
+  DEFAULT_DEPLOY_TTL,
   Deploy,
   DeployHeader,
+  Duration,
   ExecutableDeployItem,
   PublicKey,
   StoredContractByHash
-} from "../types";
-import { AuctionManagerEntryPoint, CasperNetworkName } from "../@types";
-import { AuctionManagerContractHashMap } from "./constants";
+} from '../types';
+import { AuctionManagerEntryPoint, CasperNetworkName } from '../@types';
+import { AuctionManagerContractHashMap } from './constants';
 
 export interface IMakeAuctionManagerDeployParams {
-  contractEntryPoint: AuctionManagerEntryPoint,
-  delegatorPublicKeyHex: string,
-  validatorPublicKeyHex: string,
-  newValidatorPublicKeyHex?: string,
-  amount: string,
-  paymentAmount?: string,
+  contractEntryPoint: AuctionManagerEntryPoint;
+  delegatorPublicKeyHex: string;
+  validatorPublicKeyHex: string;
+  newValidatorPublicKeyHex?: string;
+  amount: string;
+  paymentAmount?: string;
   chainName?: CasperNetworkName;
+  ttl?: number;
 }
 
 /**
@@ -68,8 +71,8 @@ export const makeAuctionManagerDeploy = ({
   paymentAmount = '2500000000',
   chainName = CasperNetworkName.Mainnet,
   newValidatorPublicKeyHex,
-  }: IMakeAuctionManagerDeployParams
-) => {
+  ttl = DEFAULT_DEPLOY_TTL
+}: IMakeAuctionManagerDeployParams) => {
   const delegatorPublicKey = PublicKey.newPublicKey(delegatorPublicKeyHex);
   const validatorPublicKey = PublicKey.newPublicKey(validatorPublicKeyHex);
   const newValidatorValidatorPublicKey = newValidatorPublicKeyHex
@@ -84,9 +87,13 @@ export const makeAuctionManagerDeploy = ({
       validator: CLValue.newCLPublicKey(validatorPublicKey),
       delegator: CLValue.newCLPublicKey(delegatorPublicKey),
       amount: CLValueUInt512.newCLUInt512(amount),
-      ...(newValidatorValidatorPublicKey ? {
-        new_validator: CLValue.newCLPublicKey(newValidatorValidatorPublicKey)
-      } : {})
+      ...(newValidatorValidatorPublicKey
+        ? {
+            new_validator: CLValue.newCLPublicKey(
+              newValidatorValidatorPublicKey
+            )
+          }
+        : {})
     })
   );
 
@@ -95,6 +102,7 @@ export const makeAuctionManagerDeploy = ({
   const deployHeader = DeployHeader.default();
   deployHeader.account = delegatorPublicKey;
   deployHeader.chainName = chainName;
+  deployHeader.ttl = new Duration(ttl);
 
   return Deploy.makeDeploy(deployHeader, payment, session);
 };

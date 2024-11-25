@@ -111,7 +111,7 @@ export class DeployHeader {
     deserializer: json => Duration.fromJSON(json),
     serializer: value => value.toJSON()
   })
-  public ttl: Duration = new Duration(30 * 60 * 1000);
+  public ttl: Duration = new Duration(DEFAULT_DEPLOY_TTL);
 
   /**
    * Constructs a `DeployHeader` instance with the specified parameters.
@@ -128,7 +128,7 @@ export class DeployHeader {
     dependencies: Hash[] = [],
     gasPrice = 1,
     timestamp: Timestamp = new Timestamp(new Date()),
-    ttl: Duration = new Duration(30 * 60 * 1000),
+    ttl: Duration = new Duration(DEFAULT_DEPLOY_TTL),
     account?: PublicKey,
     bodyHash?: Hash
   ) {

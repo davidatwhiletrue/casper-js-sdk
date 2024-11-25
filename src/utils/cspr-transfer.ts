@@ -1,5 +1,13 @@
-import { Deploy, DeployHeader, ExecutableDeployItem, PublicKey, TransferDeployItem } from "../types";
-import { CasperNetworkName } from "../@types";
+import {
+  DEFAULT_DEPLOY_TTL,
+  Deploy,
+  DeployHeader,
+  Duration,
+  ExecutableDeployItem,
+  PublicKey,
+  TransferDeployItem
+} from '../types';
+import { CasperNetworkName } from '../@types';
 
 export interface IMakeCsprTransferDeployParams {
   senderPublicKeyHex: string;
@@ -7,6 +15,7 @@ export interface IMakeCsprTransferDeployParams {
   transferAmount: string;
   chainName?: CasperNetworkName;
   memo?: string;
+  ttl?: number;
 }
 
 /**
@@ -49,6 +58,7 @@ export const makeCsprTransferDeploy = ({
   transferAmount,
   chainName = CasperNetworkName.Mainnet,
   memo,
+  ttl = DEFAULT_DEPLOY_TTL
 }: IMakeCsprTransferDeployParams) => {
   const recipientKey = PublicKey.newPublicKey(recipientPublicKeyHex);
   const senderKey = PublicKey.newPublicKey(senderPublicKeyHex);
@@ -58,7 +68,7 @@ export const makeCsprTransferDeploy = ({
     transferAmount,
     recipientKey,
     undefined,
-    memo,
+    memo
   );
 
   const payment = ExecutableDeployItem.standardPayment('100000000');
@@ -66,6 +76,7 @@ export const makeCsprTransferDeploy = ({
   const deployHeader = DeployHeader.default();
   deployHeader.account = senderKey;
   deployHeader.chainName = chainName;
+  deployHeader.ttl = new Duration(ttl);
 
   return Deploy.makeDeploy(deployHeader, payment, session);
-}
+};
