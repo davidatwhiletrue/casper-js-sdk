@@ -144,8 +144,8 @@ const paymentAmount = '20000000000000';
 
 const pricingMode = new PricingMode();
 const fixedMode = new FixedMode();
-fixedMode.gasPriceTolerance = 3;
-fixedMode.additionalComputationFactor = 1;
+fixedMode.gasPriceTolerance = 1;
+fixedMode.additionalComputationFactor = 0;
 pricingMode.fixed = fixedMode;
 
 const args = Args.fromMap({
@@ -155,7 +155,7 @@ const args = Args.fromMap({
     )
   ),
   amount: CLValueUInt512.newCLUInt512(paymentAmount),
-  id: CLValueOption.newCLOption(CLValueUInt64.newCLUint64(3))
+  id: CLValueOption.newCLOption(CLValueUInt64.newCLUint64(3)) // memo ( optional )
 });
 
 const transactionTarget = new TransactionTarget({}); // Native target;

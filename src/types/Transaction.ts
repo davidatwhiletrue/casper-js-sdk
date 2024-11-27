@@ -374,13 +374,6 @@ export class Transaction {
   public scheduling: TransactionScheduling;
 
   /**
-   * The category of the transaction, indicating its type (e.g., minting, auction).
-   * Using TransactionCategory as enum
-   */
-  @jsonMember({ name: 'transaction_category', constructor: Number })
-  public category?: number;
-
-  /**
    * The list of approvals for this transaction.
    */
   @jsonArrayMember(Approval)
@@ -427,7 +420,6 @@ export class Transaction {
     entryPoint: TransactionEntryPoint,
     scheduling: TransactionScheduling,
     approvals: Approval[],
-    category?: TransactionCategory,
     originTransactionV1?: TransactionV1,
     originDeployV1?: Deploy
   ) {
@@ -442,7 +434,6 @@ export class Transaction {
     this.entryPoint = entryPoint;
     this.scheduling = scheduling;
     this.approvals = approvals;
-    this.category = category;
 
     this.originDeployV1 = originDeployV1;
     this.originTransactionV1 = originTransactionV1;
@@ -482,7 +473,6 @@ export class Transaction {
       v1.payload.fields.entryPoint,
       v1.payload.fields.scheduling,
       v1.approvals,
-      undefined,
       v1, // originTransactionV1
       undefined // originDeployV1 is not applicable for this method
     );

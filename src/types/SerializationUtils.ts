@@ -126,39 +126,49 @@ export const dehumanizerTTL = (ttl: string): number => {
 /**
  * Deserializes an array of runtime arguments to a `RuntimeArgs` object.
  *
- * @param arr The array of serialized runtime arguments.
+ * @param arr The array of serialized runtime arguments or a Named wrapper.
  * @returns A `RuntimeArgs` object containing the deserialized arguments.
+ * @throws Error if the input format is invalid.
  */
-export const deserializeArgs = (arr: any) => {
+export const deserializeArgs = (arr: any): Args | undefined => {
   const raSerializer = new TypedJSON(Args);
-  const value = {
-    args: arr
-  };
-  return raSerializer.parse(value);
+
+  if (arr.Named && Array.isArray(arr.Named)) {
+    // If the arguments are wrapped in a "Named" property
+    return raSerializer.parse({ args: arr.Named });
+  }
+
+  if (Array.isArray(arr)) {
+    // If the input is directly an array of arguments
+    return raSerializer.parse({ args: arr });
+  }
+
+  throw new Error('Invalid argument format for deserialization.');
 };
 
 /**
- * Serializes a `RuntimeArgs` object to a byte array.
+ * Serializes a `RuntimeArgs` object to a byte array or an object representation.
  *
- * @param ra The `RuntimeArgs` object to be serialized.
- * @returns A byte array representing the serialized runtime arguments.
+ * This function converts the `RuntimeArgs` (or `Args`) object into a serialized format.
+ * If `asNamed` is set to `true`, the serialized arguments are wrapped in a `Named` property
+ * for more structured output. Otherwise, the plain array of serialized arguments is returned.
+ *
+ * @param ra - The `Args` object to be serialized. It contains the runtime arguments.
+ * @param asNamed - A boolean flag indicating whether to wrap the serialized output in a `Named` property. Defaults to `false`.
+ * @returns A serialized representation of the runtime arguments.
+ * If `asNamed` is `true`, the output is an object with a `Named` property. Otherwise, it is a plain array.
+ *
  */
-export const serializeArgs = (ra: Args) => {
+export const serializeArgs = (ra: Args, asNamed = false) => {
   const raSerializer = new TypedJSON(Args);
   const json = raSerializer.toPlainJson(ra);
-  return Object.values(json as any)[0];
-};
+  const argsArray = Object.values(json as any)[0];
 
-/**
- * Compares two arrays for equality.
- * @param a The first array.
- * @param b The second array.
- * @returns `true` if the arrays are equal, `false` otherwise.
- */
-export const arrayEquals = (a: Uint8Array, b: Uint8Array): boolean => {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
+  if (asNamed) {
+    return {
+      Named: argsArray
+    };
   }
-  return true;
+
+  return argsArray;
 };

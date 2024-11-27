@@ -146,7 +146,7 @@ export class TransactionScheduling {
    *
    * @returns A `Uint8Array` representing the transaction scheduling.
    */
-  bytes(): Uint8Array {
+  toBytes(): Uint8Array {
     if (this.standard) {
       const calltableSerialization = new CalltableSerialization();
       calltableSerialization.addField(0, Uint8Array.of(0));

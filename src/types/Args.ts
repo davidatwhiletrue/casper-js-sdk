@@ -1,8 +1,8 @@
 import { concat } from '@ethersproject/bytes';
+import { jsonMapMember, jsonObject } from 'typedjson';
 
 import { CLValue, CLValueParser } from './clvalue';
-import { jsonMapMember, jsonObject } from 'typedjson';
-import { toBytesString, toBytesU32 } from './ByteConverters';
+import { toBytesString, toBytesU32, writeInteger } from './ByteConverters';
 
 /**
  * Represents a named argument with a name and associated `CLValue`, which can be serialized to bytes.
@@ -23,6 +23,43 @@ export class NamedArg {
     const name = toBytesString(this.name);
     const value = CLValueParser.toBytesWithType(this.value);
     return concat([name, value]);
+  }
+
+  /**
+   * Converts a `NamedArg` object to a `Uint8Array` for serialization.
+   *
+   * The method encodes the name of the argument as a UTF-8 string, followed by the serialized
+   * bytes of its value. The resulting `Uint8Array` can be used for further processing, such as
+   * storage or transmission.
+   *
+   * @param source - The `NamedArg` object to serialize. It contains a name and a value.
+   * @returns A `Uint8Array` representing the serialized `NamedArg`.
+   *
+   * @example
+   * ```typescript
+   * const namedArg = new NamedArg("arg1", CLValue.u32(42));
+   * const serializedBytes = YourClass.toBytesWithNamedArg(namedArg);
+   * console.log(serializedBytes); // Logs the serialized bytes.
+   * ```
+   */
+  public static toBytesWithNamedArg(source: NamedArg): Uint8Array {
+    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
+    // encoded data, with room for edge cases. If inputs exceed this size, revisit
+    // the implementation.
+    const buffer = new ArrayBuffer(1024);
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    const nameBytes = new TextEncoder().encode(source.name);
+    offset = writeInteger(view, offset, nameBytes.length);
+    new Uint8Array(buffer, offset).set(nameBytes);
+    offset += nameBytes.length;
+
+    const valueBytes = CLValueParser.toBytesWithType(source.value);
+    new Uint8Array(buffer, offset).set(valueBytes);
+    offset += valueBytes.length;
+
+    return new Uint8Array(buffer, 0, offset);
   }
 
   /**

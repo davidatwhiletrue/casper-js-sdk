@@ -7,6 +7,7 @@ import {
   CLTypeOption,
   CLTypeUInt64,
   CLValue,
+  CLValueByteArray,
   CLValueOption,
   CLValueString,
   CLValueUInt32,
@@ -21,7 +22,6 @@ import {
   serializeArgs
 } from './SerializationUtils';
 import { PublicKey } from './keypair';
-import { toBytesArrayU8 } from './ByteConverters';
 
 /**
  * Enum representing the different types of executable deploy items.
@@ -49,7 +49,7 @@ export class ModuleBytes {
     serializer: byteArrayJsonSerializer,
     deserializer: byteArrayJsonDeserializer
   })
-  moduleBytes: Uint8Array;
+  moduleBytes!: Uint8Array;
 
   /**
    * The arguments passed to the module.
@@ -75,13 +75,21 @@ export class ModuleBytes {
    * @returns The serialized byte array.
    */
   bytes(): Uint8Array {
-    if (!this.args) throw new Error('Missing arguments for ModuleBytes');
+    const lengthBytes = CLValueUInt32.newCLUInt32(
+      BigNumber.from(this.moduleBytes.length)
+    ).bytes();
+    const bytesArrayBytes = CLValueByteArray.newCLByteArray(
+      this.moduleBytes
+    ).bytes();
 
-    return concat([
-      Uint8Array.from([0]),
-      toBytesArrayU8(this.moduleBytes),
-      this.args.toBytes()
-    ]);
+    let result = concat([lengthBytes, bytesArrayBytes]);
+
+    if (this.args) {
+      const argBytes = this.args.toBytes();
+      result = concat([result, argBytes]);
+    }
+
+    return result;
   }
 }
 

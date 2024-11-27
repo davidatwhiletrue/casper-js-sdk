@@ -5,7 +5,7 @@ import { Hash } from './key';
 import { HexBytes } from './HexBytes';
 import { PublicKey, PrivateKey } from './keypair';
 import { Duration, Timestamp } from './Time';
-import { Approval, Transaction, TransactionCategory } from './Transaction';
+import { Approval, Transaction } from './Transaction';
 import {
   TransactionEntryPoint,
   TransactionEntryPointEnum
@@ -357,10 +357,8 @@ export class Deploy {
   static newTransactionFromDeploy(deploy: Deploy): Transaction {
     let paymentAmount = 0;
     let transactionEntryPoint: TransactionEntryPoint;
-    let transactionCategory = TransactionCategory.Large;
 
     if (deploy.session.transfer) {
-      transactionCategory = TransactionCategory.Mint;
       transactionEntryPoint = new TransactionEntryPoint(
         TransactionEntryPointEnum.Transfer
       );
@@ -414,7 +412,6 @@ export class Deploy {
       transactionEntryPoint,
       new TransactionScheduling({ standard: {} }),
       deploy.approvals,
-      transactionCategory,
       undefined,
       deploy
     );

@@ -1,24 +1,16 @@
-import { concat } from '@ethersproject/bytes';
-import {
-  toBytesString,
-  toBytesU16,
-  toBytesU32,
-  toBytesU64
-} from './ByteConverters';
-import { jsonMember, jsonObject, TypedJSON } from 'typedjson';
+import { jsonMember, jsonObject } from 'typedjson';
+
 import { InitiatorAddr } from './InitiatorAddr';
 import { Duration, Timestamp } from './Time';
 import { PricingMode } from './PricingMode';
-import { Args } from './Args';
+import { Args, NamedArg } from './Args';
 import { TransactionTarget } from './TransactionTarget';
 import { TransactionEntryPoint } from './TransactionEntryPoint';
 import { TransactionScheduling } from './TransactionScheduling';
 import { CalltableSerialization } from './CalltableSerialization';
-import {
-  byteArrayJsonSerializer,
-  deserializeArgs,
-  serializeArgs
-} from './SerializationUtils';
+import { deserializeArgs, serializeArgs } from './SerializationUtils';
+import { CLValueString, CLValueUInt64 } from './clvalue';
+import { writeBytes, writeInteger, writeUShort } from './ByteConverters';
 
 /**
  * Interface representing the parameters required to build a `TransactionV1Payload`.
@@ -82,7 +74,7 @@ export class PayloadFields {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, true)
   })
   public args: Args;
 
@@ -125,26 +117,6 @@ export class PayloadFields {
   private fields: Map<number, Uint8Array> = new Map();
 
   /**
-   * Utility method to map field identifiers to serialized values.
-   * Ensures that all fields are properly initialized before serialization.
-   * @returns A map of field identifiers to their serialized values.
-   * @throws Error if any required field is uninitialized or invalid.
-   */
-  private toSerializedFields(): Map<number, Uint8Array> {
-    if (!this.args) throw new Error('args field is uninitialized.');
-    if (!this.target) throw new Error('target field is uninitialized.');
-    if (!this.entryPoint) throw new Error('entryPoint field is uninitialized.');
-    if (!this.scheduling) throw new Error('scheduling field is uninitialized.');
-
-    return new Map([
-      [0, this.args.toBytes()],
-      [1, this.target.toBytes()],
-      [2, this.entryPoint.bytes()],
-      [3, this.scheduling.bytes()]
-    ]);
-  }
-
-  /**
    * Builds a `PayloadFields` instance from provided transaction details.
    *
    * @param args - Transaction arguments.
@@ -180,8 +152,6 @@ export class PayloadFields {
     payloadFields.entryPoint = transactionEntryPoint;
     payloadFields.scheduling = transactionScheduling;
 
-    payloadFields.fields = payloadFields.toSerializedFields();
-
     return payloadFields;
   }
 
@@ -206,49 +176,31 @@ export class PayloadFields {
   }
 
   /**
-   * Serializes all fields into a `Uint8Array`.
+   * Serializes the fields of the object into a `Uint8Array` for transmission or storage.
    *
-   * @returns Serialized fields as a `Uint8Array`.
-   */
-  public toBytes(): Uint8Array {
-    const fieldsCount = toBytesU32(this.fields.size);
-    const serializedFields = Array.from(
-      this.fields.entries()
-    ).map(([key, value]) => concat([toBytesU16(key), value]));
-
-    return concat([fieldsCount, ...serializedFields]);
-  }
-
-  /**
-   * Deserializes JSON data into a `PayloadFields` instance.
+   * This method iterates over the `fields` map, serializing each key-value pair. The key is
+   * written as a 16-bit unsigned integer, and the value is written as a sequence of bytes.
+   * The resulting byte array contains all serialized fields in order, preceded by the number of fields.
    *
-   * @param json - JSON representation of the payload fields.
-   * @returns A `PayloadFields` instance.
+   * @returns A `Uint8Array` containing the serialized representation of the fields.
+   *
    */
-  public static fromJSON(json: any): PayloadFields {
-    const deserialized = new TypedJSON(PayloadFields).parse(json);
+  toBytes(): Uint8Array {
+    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
+    // encoded data, with room for edge cases. If inputs exceed this size, revisit
+    // the implementation.
+    const fieldsBytes = new ArrayBuffer(1024);
+    const view = new DataView(fieldsBytes);
+    let offset = 0;
 
-    if (!deserialized) {
-      throw new Error('Failed to deserialize PayloadFields.');
+    offset = writeInteger(view, offset, this.fields.size);
+
+    for (const [field, value] of Array.from(this.fields.entries())) {
+      offset = writeUShort(view, offset, field);
+      offset = writeBytes(view, offset, value);
     }
 
-    deserialized.fields = deserialized.toSerializedFields();
-
-    return deserialized;
-  }
-
-  /**
-   * Converts the payload fields to a JSON object.
-   *
-   * @returns A JSON representation of the payload fields.
-   */
-  public toJSON(): Record<string, string> {
-    const result: Record<string, string> = {};
-    const fieldEntries = Array.from(this.fields.entries());
-    for (const [key, value] of fieldEntries) {
-      result[key.toString()] = byteArrayJsonSerializer(value);
-    }
-    return result;
+    return new Uint8Array(fieldsBytes, 0, offset);
   }
 }
 
@@ -307,8 +259,7 @@ export class TransactionV1Payload {
    */
   @jsonMember({
     name: 'fields',
-    serializer: value => (value ? value.toJSON() : undefined),
-    deserializer: json => (json ? PayloadFields.fromJSON(json) : undefined)
+    constructor: PayloadFields
   })
   public fields: PayloadFields;
 
@@ -317,17 +268,81 @@ export class TransactionV1Payload {
    *
    * @returns A `Uint8Array` representing the serialized transaction payload.
    */
-  public toBytes(): Uint8Array {
-    const calltable = new CalltableSerialization();
+  toBytes(): Uint8Array {
+    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
+    // encoded data, with room for edge cases. If inputs exceed this size, revisit
+    // the implementation.
+    const runtimeArgsBuffer = new ArrayBuffer(1024);
+    const runtimeArgsView = new DataView(runtimeArgsBuffer);
+    let offset = 0;
 
-    calltable.addField(0, this.initiatorAddr.toBytes());
-    calltable.addField(1, toBytesU64(Date.parse(this.timestamp.toJSON())));
-    calltable.addField(2, toBytesU64(this.ttl.duration));
-    calltable.addField(3, toBytesString(this.chainName));
-    calltable.addField(4, this.pricingMode.toBytes());
-    calltable.addField(5, this.fields.toBytes());
+    runtimeArgsView.setUint8(offset, 0x00);
+    offset += 1;
 
-    return calltable.toBytes();
+    runtimeArgsView.setUint32(offset, this.fields.args.args.size, true);
+    offset += 4;
+
+    for (const [name, value] of Array.from(this.fields.args.args.entries())) {
+      const namedArg = new NamedArg(name, value);
+      const argBytes = NamedArg.toBytesWithNamedArg(namedArg);
+      new Uint8Array(runtimeArgsBuffer, offset).set(argBytes);
+      offset += argBytes.length;
+    }
+
+    const runtimeArgsBytes = new Uint8Array(runtimeArgsBuffer, 0, offset);
+
+    const fields = new PayloadFields();
+
+    const runtimeArgsWithLength = new Uint8Array(runtimeArgsBytes.length + 4);
+    new DataView(runtimeArgsWithLength.buffer).setUint32(
+      0,
+      runtimeArgsBytes.length,
+      true
+    );
+    runtimeArgsWithLength.set(runtimeArgsBytes, 4);
+    fields.addField(0, runtimeArgsWithLength);
+
+    const targetBytes = this.fields.target.toBytes();
+    const targetWithLength = new Uint8Array(targetBytes.length + 4);
+    new DataView(targetWithLength.buffer).setUint32(
+      0,
+      targetBytes.length,
+      true
+    );
+    targetWithLength.set(targetBytes, 4);
+    fields.addField(1, targetWithLength);
+
+    const entryPointBytes = this.fields.entryPoint.toBytes();
+    const entryPointWithLength = new Uint8Array(entryPointBytes.length + 4);
+    new DataView(entryPointWithLength.buffer).setUint32(
+      0,
+      entryPointBytes.length,
+      true
+    );
+    entryPointWithLength.set(entryPointBytes, 4);
+    fields.addField(2, entryPointWithLength);
+
+    const schedulingBytes = this.fields.scheduling.toBytes();
+    const schedulingWithLength = new Uint8Array(schedulingBytes.length + 4);
+    new DataView(schedulingWithLength.buffer).setUint32(
+      0,
+      schedulingBytes.length,
+      true
+    );
+    schedulingWithLength.set(schedulingBytes, 4);
+    fields.addField(3, schedulingWithLength);
+
+    return new CalltableSerialization()
+      .addField(0, this.initiatorAddr.toBytes())
+      .addField(
+        1,
+        CLValueUInt64.newCLUint64(this.timestamp.toMilliseconds()).bytes()
+      )
+      .addField(2, CLValueUInt64.newCLUint64(this.ttl.duration).bytes())
+      .addField(3, CLValueString.newCLString(this.chainName).bytes())
+      .addField(4, this.pricingMode.toBytes())
+      .addField(5, fields.toBytes())
+      .toBytes();
   }
 
   /**

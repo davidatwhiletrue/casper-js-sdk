@@ -173,3 +173,89 @@ export const fromBytesU64 = (bytes: Uint8Array): BigNumber => {
   // Convert the little-endian bytes into a BigNumber
   return BigNumber.from(bytes.reverse());
 };
+
+/**
+ * Writes a 32-bit signed integer to a `DataView` at the specified offset.
+ *
+ * The integer is written in little-endian format.
+ *
+ * @param view - The `DataView` instance where the integer will be written.
+ * @param offset - The offset (in bytes) at which to start writing.
+ * @param value - The 32-bit signed integer to write.
+ * @returns The new offset after writing the integer.
+ *
+ * @example
+ * ```typescript
+ * const buffer = new ArrayBuffer(8);
+ * const view = new DataView(buffer);
+ * let offset = 0;
+ * offset = writeInteger(view, offset, 42);
+ * console.log(new Int32Array(buffer)); // Logs: Int32Array [42, 0]
+ * ```
+ */
+export const writeInteger = (
+  view: DataView,
+  offset: number,
+  value: number
+): number => {
+  view.setInt32(offset, value, true);
+  return offset + 4;
+};
+
+/**
+ * Writes a 16-bit unsigned integer to a `DataView` at the specified offset.
+ *
+ * The integer is written in little-endian format.
+ *
+ * @param view - The `DataView` instance where the integer will be written.
+ * @param offset - The offset (in bytes) at which to start writing.
+ * @param value - The 16-bit unsigned integer to write.
+ * @returns The new offset after writing the integer.
+ *
+ * @example
+ * ```typescript
+ * const buffer = new ArrayBuffer(4);
+ * const view = new DataView(buffer);
+ * let offset = 0;
+ * offset = writeUShort(view, offset, 65535);
+ * console.log(new Uint16Array(buffer)); // Logs: Uint16Array [65535, 0]
+ * ```
+ */
+export const writeUShort = (
+  view: DataView,
+  offset: number,
+  value: number
+): number => {
+  view.setUint16(offset, value, true);
+  return offset + 2;
+};
+
+/**
+ * Writes a sequence of bytes (as a `Uint8Array`) to a `DataView` at the specified offset.
+ *
+ * Each byte in the array is written in sequence, starting from the given offset.
+ *
+ * @param view - The `DataView` instance where the bytes will be written.
+ * @param offset - The offset (in bytes) at which to start writing.
+ * @param value - The `Uint8Array` containing the bytes to write.
+ * @returns The new offset after writing the bytes.
+ *
+ * @example
+ * ```typescript
+ * const buffer = new ArrayBuffer(10);
+ * const view = new DataView(buffer);
+ * let offset = 0;
+ * offset = writeBytes(view, offset, new Uint8Array([1, 2, 3, 4]));
+ * console.log(new Uint8Array(buffer)); // Logs: Uint8Array [1, 2, 3, 4, 0, 0, 0, 0, 0, 0]
+ * ```
+ */
+export const writeBytes = (
+  view: DataView,
+  offset: number,
+  value: Uint8Array
+): number => {
+  value.forEach((byte, index) => {
+    view.setUint8(offset + index, byte);
+  });
+  return offset + value.length;
+};

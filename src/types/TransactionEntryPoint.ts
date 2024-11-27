@@ -116,7 +116,7 @@ export class TransactionEntryPoint {
    *
    * @returns A `Uint8Array` representing the transaction entry point and any associated data.
    */
-  bytes(): Uint8Array {
+  toBytes(): Uint8Array {
     const calltableSerialization = new CalltableSerialization();
     const tag = this.tag();
     calltableSerialization.addField(0, Uint8Array.from([tag]));
