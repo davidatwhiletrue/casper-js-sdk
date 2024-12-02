@@ -13,6 +13,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+## [5.0.0-rc5] - 2024-12-01
+
+### Added
+
+- DelegatorKind support fot Bid
+- Calltable serialization for `TransactionV1` - [Reference of changes](https://github.com/casper-network/casper-node/pull/4823)
+- Custom ttl for `makeCsprTransferDeploy` and `makeAuctionManagerDeploy`
+
+### Changed
+
+- `TransactionV1` structure. From now on a TransactionV1 consists of `hash`, `payload` and `approvals`. `payload` is a merge of `header` and `body` concepts from before.
+- Updated documentation
+
 ## [5.0.0-rc4] - 2024-11-25
 
 ### Added

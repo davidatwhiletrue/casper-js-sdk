@@ -1,6 +1,7 @@
 import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
 import { PublicKey } from './keypair';
 import { CLValueUInt512 } from './clvalue';
+import { DelegationKind } from './Bid';
 
 /**
  * Class representing the allocation of seigniorage to a delegator.
@@ -8,15 +9,13 @@ import { CLValueUInt512 } from './clvalue';
 @jsonObject
 export class DelegatorAllocation {
   /**
-   * The public key of the delegator receiving the allocation.
+   * Kinds of delegation bids.
    */
   @jsonMember({
-    name: 'delegator_public_key',
-    constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
-    serializer: value => value.toJSON()
+    name: 'delegator_kind',
+    constructor: DelegationKind
   })
-  delegatorPublicKey: PublicKey;
+  delegatorKind: DelegationKind;
 
   /**
    * The public key of the validator associated with the delegator's allocation.
@@ -43,16 +42,16 @@ export class DelegatorAllocation {
   /**
    * Constructs a `DelegatorAllocation` instance.
    *
-   * @param delegatorPublicKey The public key of the delegator.
+   * @param delegatorKind Kinds of delegation bids.
    * @param validatorPublicKey The public key of the associated validator.
    * @param amount The amount of seigniorage allocated to the delegator.
    */
   constructor(
-    delegatorPublicKey: PublicKey,
+    delegatorKind: DelegationKind,
     validatorPublicKey: PublicKey,
     amount: CLValueUInt512
   ) {
-    this.delegatorPublicKey = delegatorPublicKey;
+    this.delegatorKind = delegatorKind;
     this.validatorPublicKey = validatorPublicKey;
     this.amount = amount;
   }

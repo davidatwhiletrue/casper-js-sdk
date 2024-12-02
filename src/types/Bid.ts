@@ -4,6 +4,142 @@ import { CLValueUInt512 } from './clvalue';
 import { URef } from './key';
 
 /**
+ * Represents the details of an era where an unbonding request was initiated.
+ */
+@jsonObject
+export class UnbondEra {
+  /**
+   * The amount of tokens to be unbonded during this era.
+   */
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  amount: CLValueUInt512;
+
+  /**
+   * The era in which the unbonding request was created.
+   */
+  @jsonMember({ name: 'era_of_creation', constructor: Number })
+  eraOfCreation: number;
+
+  /**
+   * The bonding purse associated with the unbonding request.
+   */
+  @jsonMember({
+    name: 'bonding_purse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  bondingPurse: URef;
+}
+
+/**
+ * Represents the kind of unbonding request, including information about the validator,
+ * delegated public key, and delegated purse.
+ */
+@jsonObject
+export class UnbondKind {
+  /**
+   * The public key of the validator who the tokens are being unbonded from.
+   */
+  @jsonMember({
+    name: 'Validator',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  validator: PublicKey;
+
+  /**
+   * The public key of the delegated account involved in the unbonding.
+   */
+  @jsonMember({
+    name: 'DelegatedPublicKey',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  delegatedPublicKey: PublicKey;
+
+  /**
+   * The purse associated with the delegation from which tokens will be unbonded.
+   */
+  @jsonMember({
+    name: 'DelegatedPurse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  delegatedPurse: URef;
+}
+
+/**
+ * Represents a request to unbond tokens, specifying the validator, unbond kind, and eras.
+ */
+@jsonObject
+export class Unbond {
+  /**
+   * The public key of the validator from which tokens are being unbonded.
+   */
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  validatorPublicKey: PublicKey;
+
+  /**
+   * The kind of unbonding request, detailing whether it's from a validator, delegated public key, or delegated purse.
+   */
+  @jsonMember({
+    name: 'unbond_kind',
+    constructor: UnbondKind
+  })
+  unbondKind: UnbondKind;
+
+  /**
+   * A list of eras during which unbonding occurred.
+   */
+  @jsonArrayMember(UnbondEra, { name: 'eras' })
+  eras: UnbondEra[];
+}
+
+/**
+ * Represents a delegation bid, which can be made from either a public key or a purse.
+ */
+@jsonObject
+export class DelegationKind {
+  /**
+   * A delegation bid made using a public key.
+   */
+  @jsonMember({
+    name: 'PublicKey',
+    constructor: PublicKey,
+    deserializer: json => PublicKey.fromJSON(json),
+    serializer: value => value.toJSON(),
+    preserveNull: true
+  })
+  publicKey?: PublicKey;
+
+  /**
+   * A delegation bid made using a purse.
+   */
+  @jsonMember({
+    name: 'Purse',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: value => value.toJSON(),
+    preserveNull: true
+  })
+  purse?: URef;
+}
+
+/**
  * Represents a vesting schedule for staked amounts, including an initial release timestamp and locked amounts.
  */
 @jsonObject
@@ -333,15 +469,11 @@ export class Reservation {
   validatorPublicKey: PublicKey;
 
   /**
-   * The public key of the delegator associated with this reservation.
-   *
-   * This key is used to identify the delegator who initiated the reservation.
+   * Kinds of delegation bids.
    */
   @jsonMember({
-    name: 'delegator_public_key',
-    constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
-    serializer: value => value.toJSON()
+    name: 'delegator_kind',
+    constructor: DelegationKind
   })
-  delegatorPublicKey: PublicKey;
+  delegatorKind: DelegationKind;
 }
