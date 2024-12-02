@@ -1,15 +1,8 @@
 import { concat } from '@ethersproject/bytes';
-
-import {
-  CLTypeString,
-  CLValue,
-  CLValueParser,
-  CLValueString,
-  CLValueUInt32,
-  IResultWithBytes
-} from './clvalue';
 import { jsonMapMember, jsonObject } from 'typedjson';
-import { toBytesString, toBytesU32 } from './ByteConverters';
+
+import { CLValue, CLValueParser } from './clvalue';
+import { toBytesString, toBytesU32, writeInteger } from './ByteConverters';
 
 /**
  * Represents a named argument with a name and associated `CLValue`, which can be serialized to bytes.
@@ -33,23 +26,60 @@ export class NamedArg {
   }
 
   /**
+   * Converts a `NamedArg` object to a `Uint8Array` for serialization.
+   *
+   * The method encodes the name of the argument as a UTF-8 string, followed by the serialized
+   * bytes of its value. The resulting `Uint8Array` can be used for further processing, such as
+   * storage or transmission.
+   *
+   * @param source - The `NamedArg` object to serialize. It contains a name and a value.
+   * @returns A `Uint8Array` representing the serialized `NamedArg`.
+   *
+   * @example
+   * ```typescript
+   * const namedArg = new NamedArg("arg1", CLValue.u32(42));
+   * const serializedBytes = YourClass.toBytesWithNamedArg(namedArg);
+   * console.log(serializedBytes); // Logs the serialized bytes.
+   * ```
+   */
+  public static toBytesWithNamedArg(source: NamedArg): Uint8Array {
+    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
+    // encoded data, with room for edge cases. If inputs exceed this size, revisit
+    // the implementation.
+    const buffer = new ArrayBuffer(1024);
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    const nameBytes = new TextEncoder().encode(source.name);
+    offset = writeInteger(view, offset, nameBytes.length);
+    new Uint8Array(buffer, offset).set(nameBytes);
+    offset += nameBytes.length;
+
+    const valueBytes = CLValueParser.toBytesWithType(source.value);
+    new Uint8Array(buffer, offset).set(valueBytes);
+    offset += valueBytes.length;
+
+    return new Uint8Array(buffer, 0, offset);
+  }
+
+  /**
    * Creates a `NamedArg` instance from a byte array.
    * @param bytes - The byte array to parse.
-   * @returns A new `NamedArg` instance.
-   * @throws Error if the value data is missing.
+   * @returns A `NamedArg` instance.
    */
   public static fromBytes(bytes: Uint8Array): NamedArg {
-    const stringValue = CLValueString.fromBytes(bytes);
+    let offset = 0;
 
-    if (!stringValue.bytes) {
-      throw new Error('Missing data for value of named arg');
-    }
+    const nameLength = new DataView(bytes.buffer).getUint32(offset, true);
+    offset += 4;
+    const nameBytes = bytes.slice(offset, offset + nameLength);
+    offset += nameLength;
+    const name = new TextDecoder().decode(nameBytes);
 
-    const value = CLValueParser.fromBytesByType(
-      stringValue.bytes,
-      CLTypeString
-    );
-    return new NamedArg(value.result.toString(), value.result);
+    const valueBytes = bytes.slice(offset);
+    const value = CLValueParser.fromBytesWithType(valueBytes);
+
+    return new NamedArg(name, value.result);
   }
 }
 
@@ -156,28 +186,30 @@ export class Args {
 
   /**
    * Creates an `Args` instance from a byte array.
-   * Parses the byte array to extract each argument.
    * @param bytes - The byte array to parse.
-   * @returns An object containing a new `Args` instance and any remaining bytes.
-   * @throws Error if there is an issue parsing the bytes.
+   * @returns An `Args` instance.
    */
-  public static fromBytes(bytes: Uint8Array): IResultWithBytes<Args> {
-    const uint32 = CLValueUInt32.fromBytes(bytes);
-    const size = uint32.result.getValue().toNumber();
+  public static fromBytes(bytes: Uint8Array): Args {
+    let offset = 0;
 
-    let remainBytes: Uint8Array | undefined = uint32.bytes;
-    const res: NamedArg[] = [];
-    for (let i = 0; i < size; i++) {
-      if (!remainBytes) {
-        throw new Error('Error while parsing bytes');
-      }
-      const namedArg = NamedArg.fromBytes(remainBytes);
-      res.push(namedArg);
-      remainBytes = undefined;
+    const numArgs = new DataView(bytes.buffer).getUint32(offset, true);
+    offset += 4;
+
+    const args = new Map<string, CLValue>();
+
+    for (let i = 0; i < numArgs; i++) {
+      const namedArgBytes = bytes.slice(offset);
+      const namedArg = NamedArg.fromBytes(namedArgBytes);
+
+      const nameLength = new DataView(namedArgBytes.buffer).getUint32(0, true);
+      const valueBytes = CLValueParser.toBytesWithType(namedArg.value);
+      const consumedBytes = 4 + nameLength + valueBytes.length;
+
+      offset += consumedBytes;
+
+      args.set(namedArg.name, namedArg.value);
     }
-    return {
-      result: Args.fromNamedArgs(res),
-      bytes: remainBytes || Uint8Array.from([])
-    };
+
+    return new Args(args);
   }
 }

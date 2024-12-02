@@ -15,9 +15,13 @@ import {
   CLValueUInt64
 } from './clvalue';
 import { ContractHash, URef } from './key';
-import { deserializeArgs, serializeArgs } from './SerializationUtils';
+import {
+  byteArrayJsonDeserializer,
+  byteArrayJsonSerializer,
+  deserializeArgs,
+  serializeArgs
+} from './SerializationUtils';
 import { PublicKey } from './keypair';
-import { Conversions } from './Conversions';
 
 /**
  * Enum representing the different types of executable deploy items.
@@ -39,8 +43,13 @@ export class ModuleBytes {
   /**
    * The module bytes in hexadecimal format.
    */
-  @jsonMember({ name: 'module_bytes', constructor: String })
-  moduleBytes!: string;
+  @jsonMember({
+    name: 'module_bytes',
+    constructor: Uint8Array,
+    serializer: byteArrayJsonSerializer,
+    deserializer: byteArrayJsonDeserializer
+  })
+  moduleBytes!: Uint8Array;
 
   /**
    * The arguments passed to the module.
@@ -56,7 +65,7 @@ export class ModuleBytes {
    * @param moduleBytes The module bytes in hexadecimal format.
    * @param args The arguments for the module.
    */
-  constructor(moduleBytes: string, args: Args) {
+  constructor(moduleBytes: Uint8Array, args: Args) {
     this.moduleBytes = moduleBytes;
     this.args = args;
   }
@@ -66,12 +75,11 @@ export class ModuleBytes {
    * @returns The serialized byte array.
    */
   bytes(): Uint8Array {
-    const moduleBytes = new Uint8Array(Buffer.from(this.moduleBytes, 'hex'));
     const lengthBytes = CLValueUInt32.newCLUInt32(
-      BigNumber.from(moduleBytes.length)
+      BigNumber.from(this.moduleBytes.length)
     ).bytes();
     const bytesArrayBytes = CLValueByteArray.newCLByteArray(
-      moduleBytes
+      this.moduleBytes
     ).bytes();
 
     let result = concat([lengthBytes, bytesArrayBytes]);
@@ -365,7 +373,7 @@ export class TransferDeployItem {
     amount: BigNumber | string,
     target: URef | PublicKey,
     sourcePurse: URef | null = null,
-    id?: BigNumberish,
+    id?: BigNumberish
   ): TransferDeployItem {
     const runtimeArgs = Args.fromMap({});
     runtimeArgs.insert('amount', CLValueUInt512.newCLUInt512(amount));
@@ -386,7 +394,9 @@ export class TransferDeployItem {
 
     runtimeArgs.insert(
       'id',
-      id ? CLValueOption.newCLOption(CLValueUInt64.newCLUint64(id)) : defaultClValue
+      id
+        ? CLValueOption.newCLOption(CLValueUInt64.newCLUint64(id))
+        : defaultClValue
     );
 
     return new TransferDeployItem(runtimeArgs);
@@ -545,7 +555,7 @@ export class ExecutableDeployItem {
   ): ExecutableDeployItem {
     const executableDeployItem = new ExecutableDeployItem();
     executableDeployItem.moduleBytes = new ModuleBytes(
-      '',
+      Uint8Array.from([]),
       Args.fromMap({ amount: CLValueUInt512.newCLUInt512(amount) })
     );
     return executableDeployItem;
@@ -618,10 +628,7 @@ export class ExecutableDeployItem {
     args: Args
   ): ExecutableDeployItem {
     const executableDeployItem = new ExecutableDeployItem();
-    executableDeployItem.moduleBytes = new ModuleBytes(
-      Conversions.encodeBase16(moduleBytes),
-      args
-    );
+    executableDeployItem.moduleBytes = new ModuleBytes(moduleBytes, args);
 
     return executableDeployItem;
   }

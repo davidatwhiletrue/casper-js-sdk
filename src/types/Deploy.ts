@@ -5,16 +5,13 @@ import { Hash } from './key';
 import { HexBytes } from './HexBytes';
 import { PublicKey, PrivateKey } from './keypair';
 import { Duration, Timestamp } from './Time';
+import { Approval, Transaction } from './Transaction';
 import {
-  Approval,
-  Transaction,
-  TransactionBody,
-  TransactionCategory,
-  TransactionHeader
-} from './Transaction';
-import { TransactionEntryPoint } from './TransactionEntryPoint';
+  TransactionEntryPoint,
+  TransactionEntryPointEnum
+} from './TransactionEntryPoint';
 import { InitiatorAddr } from './InitiatorAddr';
-import { ClassicMode, PricingMode } from './PricingMode';
+import { PaymentLimitedMode, PricingMode } from './PricingMode';
 import { TransactionTarget } from './TransactionTarget';
 import { TransactionScheduling } from './TransactionScheduling';
 import { ExecutableDeployItem } from './ExecutableDeployItem';
@@ -359,14 +356,16 @@ export class Deploy {
    */
   static newTransactionFromDeploy(deploy: Deploy): Transaction {
     let paymentAmount = 0;
-    const transactionEntryPoint: TransactionEntryPoint = new TransactionEntryPoint();
-    let transactionCategory = TransactionCategory.Large;
+    let transactionEntryPoint: TransactionEntryPoint;
 
     if (deploy.session.transfer) {
-      transactionCategory = TransactionCategory.Mint;
-      transactionEntryPoint.transfer = {};
+      transactionEntryPoint = new TransactionEntryPoint(
+        TransactionEntryPointEnum.Transfer
+      );
     } else if (deploy.session.moduleBytes) {
-      transactionEntryPoint.call = {};
+      transactionEntryPoint = new TransactionEntryPoint(
+        TransactionEntryPointEnum.Call
+      );
     } else {
       let entryPoint = '';
 
@@ -379,7 +378,10 @@ export class Deploy {
       } else if (deploy.session.storedVersionedContractByName) {
         entryPoint = deploy.session.storedVersionedContractByName.entryPoint;
       }
-      transactionEntryPoint.custom = entryPoint;
+      transactionEntryPoint = new TransactionEntryPoint(
+        TransactionEntryPointEnum.Custom,
+        entryPoint
+      );
     }
 
     const amountArgument = deploy.payment.getArgs();
@@ -393,27 +395,22 @@ export class Deploy {
     const standardPayment = paymentAmount === 0 && !deploy.payment.moduleBytes;
 
     const pricingMode = new PricingMode();
-    const classicMode = new ClassicMode();
-    classicMode.gasPriceTolerance = 1;
-    classicMode.paymentAmount = paymentAmount;
-    classicMode.standardPayment = standardPayment;
+    const paymentLimitedMode = new PaymentLimitedMode();
+    paymentLimitedMode.gasPriceTolerance = 1;
+    paymentLimitedMode.paymentAmount = paymentAmount;
+    paymentLimitedMode.standardPayment = standardPayment;
 
     return new Transaction(
       deploy.hash,
-      new TransactionHeader(
-        deploy.header.chainName,
-        deploy.header.timestamp,
-        deploy.header.ttl,
-        new InitiatorAddr(deploy.header.account),
-        pricingMode
-      ),
-      new TransactionBody(
-        deploy.session.getArgs(),
-        TransactionTarget.newTransactionTargetFromSession(deploy.session),
-        transactionEntryPoint,
-        new TransactionScheduling({ standard: {} }),
-        transactionCategory
-      ),
+      deploy.header.chainName,
+      deploy.header.timestamp,
+      deploy.header.ttl,
+      new InitiatorAddr(deploy.header.account),
+      pricingMode,
+      deploy.session.getArgs(),
+      TransactionTarget.newTransactionTargetFromSession(deploy.session),
+      transactionEntryPoint,
+      new TransactionScheduling({ standard: {} }),
       deploy.approvals,
       undefined,
       deploy
