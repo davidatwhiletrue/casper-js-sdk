@@ -13,6 +13,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+## [5.0.0-rc6] - 2024-12-08
+
+### Added
+
+- Basic documentation for Casper 2.0 (Condor)
+- **Enhanced `CLValue.newCLOption` Method**:
+  - Automatic resolution of the option type from `inner` when provided.
+  - Optional `clType` parameter when `inner` is present.
+  - Defaults to `CLTypeAny` if `inner` is `null` and `clType` is not specified.
+- **New Method**:
+  - **`ExecutionResult.toJSON(executionResult: ExecutionResult): object`**
+    - Converts an `ExecutionResult` instance to a plain JSON object using the `TypedJSON` serializer.
+
+### Fixed
+
+- Issue with parsing in RPC `getDictionaryItem` method
+
 ## [5.0.0-rc5] - 2024-12-01
 
 ### Added

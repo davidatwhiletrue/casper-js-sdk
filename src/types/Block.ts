@@ -577,113 +577,6 @@ export function parseBlockTransactions(data: string): BlockTransaction[] {
 }
 
 /**
- * Represents a version 1 block in the blockchain, including the block's metadata (header), body, and proofs.
- * A `BlockV1` contains the block's unique hash, header (which includes metadata like height and era ID), body (which includes transactions),
- * and an array of proofs related to the block.
- */
-@jsonObject
-export class BlockV1 {
-  /**
-   * The unique hash of the block, used to identify and verify the block in the blockchain.
-   */
-  @jsonMember({
-    name: 'hash',
-    constructor: Hash,
-    deserializer: (json: string) => Hash.fromJSON(json),
-    serializer: (value: Hash) => value.toJSON()
-  })
-  public hash: Hash;
-
-  /**
-   * The header of the block, containing metadata such as block height, era ID, and timestamp.
-   */
-  @jsonMember({ name: 'header', constructor: () => BlockHeaderV1 })
-  public header: BlockHeaderV1;
-
-  /**
-   * The body of the block, which contains the transactions and related data for the block.
-   */
-  @jsonMember({ name: 'body', constructor: () => BlockBodyV1 })
-  public body: BlockBodyV1;
-
-  /**
-   * An array of proofs associated with the block, used to verify the authenticity of the block.
-   */
-  @jsonArrayMember(Proof, { name: 'proofs' })
-  public proofs: Proof[];
-}
-
-/**
- * Represents the body of a version 1 block in the blockchain.
- * The body contains essential data related to transactions, deploys, and other actions within the block.
- */
-@jsonObject
-export class BlockBodyV1 {
-  /**
-   * The list of deploy hashes included in the block.
-   * Deploys represent the transactions that are being executed within this block.
-   */
-  @jsonArrayMember(() => Hash, {
-    name: 'deploy_hashes',
-    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
-    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
-  })
-  public deployHashes: Hash[];
-
-  /**
-   * The proposer of the block, which represents the entity that created or proposed the block.
-   */
-  @jsonMember({
-    name: 'proposer',
-    constructor: Proposer,
-    deserializer: (json: string) => Proposer.fromJSON(json),
-    serializer: (value: Proposer) => value.toJSON()
-  })
-  public proposer: Proposer;
-
-  /**
-   * The list of transfer hashes included in the block.
-   * Transfers represent the transactions related to the movement of tokens within the blockchain.
-   */
-  @jsonArrayMember(() => Hash, {
-    name: 'transfer_hashes',
-    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
-    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
-  })
-  public transferHashes: Hash[];
-}
-
-/**
- * Represents a version 2 block in the blockchain.
- * A `BlockV2` includes a hash, a header containing metadata, and the body containing the block's transactions and related data.
- */
-@jsonObject
-export class BlockV2 {
-  /**
-   * The unique hash of the block, used to identify and verify the block in the blockchain.
-   */
-  @jsonMember({
-    name: 'hash',
-    constructor: Hash,
-    deserializer: (json: string) => Hash.fromJSON(json),
-    serializer: (value: Hash) => value.toJSON()
-  })
-  public hash: Hash;
-
-  /**
-   * The header of the block, which contains metadata such as the block's height, parent hash, and protocol version.
-   */
-  @jsonMember({ name: 'header', constructor: () => BlockHeaderV2 })
-  public header: BlockHeaderV2;
-
-  /**
-   * The body of the block, which contains the transactions, deploys, and other data related to the block's content.
-   */
-  @jsonMember({ name: 'body', constructor: () => BlockBodyV2 })
-  public body: BlockBodyV2;
-}
-
-/**
  * Represents the header of a version 1 block in the blockchain.
  * The header contains metadata about the block, such as its height, parent hash, protocol version, and timestamps.
  */
@@ -787,6 +680,83 @@ export class BlockHeaderV1 {
    */
   @jsonMember({ name: 'era_end', constructor: EraEndV1 })
   public eraEnd?: EraEndV1;
+}
+
+/**
+ * Represents the body of a version 1 block in the blockchain.
+ * The body contains essential data related to transactions, deploys, and other actions within the block.
+ */
+@jsonObject
+export class BlockBodyV1 {
+  /**
+   * The list of deploy hashes included in the block.
+   * Deploys represent the transactions that are being executed within this block.
+   */
+  @jsonArrayMember(() => Hash, {
+    name: 'deploy_hashes',
+    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
+  })
+  public deployHashes: Hash[];
+
+  /**
+   * The proposer of the block, which represents the entity that created or proposed the block.
+   */
+  @jsonMember({
+    name: 'proposer',
+    constructor: Proposer,
+    deserializer: (json: string) => Proposer.fromJSON(json),
+    serializer: (value: Proposer) => value.toJSON()
+  })
+  public proposer: Proposer;
+
+  /**
+   * The list of transfer hashes included in the block.
+   * Transfers represent the transactions related to the movement of tokens within the blockchain.
+   */
+  @jsonArrayMember(() => Hash, {
+    name: 'transfer_hashes',
+    serializer: (value: Hash[]) => value.map(it => it.toJSON()),
+    deserializer: (json: any) => json.map((it: string) => Hash.fromJSON(it))
+  })
+  public transferHashes: Hash[];
+}
+
+/**
+ * Represents a version 1 block in the blockchain, including the block's metadata (header), body, and proofs.
+ * A `BlockV1` contains the block's unique hash, header (which includes metadata like height and era ID), body (which includes transactions),
+ * and an array of proofs related to the block.
+ */
+@jsonObject
+export class BlockV1 {
+  /**
+   * The unique hash of the block, used to identify and verify the block in the blockchain.
+   */
+  @jsonMember({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  })
+  public hash: Hash;
+
+  /**
+   * The header of the block, containing metadata such as block height, era ID, and timestamp.
+   */
+  @jsonMember({ name: 'header', constructor: BlockHeaderV1 })
+  public header: BlockHeaderV1;
+
+  /**
+   * The body of the block, which contains the transactions and related data for the block.
+   */
+  @jsonMember({ name: 'body', constructor: BlockBodyV1 })
+  public body: BlockBodyV1;
+
+  /**
+   * An array of proofs associated with the block, used to verify the authenticity of the block.
+   */
+  @jsonArrayMember(Proof, { name: 'proofs' })
+  public proofs: Proof[];
 }
 
 /**
@@ -937,6 +907,36 @@ export class BlockBodyV2 {
    */
   @jsonArrayMember(Number, { name: 'rewarded_signatures' })
   public rewardedSignatures: number[];
+}
+
+/**
+ * Represents a version 2 block in the blockchain.
+ * A `BlockV2` includes a hash, a header containing metadata, and the body containing the block's transactions and related data.
+ */
+@jsonObject
+export class BlockV2 {
+  /**
+   * The unique hash of the block, used to identify and verify the block in the blockchain.
+   */
+  @jsonMember({
+    name: 'hash',
+    constructor: Hash,
+    deserializer: (json: string) => Hash.fromJSON(json),
+    serializer: (value: Hash) => value.toJSON()
+  })
+  public hash: Hash;
+
+  /**
+   * The header of the block, which contains metadata such as the block's height, parent hash, and protocol version.
+   */
+  @jsonMember({ name: 'header', constructor: BlockHeaderV2 })
+  public header: BlockHeaderV2;
+
+  /**
+   * The body of the block, which contains the transactions, deploys, and other data related to the block's content.
+   */
+  @jsonMember({ name: 'body', constructor: BlockBodyV2 })
+  public body: BlockBodyV2;
 }
 
 /**

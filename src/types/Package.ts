@@ -2,6 +2,35 @@ import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
 import { AddressableEntityHash, URef } from './key';
 
 /**
+ * Represents a key that uniquely identifies the version of an entity, including both the entity version and the protocol version.
+ */
+@jsonObject
+export class EntityVersionKey {
+  /**
+   * The version of the entity.
+   */
+  @jsonMember({ name: 'entity_version', constructor: Number })
+  entityVersion: number;
+
+  /**
+   * The major version of the protocol used by the entity.
+   */
+  @jsonMember({ name: 'protocol_version_major', constructor: Number })
+  protocolVersionMajor: number;
+
+  /**
+   * Creates a new instance of `EntityVersionKey` with an entity version and protocol version major.
+   *
+   * @param entityVersion The version of the entity.
+   * @param protocolVersionMajor The major version of the protocol used by the entity.
+   */
+  constructor(entityVersion: number, protocolVersionMajor: number) {
+    this.entityVersion = entityVersion;
+    this.protocolVersionMajor = protocolVersionMajor;
+  }
+}
+
+/**
  * Represents an entity version and its associated addressable entity hash.
  */
 @jsonObject
@@ -23,7 +52,7 @@ export class EntityVersionAndHash {
    */
   @jsonMember({
     name: 'entity_version_key',
-    constructor: () => EntityVersionKey
+    constructor: EntityVersionKey
   })
   entityVersionKey: EntityVersionKey;
 
@@ -70,35 +99,6 @@ export class Package {
    */
   @jsonArrayMember(String, { name: 'groups' })
   groups: string[];
-}
-
-/**
- * Represents a key that uniquely identifies the version of an entity, including both the entity version and the protocol version.
- */
-@jsonObject
-export class EntityVersionKey {
-  /**
-   * The version of the entity.
-   */
-  @jsonMember({ name: 'entity_version', constructor: Number })
-  entityVersion: number;
-
-  /**
-   * The major version of the protocol used by the entity.
-   */
-  @jsonMember({ name: 'protocol_version_major', constructor: Number })
-  protocolVersionMajor: number;
-
-  /**
-   * Creates a new instance of `EntityVersionKey` with an entity version and protocol version major.
-   *
-   * @param entityVersion The version of the entity.
-   * @param protocolVersionMajor The major version of the protocol used by the entity.
-   */
-  constructor(entityVersion: number, protocolVersionMajor: number) {
-    this.entityVersion = entityVersion;
-    this.protocolVersionMajor = protocolVersionMajor;
-  }
 }
 
 /**

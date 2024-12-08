@@ -94,10 +94,46 @@ export class ParamStateRootHash {
 }
 
 @jsonObject
+export class BlockIdentifier {
+  @jsonMember({ isRequired: false, constructor: String, name: 'Hash' })
+  hash?: string;
+
+  @jsonMember({ isRequired: false, constructor: Number, name: 'Height' })
+  height?: number;
+
+  constructor(hash?: string, height?: number) {
+    this.hash = hash;
+    this.height = height;
+  }
+}
+
+@jsonObject
+export class ParamQueryGlobalStateID {
+  @jsonMember({ isRequired: false, constructor: String, name: 'StateRootHash' })
+  stateRootHash?: string;
+
+  @jsonMember({ isRequired: false, constructor: String, name: 'BlockHash' })
+  blockHash?: string;
+
+  @jsonMember({ isRequired: false, constructor: Number, name: 'BlockHeight' })
+  blockHeight?: number;
+
+  constructor(
+    stateRootHash?: string,
+    blockHash?: string,
+    blockHeight?: number
+  ) {
+    this.stateRootHash = stateRootHash;
+    this.blockHash = blockHash;
+    this.blockHeight = blockHeight;
+  }
+}
+
+@jsonObject
 export class ParamQueryGlobalState {
   @jsonMember({
     isRequired: false,
-    constructor: () => ParamQueryGlobalStateID,
+    constructor: ParamQueryGlobalStateID,
     name: 'state_identifier'
   })
   stateIdentifier?: ParamQueryGlobalStateID;
@@ -124,28 +160,6 @@ export class ParamQueryGlobalState {
     id?: ParamQueryGlobalStateID
   ): ParamQueryGlobalState {
     return new ParamQueryGlobalState(id, key, path);
-  }
-}
-
-@jsonObject
-export class ParamQueryGlobalStateID {
-  @jsonMember({ isRequired: false, constructor: String, name: 'StateRootHash' })
-  stateRootHash?: string;
-
-  @jsonMember({ isRequired: false, constructor: String, name: 'BlockHash' })
-  blockHash?: string;
-
-  @jsonMember({ isRequired: false, constructor: Number, name: 'BlockHeight' })
-  blockHeight?: number;
-
-  constructor(
-    stateRootHash?: string,
-    blockHash?: string,
-    blockHeight?: number
-  ) {
-    this.stateRootHash = stateRootHash;
-    this.blockHash = blockHash;
-    this.blockHeight = blockHeight;
   }
 }
 
@@ -190,11 +204,33 @@ export class ParamDeployHash {
 }
 
 @jsonObject
+export class ParamBlockIdentifier {
+  @jsonMember({
+    isRequired: false,
+    constructor: BlockIdentifier,
+    name: 'block_identifier'
+  })
+  blockIdentifier?: BlockIdentifier;
+
+  constructor(blockIdentifier?: BlockIdentifier) {
+    this.blockIdentifier = blockIdentifier;
+  }
+
+  static byHeight(height: number): ParamBlockIdentifier {
+    return new ParamBlockIdentifier(new BlockIdentifier(undefined, height));
+  }
+
+  static byHash(hash: string): ParamBlockIdentifier {
+    return new ParamBlockIdentifier(new BlockIdentifier(hash));
+  }
+}
+
+@jsonObject
 export class ParamGetAccountInfoBalance {
   @jsonMember({ constructor: String, name: 'account_identifier' })
   accountIdentifier: string;
 
-  @jsonMember({ constructor: () => ParamBlockIdentifier })
+  @jsonMember({ constructor: ParamBlockIdentifier })
   paramBlockIdentifier: ParamBlockIdentifier;
 
   constructor(
@@ -203,66 +239,6 @@ export class ParamGetAccountInfoBalance {
   ) {
     this.accountIdentifier = accountIdentifier;
     this.paramBlockIdentifier = paramBlockIdentifier;
-  }
-}
-
-@jsonObject
-export class ParamGetStateEntity {
-  @jsonMember({
-    constructor: () => EntityIdentifier,
-    name: 'entity_identifier'
-  })
-  entityIdentifier: EntityIdentifier;
-
-  @jsonMember({
-    isRequired: false,
-    constructor: () => BlockIdentifier,
-    name: 'block_identifier'
-  })
-  blockIdentifier?: BlockIdentifier;
-
-  constructor(
-    entityIdentifier: EntityIdentifier,
-    blockIdentifier?: BlockIdentifier
-  ) {
-    this.entityIdentifier = entityIdentifier;
-    this.blockIdentifier = blockIdentifier;
-  }
-}
-
-@jsonObject
-export class AccountIdentifier {
-  @jsonMember({
-    constructor: AccountHash,
-    isRequired: false,
-    deserializer: (json: string) => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: (value: AccountHash) => {
-      if (!value) return;
-      return value.toJSON();
-    }
-  })
-  accountHash?: AccountHash;
-
-  @jsonMember({
-    constructor: PublicKey,
-    isRequired: false,
-    deserializer: (json: string) => {
-      if (!json) return;
-      return PublicKey.fromJSON(json);
-    },
-    serializer: (value: PublicKey) => {
-      if (!value) return;
-      return value.toJSON();
-    }
-  })
-  publicKey?: PublicKey;
-
-  constructor(accountHash?: AccountHash, publicKey?: PublicKey) {
-    this.accountHash = accountHash;
-    this.publicKey = publicKey;
   }
 }
 
@@ -337,6 +313,66 @@ export class EntityIdentifier {
 }
 
 @jsonObject
+export class ParamGetStateEntity {
+  @jsonMember({
+    constructor: EntityIdentifier,
+    name: 'entity_identifier'
+  })
+  entityIdentifier: EntityIdentifier;
+
+  @jsonMember({
+    isRequired: false,
+    constructor: BlockIdentifier,
+    name: 'block_identifier'
+  })
+  blockIdentifier?: BlockIdentifier;
+
+  constructor(
+    entityIdentifier: EntityIdentifier,
+    blockIdentifier?: BlockIdentifier
+  ) {
+    this.entityIdentifier = entityIdentifier;
+    this.blockIdentifier = blockIdentifier;
+  }
+}
+
+@jsonObject
+export class AccountIdentifier {
+  @jsonMember({
+    constructor: AccountHash,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  accountHash?: AccountHash;
+
+  @jsonMember({
+    constructor: PublicKey,
+    isRequired: false,
+    deserializer: (json: string) => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: (value: PublicKey) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  publicKey?: PublicKey;
+
+  constructor(accountHash?: AccountHash, publicKey?: PublicKey) {
+    this.accountHash = accountHash;
+    this.publicKey = publicKey;
+  }
+}
+
+@jsonObject
 export class PutDeployRequest {
   @jsonMember({ constructor: Deploy })
   deploy: Deploy;
@@ -353,20 +389,6 @@ export class PutTransactionRequest {
 
   constructor(transaction: TransactionWrapper) {
     this.transaction = transaction;
-  }
-}
-
-@jsonObject
-export class BlockIdentifier {
-  @jsonMember({ isRequired: false, constructor: String, name: 'Hash' })
-  hash?: string;
-
-  @jsonMember({ isRequired: false, constructor: Number, name: 'Height' })
-  height?: number;
-
-  constructor(hash?: string, height?: number) {
-    this.hash = hash;
-    this.height = height;
   }
 }
 
@@ -407,63 +429,16 @@ export class EraIdentifier {
 }
 
 @jsonObject
-export class ParamBlockIdentifier {
-  @jsonMember({
-    isRequired: false,
-    constructor: BlockIdentifier,
-    name: 'block_identifier'
-  })
-  blockIdentifier?: BlockIdentifier;
+export class ParamDictionaryIdentifierURef {
+  @jsonMember({ constructor: String, name: 'dictionary_item_key' })
+  dictionaryItemKey: string;
 
-  constructor(blockIdentifier?: BlockIdentifier) {
-    this.blockIdentifier = blockIdentifier;
-  }
+  @jsonMember({ constructor: String, name: 'seed_uref' })
+  seedUref: string;
 
-  static byHeight(height: number): ParamBlockIdentifier {
-    return new ParamBlockIdentifier(new BlockIdentifier(undefined, height));
-  }
-
-  static byHash(hash: string): ParamBlockIdentifier {
-    return new ParamBlockIdentifier(new BlockIdentifier(hash));
-  }
-}
-
-@jsonObject
-export class ParamDictionaryIdentifier {
-  @jsonMember({
-    isRequired: false,
-    constructor: () => AccountNamedKey,
-    name: 'AccountNamedKey'
-  })
-  accountNamedKey?: AccountNamedKey;
-
-  @jsonMember({
-    isRequired: false,
-    constructor: () => ParamDictionaryIdentifierContractNamedKey,
-    name: 'ContractNamedKey'
-  })
-  contractNamedKey?: ParamDictionaryIdentifierContractNamedKey;
-
-  @jsonMember({
-    isRequired: false,
-    constructor: () => ParamDictionaryIdentifierURef,
-    name: 'URef'
-  })
-  uRef?: ParamDictionaryIdentifierURef;
-
-  @jsonMember({ isRequired: false, constructor: String, name: 'Dictionary' })
-  dictionary?: string;
-
-  constructor(
-    accountNamedKey?: AccountNamedKey,
-    contractNamedKey?: ParamDictionaryIdentifierContractNamedKey,
-    uRef?: ParamDictionaryIdentifierURef,
-    dictionary?: string
-  ) {
-    this.accountNamedKey = accountNamedKey;
-    this.contractNamedKey = contractNamedKey;
-    this.uRef = uRef;
-    this.dictionary = dictionary;
+  constructor(dictionaryItemKey: string, seedUref: string) {
+    this.dictionaryItemKey = dictionaryItemKey;
+    this.seedUref = seedUref;
   }
 }
 
@@ -504,16 +479,41 @@ export class ParamDictionaryIdentifierContractNamedKey {
 }
 
 @jsonObject
-export class ParamDictionaryIdentifierURef {
-  @jsonMember({ constructor: String, name: 'dictionary_item_key' })
-  dictionaryItemKey: string;
+export class ParamDictionaryIdentifier {
+  @jsonMember({
+    isRequired: false,
+    constructor: AccountNamedKey,
+    name: 'AccountNamedKey'
+  })
+  accountNamedKey?: AccountNamedKey;
 
-  @jsonMember({ constructor: String, name: 'seed_uref' })
-  seedUref: string;
+  @jsonMember({
+    isRequired: false,
+    constructor: ParamDictionaryIdentifierContractNamedKey,
+    name: 'ContractNamedKey'
+  })
+  contractNamedKey?: ParamDictionaryIdentifierContractNamedKey;
 
-  constructor(dictionaryItemKey: string, seedUref: string) {
-    this.dictionaryItemKey = dictionaryItemKey;
-    this.seedUref = seedUref;
+  @jsonMember({
+    isRequired: false,
+    constructor: ParamDictionaryIdentifierURef,
+    name: 'URef'
+  })
+  uRef?: ParamDictionaryIdentifierURef;
+
+  @jsonMember({ isRequired: false, constructor: String, name: 'Dictionary' })
+  dictionary?: string;
+
+  constructor(
+    accountNamedKey?: AccountNamedKey,
+    contractNamedKey?: ParamDictionaryIdentifierContractNamedKey,
+    uRef?: ParamDictionaryIdentifierURef,
+    dictionary?: string
+  ) {
+    this.accountNamedKey = accountNamedKey;
+    this.contractNamedKey = contractNamedKey;
+    this.uRef = uRef;
+    this.dictionary = dictionary;
   }
 }
 

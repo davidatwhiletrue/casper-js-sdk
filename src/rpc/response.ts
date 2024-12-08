@@ -90,21 +90,6 @@ export class StateGetAccountInfo {
 }
 
 @jsonObject
-export class EntityOrAccount {
-  @jsonMember({
-    name: 'AddressableEntity',
-    constructor: () => RpcAddressableEntity
-  })
-  addressableEntity?: RpcAddressableEntity;
-
-  @jsonMember({
-    name: 'LegacyAccount',
-    constructor: Account
-  })
-  legacyAccount?: Account;
-}
-
-@jsonObject
 export class RpcAddressableEntity {
   @jsonMember({ name: 'entity', constructor: RpcAddressableEntity })
   entity: RpcAddressableEntity;
@@ -114,6 +99,21 @@ export class RpcAddressableEntity {
 
   @jsonMember({ name: 'entry_points', constructor: EntryPointValue })
   entryPoints?: EntryPointValue[];
+}
+
+@jsonObject
+export class EntityOrAccount {
+  @jsonMember({
+    name: 'AddressableEntity',
+    constructor: RpcAddressableEntity
+  })
+  addressableEntity?: RpcAddressableEntity;
+
+  @jsonMember({
+    name: 'LegacyAccount',
+    constructor: Account
+  })
+  legacyAccount?: Account;
 }
 
 @jsonObject
@@ -580,6 +580,24 @@ export class InfoGetValidatorChangesResult {
 }
 
 @jsonObject
+export class NodeNextUpgrade {
+  @jsonMember({ name: 'activation_point', constructor: Number })
+  activationPoint: number;
+
+  @jsonMember({ name: 'protocol_version', constructor: String })
+  protocolVersion: string;
+}
+
+@jsonObject
+export class BlockSync {
+  @jsonMember({ name: 'historical', constructor: String })
+  historical?: string;
+
+  @jsonMember({ name: 'forward', constructor: String })
+  forward?: string;
+}
+
+@jsonObject
 export class InfoGetStatusResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
@@ -596,7 +614,7 @@ export class InfoGetStatusResult {
   @jsonMember({ name: 'last_added_block_info', constructor: MinimalBlockInfo })
   lastAddedBlockInfo: MinimalBlockInfo;
 
-  @jsonMember({ name: 'next_upgrade', constructor: () => NodeNextUpgrade })
+  @jsonMember({ name: 'next_upgrade', constructor: NodeNextUpgrade })
   nextUpgrade?: NodeNextUpgrade;
 
   @jsonMember({ name: 'our_public_signing_key', constructor: String })
@@ -656,29 +674,11 @@ export class InfoGetStatusResult {
 
   @jsonMember({
     name: 'block_sync',
-    constructor: () => BlockSync
+    constructor: BlockSync
   })
   blockSync: BlockSync;
 
   rawJSON: any;
-}
-
-@jsonObject
-export class BlockSync {
-  @jsonMember({ name: 'historical', constructor: String })
-  historical?: string;
-
-  @jsonMember({ name: 'forward', constructor: String })
-  forward?: string;
-}
-
-@jsonObject
-export class NodeNextUpgrade {
-  @jsonMember({ name: 'activation_point', constructor: Number })
-  activationPoint: number;
-
-  @jsonMember({ name: 'protocol_version', constructor: String })
-  protocolVersion: string;
 }
 
 @jsonObject

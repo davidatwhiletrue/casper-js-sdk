@@ -457,6 +457,24 @@ export class ExecutionResult {
 
     throw new Error('Invalid ExecutionResultV1 structure');
   }
+
+  /**
+   * Converts an `ExecutionResult` instance to a plain JSON object.
+   *
+   * This method serializes an `ExecutionResult` object into a plain JSON structure
+   * using the `TypedJSON` serializer. It allows for easy conversion of the
+   * `ExecutionResult` to a JSON-compatible format that can be used for logging,
+   * transmission over the network, or storage.
+   *
+   * @param executionResult - The `ExecutionResult` instance to be converted into a plain JSON object.
+   *
+   * @returns A plain JSON object representing the `ExecutionResult`.
+   *
+   */
+  public static toJSON(executionResult: ExecutionResult) {
+    const serializer = new TypedJSON(ExecutionResult);
+    return serializer.toPlainJson(executionResult);
+  }
 }
 
 /**

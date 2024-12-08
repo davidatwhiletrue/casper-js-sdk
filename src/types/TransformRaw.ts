@@ -91,7 +91,7 @@ export class TranformBidKindData {
   /**
    * The bid kind data in the transform.
    */
-  @jsonMember({ name: 'BidKind', constructor: () => BidKind })
+  @jsonMember({ name: 'BidKind', constructor: BidKind })
   BidKind?: BidKind;
 }
 
