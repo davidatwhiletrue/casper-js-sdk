@@ -1,5 +1,4 @@
 import * as ed25519 from '@noble/ed25519';
-import { Buffer } from 'buffer';
 
 /**
  * Interface representing the structure and methods of a private key, including
