@@ -120,6 +120,7 @@
     "@scure/bip32": "^1.1.5",
     "@scure/bip39": "^1.2.0",
     "@types/ws": "^8.2.2",
+    "axios": "^1.7.9",
     "eventsource": "^2.0.2",
     "glob": "^7.1.6",
     "humanize-duration": "^3.24.0",
