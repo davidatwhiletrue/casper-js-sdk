@@ -1,5 +1,4 @@
 import { jsonObject, jsonMember } from 'typedjson';
-import { Buffer } from 'buffer';
 import { concat } from '@ethersproject/bytes';
 
 import { PublicKey as Ed25519PublicKey } from './ed25519/PublicKey';
@@ -28,6 +27,14 @@ enum KeyAlgorithm {
   ED25519 = 1,
   SECP256K1 = 2
 }
+
+const SMALL_BYTES_COUNT = 75;
+// prettier-ignore
+const HEX_CHARS = [
+  '0', '1', '2', '3', '4', '5', '6', '7',
+  '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+  'A', 'B', 'C', 'D', 'E', 'F'
+];
 
 /**
  * Interface representing the internal structure of a public key, which includes
@@ -85,12 +92,33 @@ export class PublicKey {
   }
 
   /**
-   * Converts the public key to a hexadecimal string.
-   * @returns A hex string representation of the public key.
+   * Converts the public key to a hexadecimal string representation.
+   *
+   * @param checksummed - A boolean indicating whether to return a checksummed version of the hex string.
+   *   - `true`: Includes a checksum in the output.
+   *   - `false` (default): Returns the raw hexadecimal string without a checksum.
+   * @returns The hexadecimal string representation of the public key.
+   *   - If `checksummed` is `true`, the result includes a checksum.
+   *   - If `checksummed` is `false`, the raw hex string is returned.
+   * @throws {Error} If the public key is not initialized properly (i.e., `this.key` is missing).
    */
-  toHex(): string {
-    const bytes = this.bytes();
-    return Conversions.encodeBase16(bytes);
+  toHex(checksummed = false): string {
+    if (!this.key) {
+      throw new Error('Public key initialised incorrectly. Missing key');
+    }
+
+    const rawHex = `0${this.cryptoAlg}${Conversions.encodeBase16(
+      this.key.bytes()
+    )}`;
+
+    if (checksummed) {
+      const bytes = Conversions.decodeBase16(rawHex);
+      return (
+        PublicKey.encode(bytes.slice(0, 1)) + PublicKey.encode(bytes.slice(1))
+      );
+    }
+
+    return rawHex;
   }
 
   /**
@@ -123,9 +151,32 @@ export class PublicKey {
    * @param source - The hexadecimal string.
    * @returns A new PublicKey instance.
    */
-  static fromHex(source: string): PublicKey {
-    const buffer = Buffer.from(source, 'hex');
-    return PublicKey.fromBuffer(buffer);
+  // static fromHex(source: string): PublicKey {
+  //   const publicKeyHexBytes = Conversions.decodeBase16(source);
+  //
+  //   return PublicKey.fromBuffer(publicKeyHexBytes);
+  // }
+
+  /**
+   * Tries to decode PublicKey from its hex-representation.
+   * The hex format should be as produced by PublicKey.toHex
+   * @param publicKeyHex public key hex string contains key tag
+   * @param checksummed throws an Error if true and given string is not checksummed
+   */
+  static fromHex(publicKeyHex: string, checksummed = false): PublicKey {
+    if (publicKeyHex.length < 2) {
+      throw new Error('Public key error: too short');
+    }
+
+    if (!/^0(1[0-9a-fA-F]{64}|2[0-9a-fA-F]{66})$/.test(publicKeyHex)) {
+      throw new Error('Invalid public key');
+    }
+
+    if (checksummed && !PublicKey.isChecksummed(publicKeyHex)) {
+      throw Error('Provided public key is not checksummed.');
+    }
+
+    return PublicKey.fromBuffer(Conversions.decodeBase16(publicKeyHex));
   }
 
   /**
@@ -248,6 +299,60 @@ export class PublicKey {
 
     return { result: new PublicKey(alg, key), bytes };
   }
+
+  /**
+   * Verify a mixed-case hexadecimal string that it conforms to the checksum scheme
+   * similar to scheme in [EIP-55](https://eips.ethereum.org/EIPS/eip-55).
+   * Key differences:
+   * - Works on any length of (decoded) data up to `SMALL_BYTES_COUNT`, not just 20-byte addresses
+   * - Uses Blake2b hashes rather than Keccak
+   * - Uses hash bits rather than nibbles
+   * For backward compatibility: if the hex string is all uppercase or all lowercase, the check is
+   * skipped.
+   * @param input string to check if it is checksummed
+   * @returns true if input is checksummed
+   */
+  static isChecksummed = (input: string): boolean => {
+    const bytes = new Uint8Array(Buffer.from(input, 'hex'));
+
+    if (bytes.length > SMALL_BYTES_COUNT || isSameCase(input)) return true;
+
+    if (isValidPublicKey(input)) {
+      return (
+        input ===
+        PublicKey.encode(bytes.slice(0, 1)) + PublicKey.encode(bytes.slice(1))
+      );
+    }
+
+    return input === PublicKey.encode(bytes);
+  };
+
+  /**
+   * Returns the bytes encoded as hexadecimal with mixed-case based checksums following a scheme
+   * similar to [EIP-55](https://eips.ethereum.org/EIPS/eip-55).
+   * Key differences:
+   * - Works on any length of data, not just 20-byte addresses
+   * - Uses Blake2b hashes rather than Keccak
+   * - Uses hash bits rather than nibbles
+   * @param input Uint8Array to generate checksummed hex string
+   * @returns checksummed hex presentation string of input
+   */
+  static encode = (input: Uint8Array): string => {
+    const inputNibbles = bytesToNibbles(input);
+    const hashBits = bytesToBitsCycle(byteHash(input)).values();
+
+    const hexOutputString = inputNibbles.reduce((accum, nibble) => {
+      const c = HEX_CHARS[nibble];
+
+      if (/^[a-zA-Z()]+$/.test(c) && hashBits.next().value) {
+        return accum + c.toUpperCase();
+      } else {
+        return accum + c.toLowerCase();
+      }
+    }, '');
+
+    return hexOutputString;
+  };
 }
 
 /**
@@ -272,4 +377,30 @@ export class PublicKeyList {
   contains(target: PublicKey): boolean {
     return this.keys.some(key => key.equals(target));
   }
+}
+
+export function isSameCase(value: string) {
+  return /^[a-z0-9]+$|^[A-Z0-9]+$/.test(value);
+}
+
+export function isValidPublicKey(key: string) {
+  return /^0(1[0-9a-fA-F]{64}|2[0-9a-fA-F]{66})$/.test(key);
+}
+
+function bytesToNibbles(bytes: Uint8Array): Uint8Array {
+  const outputNibbles = bytes.reduce((accum, byte) => {
+    return concat([accum, Uint8Array.of(byte >>> 4, byte & 0x0f)]);
+  }, new Uint8Array());
+
+  return outputNibbles;
+}
+
+function bytesToBitsCycle(bytes: Uint8Array) {
+  const output: boolean[] = [];
+
+  for (let i = 0, k = 0; i < bytes.length; i++)
+    for (let j = 0; j < 8; j++)
+      output[k++] = ((bytes[i] >>> j) & 0x01) === 0x01;
+
+  return output;
 }
