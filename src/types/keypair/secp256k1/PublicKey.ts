@@ -25,7 +25,7 @@ export class PublicKey {
    * @returns A compressed `Uint8Array` representation of the public key.
    */
   bytes(): Uint8Array {
-    return secp256k1.Point.fromHex(this.key).toRawBytes(true);
+    return this.key;
   }
 
   /**
