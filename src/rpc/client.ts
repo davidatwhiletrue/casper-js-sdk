@@ -35,7 +35,7 @@ import {
   PurseIdentifier,
   RpcRequest
 } from './request';
-import { TransactionV1, Deploy, PublicKey } from '../types';
+import { Deploy, PublicKey, Transaction } from '../types';
 
 export interface ClientPOS {
   getLatestAuctionInfo(): Promise<StateGetAuctionInfoResult>;
@@ -226,7 +226,7 @@ export interface ClientInformational {
 
 export interface ClientTransactional {
   putDeploy(deploy: Deploy): Promise<PutDeployResult>;
-  putTransactionV1(transaction: TransactionV1): Promise<PutTransactionResult>;
+  putTransaction(transaction: Transaction): Promise<PutTransactionResult>;
 }
 
 export interface IClient

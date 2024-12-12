@@ -58,11 +58,10 @@ import {
 import { IDValue } from './id_value';
 import {
   TransactionHash,
-  TransactionV1,
-  TransactionWrapper,
   Deploy,
   PublicKey,
-  Hash
+  Hash,
+  Transaction
 } from '../types';
 
 export class RpcClient implements IClient {
@@ -903,12 +902,12 @@ export class RpcClient implements IClient {
     return result;
   }
 
-  async putTransactionV1(
-    transaction: TransactionV1
+  async putTransaction(
+    transaction: Transaction
   ): Promise<PutTransactionResult> {
     const serializer = new TypedJSON(PutTransactionRequest);
     const transactionRequestParam = new PutTransactionRequest(
-      new TransactionWrapper(undefined, transaction)
+      transaction.getTransactionWrapper()
     );
 
     const resp = await this.processRequest<PutTransactionRequest>(

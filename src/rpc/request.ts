@@ -385,10 +385,10 @@ export class PutDeployRequest {
 @jsonObject
 export class PutTransactionRequest {
   @jsonMember({ constructor: TransactionWrapper })
-  transaction: TransactionWrapper;
+  transactionWrapper: TransactionWrapper;
 
   constructor(transaction: TransactionWrapper) {
-    this.transaction = transaction;
+    this.transactionWrapper = transaction;
   }
 }
 
