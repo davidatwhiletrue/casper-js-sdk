@@ -85,8 +85,8 @@ export class Hash {
    * @throws Error if the byte array length does not match the expected hash length.
    */
   static fromBytes(source: Uint8Array): IResultWithBytes<Hash> {
-    if (source.length !== Hash.ByteHashLen) {
-      throw new Error('Key length is not equal to 32 bytes.');
+    if (source.length < Hash.ByteHashLen) {
+      throw new Error('Key length is less than 32 bytes.');
     }
 
     const hashBytes = source.subarray(0, Hash.ByteHashLen);

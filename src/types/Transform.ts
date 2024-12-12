@@ -72,7 +72,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteTransfer, otherwise `false`.
    */
   public isWriteTransfer(): boolean {
-    return this.data.includes('WriteTransfer');
+    return this.data.includes?.('WriteTransfer') ?? false;
   }
 
   /**
@@ -81,7 +81,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteAccount, otherwise `false`.
    */
   public isWriteAccount(): boolean {
-    return this.data.includes('WriteAccount');
+    return this.data.includes?.('WriteAccount') ?? false;
   }
 
   /**
@@ -99,7 +99,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteWithdraw, otherwise `false`.
    */
   public isWriteWithdraw(): boolean {
-    return this.data.includes('WriteWithdraw');
+    return this.data.includes?.('WriteWithdraw') ?? false;
   }
 
   /**
@@ -108,7 +108,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteUnbonding, otherwise `false`.
    */
   public isWriteUnbonding(): boolean {
-    return this.data.includes('WriteUnbonding');
+    return this.data.includes?.('WriteUnbonding') ?? false;
   }
 
   /**
@@ -117,7 +117,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteCLValue, otherwise `false`.
    */
   public isWriteCLValue(): boolean {
-    return this.data.includes('CLValue');
+    return this.data.includes?.('CLValue') ?? false;
   }
 
   /**
@@ -126,7 +126,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WritePackage, otherwise `false`.
    */
   public isWritePackage(): boolean {
-    return this.data.includes('"Package"');
+    return this.data.includes?.('"Package"') ?? false;
   }
 
   /**
@@ -135,7 +135,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteAddressableEntity, otherwise `false`.
    */
   public isWriteAddressableEntity(): boolean {
-    return this.data.includes('"AddressableEntity"');
+    return this.data.includes?.('"AddressableEntity"') ?? false;
   }
 
   /**
@@ -144,7 +144,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteBidKind, otherwise `false`.
    */
   public isWriteBidKind(): boolean {
-    return this.data.includes('"BidKind"');
+    return this.data.includes?.('"BidKind"') ?? false;
   }
 
   /**
@@ -153,7 +153,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteNamedKey, otherwise `false`.
    */
   public isWriteNamedKey(): boolean {
-    return this.data.includes('"NamedKey"');
+    return this.data.includes?.('"NamedKey"') ?? false;
   }
 
   /**
@@ -162,7 +162,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteMessage, otherwise `false`.
    */
   public isWriteMessage(): boolean {
-    return this.data.includes('"Message"');
+    return this.data.includes?.('"Message"') ?? false;
   }
 
   /**
@@ -171,7 +171,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteMessageTopic, otherwise `false`.
    */
   public isWriteMessageTopic(): boolean {
-    return this.data.includes('"MessageTopic"');
+    return this.data.includes?.('"MessageTopic"') ?? false;
   }
 
   /**
@@ -180,7 +180,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteBid, otherwise `false`.
    */
   public isWriteBid(): boolean {
-    return this.data.includes('WriteBid');
+    return this.data.includes?.('WriteBid') ?? false;
   }
 
   /**
@@ -189,7 +189,7 @@ export class TransformKind {
    * @returns `true` if the transformation is AddUInt512, otherwise `false`.
    */
   public isAddUint512(): boolean {
-    return this.data.includes('AddUInt512');
+    return this.data.includes?.('AddUInt512') ?? false;
   }
 
   /**
@@ -198,7 +198,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteDeployInfo, otherwise `false`.
    */
   public isWriteDeployInfo(): boolean {
-    return this.data.includes('WriteDeployInfo');
+    return this.data.includes?.('WriteDeployInfo') ?? false;
   }
 
   /**
