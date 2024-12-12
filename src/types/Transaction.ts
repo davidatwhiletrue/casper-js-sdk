@@ -404,7 +404,6 @@ export class Transaction {
    * @param entryPoint The entry point of the transaction.
    * @param scheduling The scheduling information for the transaction.
    * @param approvals The list of approvals for this transaction.
-   * @param category The category of the transaction, indicating its type (e.g., minting, auction).
    * @param originTransactionV1 The original TransactionV1, if applicable.
    * @param originDeployV1 The original deploy, if applicable.
    */
@@ -437,6 +436,18 @@ export class Transaction {
 
     this.originDeployV1 = originDeployV1;
     this.originTransactionV1 = originTransactionV1;
+
+    if (!(this.originDeployV1 || this.originTransactionV1)) {
+      throw new Error(
+        'Incorrect Transaction instance. Missing originTransactionV1 or originDeploy'
+      );
+    }
+
+    if (this.originDeployV1 && this.originTransactionV1) {
+      throw new Error(
+        'Incorrect Transaction instance. Should be only one of originTransactionV1 or originDeploy'
+      );
+    }
   }
 
   /**
@@ -453,6 +464,53 @@ export class Transaction {
    */
   public getTransactionV1(): TransactionV1 | undefined {
     return this.originTransactionV1;
+  }
+
+  public getTransactionWrapper(): TransactionWrapper {
+    return new TransactionWrapper(this.originDeployV1, this.originTransactionV1);
+  }
+
+  /**
+   * Validates the transaction by checking the transaction hash and the approval signatures.
+   * @throws {TransactionError} Throws errors if validation fails.
+   */
+  public validate(): boolean {
+    if (this.originTransactionV1) {
+      return this.originTransactionV1.validate();
+    } else if (this.originDeployV1) {
+      return this.originDeployV1.validate();
+    }
+
+    throw new Error('Incorrect Transaction instance. Missing origin value');
+  }
+
+  /**
+   * Signs the transaction using the provided private key.
+   * @param key The private key to sign the transaction.
+   */
+  async sign(key: PrivateKey): Promise<void> {
+    const signatureBytes = await key.sign(this.hash.toBytes());
+    this.setSignature(signatureBytes, key.publicKey);
+  }
+
+  /**
+   * Sets an already generated signature to the transaction.
+   * @param signature The Ed25519 or Secp256K1 signature.
+   * @param publicKey The public key used to generate the signature.
+   */
+  setSignature(signature: Uint8Array, publicKey: PublicKey) {
+    const hex = new HexBytes(signature);
+    const approval = new Approval(publicKey, hex);
+
+    this.approvals.push(approval);
+
+    if (this.originTransactionV1) {
+      this.originTransactionV1.approvals.push(approval);
+    } else if (this.originDeployV1) {
+      this.originDeployV1.approvals.push(approval);
+    } else {
+      throw new Error('Incorrect Transaction instance. Missing origin value');
+    }
   }
 
   /**
@@ -477,6 +535,36 @@ export class Transaction {
       undefined // originDeployV1 is not applicable for this method
     );
   }
+
+  /**
+   * Converts a `TransactionV1` to a `Transaction` object.
+   * @param deploy The `Deploy` to convert.
+   * @returns A new `Transaction` instance created from the given `Deploy`.
+   */
+  static fromDeploy(deploy: Deploy): Transaction {
+    return Deploy.newTransactionFromDeploy(deploy);
+  }
+
+  static fromJson(json: any): Transaction {
+    try {
+      const txV1 = TransactionV1.fromJSON(json);
+
+      return Transaction.fromTransactionV1(txV1);
+    } catch (e) {}
+
+    try {
+      const deploy = Deploy.fromJSON(json);
+
+      return Transaction.fromDeploy(deploy);
+    } catch (e) {}
+
+    throw new Error("The JSON can't be parsed as a Transaction.");
+  }
+
+  static toJSON(tx: Transaction) {
+    const serializer = new TypedJSON(Transaction);
+    return serializer.toPlainJson(tx);
+  }
 }
 
 /**
@@ -489,7 +577,7 @@ export class TransactionWrapper {
    * The deployment object associated with the transaction, if applicable.
    * This will contain the details of the deploy transaction.
    */
-  @jsonMember({ name: 'Deploy', constructor: () => Deploy })
+  @jsonMember(() => Deploy, { name: 'Deploy' })
   deploy?: Deploy;
 
   /**
@@ -507,6 +595,11 @@ export class TransactionWrapper {
   constructor(deploy?: Deploy, transactionV1?: TransactionV1) {
     this.deploy = deploy;
     this.transactionV1 = transactionV1;
+  }
+
+  static toJSON(wrapper: TransactionWrapper) {
+    const serializer = new TypedJSON(TransactionWrapper);
+    return serializer.toPlainJson(wrapper);
   }
 }
 

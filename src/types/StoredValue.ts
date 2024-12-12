@@ -154,8 +154,8 @@ export class StoredValue {
   /**
    * Stores location, type and data for a gas pre-payment.
    */
-  @jsonMember({ name: 'Prepaid', constructor: PrepaymentKind })
-  prepaid?: PrepaymentKind;
+  @jsonMember({ name: 'Prepayment', constructor: PrepaymentKind })
+  prepayment?: PrepaymentKind;
 
   /**
    * The stored entry point value, typically representing an entry point in a smart contract.

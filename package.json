@@ -1,6 +1,6 @@
 {
   "name": "casper-js-sdk",
-  "version": "5.0.0-rc6",
+  "version": "5.0.0-rc7",
   "license": "Apache 2.0",
   "description": "SDK to interact with the Casper blockchain",
   "homepage": "https://github.com/casper-ecosystem/casper-js-sdk#README.md",
@@ -120,6 +120,7 @@
     "@scure/bip32": "^1.1.5",
     "@scure/bip39": "^1.2.0",
     "@types/ws": "^8.2.2",
+    "axios": "^1.7.9",
     "eventsource": "^2.0.2",
     "glob": "^7.1.6",
     "humanize-duration": "^3.24.0",

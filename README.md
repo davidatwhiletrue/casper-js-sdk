@@ -176,12 +176,14 @@ const transactionPayload = TransactionV1Payload.build({
   pricingMode
 });
 
-const transaction = TransactionV1.makeTransactionV1(
+const transactionV1 = TransactionV1.makeTransactionV1(
   transactionPayload
 );
-await transaction.sign(privateKey);
+await transactionV1.sign(privateKey);
 
-const result = await rpcClient.putTransactionV1(transaction);
+const tx = Transaction.fromTransactionV1(transactionV1);
+
+const result = await rpcClient.putTransaction(tx);
 
 console.log(`Transaction Hash: ${result.transactionHash}`);
 ```
