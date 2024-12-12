@@ -384,11 +384,14 @@ export class PutDeployRequest {
 
 @jsonObject
 export class PutTransactionRequest {
-  @jsonMember({ constructor: TransactionWrapper })
-  transactionWrapper: TransactionWrapper;
+  @jsonMember({
+    constructor: TransactionWrapper,
+    serializer: val => TransactionWrapper.toJSON(val)
+  })
+  transaction: TransactionWrapper;
 
   constructor(transaction: TransactionWrapper) {
-    this.transactionWrapper = transaction;
+    this.transaction = transaction;
   }
 }
 

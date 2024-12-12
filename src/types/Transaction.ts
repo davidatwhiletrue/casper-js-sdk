@@ -560,6 +560,11 @@ export class Transaction {
 
     throw new Error("The JSON can't be parsed as a Transaction.");
   }
+
+  static toJSON(tx: Transaction) {
+    const serializer = new TypedJSON(Transaction);
+    return serializer.toPlainJson(tx);
+  }
 }
 
 /**
@@ -572,7 +577,7 @@ export class TransactionWrapper {
    * The deployment object associated with the transaction, if applicable.
    * This will contain the details of the deploy transaction.
    */
-  @jsonMember({ name: 'Deploy', constructor: () => Deploy })
+  @jsonMember(() => Deploy, { name: 'Deploy' })
   deploy?: Deploy;
 
   /**
@@ -590,6 +595,11 @@ export class TransactionWrapper {
   constructor(deploy?: Deploy, transactionV1?: TransactionV1) {
     this.deploy = deploy;
     this.transactionV1 = transactionV1;
+  }
+
+  static toJSON(wrapper: TransactionWrapper) {
+    const serializer = new TypedJSON(TransactionWrapper);
+    return serializer.toPlainJson(wrapper);
   }
 }
 

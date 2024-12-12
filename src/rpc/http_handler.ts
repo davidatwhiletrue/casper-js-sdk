@@ -56,7 +56,7 @@ export class HttpHandler implements IHandler {
     };
 
     try {
-      const response = await this.httpClient.request(config);
+      const response = await this.httpClient.request<RpcResponse>(config);
 
       if (response.status < 200 || response.status >= 300) {
         throw new HttpError(response.status, new Error(response.statusText));
