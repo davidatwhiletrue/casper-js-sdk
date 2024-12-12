@@ -63,6 +63,7 @@ import {
   Hash,
   Transaction
 } from '../types';
+import { HttpError } from './error';
 
 export class RpcClient implements IClient {
   private handler: IHandler;
@@ -1283,13 +1284,9 @@ export class RpcClient implements IClient {
     const resp = await this.handler.processCall(request);
 
     if (resp.error) {
-      throw new Error(`RPC call failed, details: ${resp.error.message}`);
+      throw new HttpError(resp.error.code, resp.error);
     }
 
-    try {
-      return resp;
-    } catch (err) {
-      throw new Error(`Error parsing result: ${err.message}`);
-    }
+    return resp;
   }
 }

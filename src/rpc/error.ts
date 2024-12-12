@@ -20,24 +20,30 @@ export class RpcError extends Error {
 }
 
 @jsonObject
-export class HttpError extends Error {
+export class HttpError<T extends Error = Error> extends Error {
   @jsonMember({ constructor: Error })
-  sourceErr: Error;
+  sourceErr: T;
 
   @jsonMember({ constructor: Number })
   statusCode: number;
 
-  constructor(statusCode = 0, sourceErr: Error = new Error()) {
+  constructor(statusCode = 0, sourceErr: T) {
     super(`Code: ${statusCode}, err: ${sourceErr.message}`);
     this.sourceErr = sourceErr;
     this.statusCode = statusCode;
   }
 
-  unwrap(): Error {
+  unwrap(): T {
     return this.sourceErr;
   }
 
   isNotFound(): boolean {
     return this.statusCode === 404;
+  }
+
+  static isHttpError<E extends Error = Error>(
+    err: any | HttpError<E>
+  ): err is HttpError<E> {
+    return err?.statusCode && err.sourceErr;
   }
 }
