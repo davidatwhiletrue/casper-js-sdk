@@ -1,30 +1,12 @@
 import * as secp256k1 from '@noble/secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
+import { PrivateKeyInternal } from "../PrivateKey";
 
 /** PEM prefix for a private key. */
 const PemPrivateKeyPrefix = '-----BEGIN PRIVATE KEY-----';
 
 /** PEM suffix for a private key. */
 const PemPrivateKeySuffix = '-----END PRIVATE KEY-----';
-
-/**
- * Interface representing the structure and methods of a private key, including
- * functions to retrieve public key bytes, sign messages, and export to PEM format.
- */
-interface PrivateKeyInternal {
-  /** Retrieves the public key bytes. */
-  publicKeyBytes(): Promise<Uint8Array>;
-
-  /**
-   * Signs a message using the private key.
-   * @param message - The message to sign.
-   * @returns A promise resolving to the signature bytes.
-   */
-  sign(message: Uint8Array): Promise<Uint8Array>;
-
-  /** Converts the private key to PEM format. */
-  toPem(): string;
-}
 
 /**
  * Represents a secp256k1 private key, supporting key generation, signing, and PEM encoding.
@@ -65,6 +47,10 @@ export class PrivateKey implements PrivateKeyInternal {
    */
   async getPublicKeyBytes(): Promise<Uint8Array> {
     return secp256k1.getPublicKey(this.key, true);
+  }
+
+  toBytes(): Uint8Array {
+    return this.key;
   }
 
   /**

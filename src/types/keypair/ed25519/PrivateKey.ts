@@ -1,23 +1,5 @@
 import * as ed25519 from '@noble/ed25519';
-
-/**
- * Interface representing the structure and methods of a private key, including
- * functions to retrieve public key bytes, sign messages, and export to PEM format.
- */
-interface PrivateKeyInternal {
-  /** Retrieves the public key bytes. */
-  publicKeyBytes(): Promise<Uint8Array>;
-
-  /**
-   * Signs a message using the private key.
-   * @param message - The message to sign.
-   * @returns A promise that resolves to the signature bytes.
-   */
-  sign(message: Uint8Array): Promise<Uint8Array>;
-
-  /** Converts the private key to PEM format. */
-  toPem(): string;
-}
+import { PrivateKeyInternal } from "../PrivateKey";
 
 /**
  * Represents an Ed25519 private key, supporting key generation, signing, and PEM encoding.
@@ -53,6 +35,10 @@ export class PrivateKey implements PrivateKeyInternal {
    */
   async publicKeyBytes(): Promise<Uint8Array> {
     return ed25519.getPublicKey(this.key);
+  }
+
+  toBytes(): Uint8Array {
+    return this.key;
   }
 
   /**

@@ -5,12 +5,13 @@ import { PrivateKey as Ed25519PrivateKey } from './ed25519/PrivateKey';
 import { PrivateKey as Secp256k1PrivateKey } from './secp256k1/PrivateKey';
 
 /**
- * Interface representing the structure of a private key, with methods for
- * obtaining the public key, signing messages, and exporting to PEM format.
+ * Interface representing the structure and methods of a private key, including
+ * functions to retrieve public key bytes, sign messages, and export to PEM format.
  */
-interface PrivateKeyInternal {
+export interface PrivateKeyInternal {
   /** Retrieves the public key bytes. */
   publicKeyBytes(): Promise<Uint8Array>;
+  toBytes(): Uint8Array;
 
   /**
    * Signs a message using the private key.
@@ -55,6 +56,10 @@ export class PrivateKey {
     this.alg = alg;
     this.pub = pub;
     this.priv = priv;
+  }
+
+  toBytes(): Uint8Array {
+    return this.priv.toBytes();
   }
 
   /**
