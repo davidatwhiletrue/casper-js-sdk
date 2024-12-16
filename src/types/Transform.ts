@@ -72,7 +72,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteTransfer, otherwise `false`.
    */
   public isWriteTransfer(): boolean {
-    return this.data.includes?.('WriteTransfer') ?? false;
+    return this.isTransformation('WriteTransfer');
   }
 
   /**
@@ -81,7 +81,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteAccount, otherwise `false`.
    */
   public isWriteAccount(): boolean {
-    return this.data.includes?.('WriteAccount') ?? false;
+    return this.isTransformation('WriteAccount');
   }
 
   /**
@@ -90,7 +90,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteContract, otherwise `false`.
    */
   public isWriteContract(): boolean {
-    return this.data === '"WriteContract"';
+    return this.isTransformation('WriteContract');
   }
 
   /**
@@ -99,7 +99,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteWithdraw, otherwise `false`.
    */
   public isWriteWithdraw(): boolean {
-    return this.data.includes?.('WriteWithdraw') ?? false;
+    return this.isTransformation('WriteWithdraw');
   }
 
   /**
@@ -108,7 +108,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteUnbonding, otherwise `false`.
    */
   public isWriteUnbonding(): boolean {
-    return this.data.includes?.('WriteUnbonding') ?? false;
+    return this.isTransformation('WriteUnbonding');
   }
 
   /**
@@ -117,7 +117,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteCLValue, otherwise `false`.
    */
   public isWriteCLValue(): boolean {
-    return this.data.includes?.('CLValue') ?? false;
+    return this.isTransformation('CLValue');
   }
 
   /**
@@ -126,7 +126,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WritePackage, otherwise `false`.
    */
   public isWritePackage(): boolean {
-    return this.data.includes?.('"Package"') ?? false;
+    return this.isTransformation('Package');
   }
 
   /**
@@ -135,7 +135,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteAddressableEntity, otherwise `false`.
    */
   public isWriteAddressableEntity(): boolean {
-    return this.data.includes?.('"AddressableEntity"') ?? false;
+    return this.isTransformation('AddressableEntity');
   }
 
   /**
@@ -144,7 +144,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteBidKind, otherwise `false`.
    */
   public isWriteBidKind(): boolean {
-    return this.data.includes?.('"BidKind"') ?? false;
+    return this.isTransformation('BidKind');
   }
 
   /**
@@ -153,7 +153,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteNamedKey, otherwise `false`.
    */
   public isWriteNamedKey(): boolean {
-    return this.data.includes?.('"NamedKey"') ?? false;
+    return this.isTransformation('NamedKey');
   }
 
   /**
@@ -162,7 +162,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteMessage, otherwise `false`.
    */
   public isWriteMessage(): boolean {
-    return this.data.includes?.('"Message"') ?? false;
+    return this.isTransformation('Message');
   }
 
   /**
@@ -171,7 +171,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteMessageTopic, otherwise `false`.
    */
   public isWriteMessageTopic(): boolean {
-    return this.data.includes?.('"MessageTopic"') ?? false;
+    return this.isTransformation('MessageTopic');
   }
 
   /**
@@ -180,7 +180,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteBid, otherwise `false`.
    */
   public isWriteBid(): boolean {
-    return this.data.includes?.('WriteBid') ?? false;
+    return this.isTransformation('WriteBid');
   }
 
   /**
@@ -189,7 +189,7 @@ export class TransformKind {
    * @returns `true` if the transformation is AddUInt512, otherwise `false`.
    */
   public isAddUint512(): boolean {
-    return this.data.includes?.('AddUInt512') ?? false;
+    return this.isTransformation('AddUInt512');
   }
 
   /**
@@ -198,7 +198,7 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteDeployInfo, otherwise `false`.
    */
   public isWriteDeployInfo(): boolean {
-    return this.data.includes?.('WriteDeployInfo') ?? false;
+    return this.isTransformation('WriteDeployInfo');
   }
 
   /**
@@ -397,6 +397,22 @@ export class TransformKind {
     }
 
     return jsonRes2.Write?.CLValue;
+  }
+
+  /**
+   * Checks if `TransformKind` has the transformation specified by name.
+   *
+   * @param `name` - transformation name (aka WriteTransfer)
+   * @returns `true` if the transformation is a WriteTransfer, otherwise `false`.
+   */
+  public isTransformation(name: string): boolean {
+    if (typeof this.data === 'string') {
+      return this.data.includes(name);
+    } else if (typeof this.data === 'object') {
+      return Object.keys(this.data).some(key => key.includes(name));
+    }
+
+    return false;
   }
 }
 
