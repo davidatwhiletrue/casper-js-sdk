@@ -58,7 +58,7 @@ export class PrivateKey implements PrivateKeyInternal {
    * @throws Error if the byte array length is not 64.
    */
   static fromBytes(key: Uint8Array): PrivateKey {
-    if (key.length !== 64) {
+    if (key.length !== 32) {
       throw new Error(`Invalid key size: expected 64 bytes, got ${key.length}`);
     }
     return new PrivateKey(key);
@@ -72,9 +72,9 @@ export class PrivateKey implements PrivateKeyInternal {
    * @throws Error if the hex string length is not 128 characters.
    */
   static fromHex(keyHex: string): PrivateKey {
-    if (keyHex.length !== 128) {
+    if (keyHex.length !== 64) {
       throw new Error(
-        `Invalid hex string length: expected 128 characters, got ${keyHex.length}`
+        `Invalid hex string length: expected 64 characters, got ${keyHex.length}`
       );
     }
     const keyBytes = Buffer.from(keyHex, 'hex');
