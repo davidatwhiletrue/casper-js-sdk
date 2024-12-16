@@ -1,23 +1,5 @@
 import * as ed25519 from '@noble/ed25519';
-
-/**
- * Interface representing the structure and methods of a private key, including
- * functions to retrieve public key bytes, sign messages, and export to PEM format.
- */
-interface PrivateKeyInternal {
-  /** Retrieves the public key bytes. */
-  publicKeyBytes(): Promise<Uint8Array>;
-
-  /**
-   * Signs a message using the private key.
-   * @param message - The message to sign.
-   * @returns A promise that resolves to the signature bytes.
-   */
-  sign(message: Uint8Array): Promise<Uint8Array>;
-
-  /** Converts the private key to PEM format. */
-  toPem(): string;
-}
+import { PrivateKeyInternal } from "../PrivateKey";
 
 /**
  * Represents an Ed25519 private key, supporting key generation, signing, and PEM encoding.
@@ -55,6 +37,10 @@ export class PrivateKey implements PrivateKeyInternal {
     return ed25519.getPublicKey(this.key);
   }
 
+  toBytes(): Uint8Array {
+    return this.key;
+  }
+
   /**
    * Signs a message using the private key.
    * @param message - The message to sign.
@@ -72,7 +58,7 @@ export class PrivateKey implements PrivateKeyInternal {
    * @throws Error if the byte array length is not 64.
    */
   static fromBytes(key: Uint8Array): PrivateKey {
-    if (key.length !== 64) {
+    if (key.length !== 32) {
       throw new Error(`Invalid key size: expected 64 bytes, got ${key.length}`);
     }
     return new PrivateKey(key);
@@ -86,9 +72,9 @@ export class PrivateKey implements PrivateKeyInternal {
    * @throws Error if the hex string length is not 128 characters.
    */
   static fromHex(keyHex: string): PrivateKey {
-    if (keyHex.length !== 128) {
+    if (keyHex.length !== 64) {
       throw new Error(
-        `Invalid hex string length: expected 128 characters, got ${keyHex.length}`
+        `Invalid hex string length: expected 64 characters, got ${keyHex.length}`
       );
     }
     const keyBytes = Buffer.from(keyHex, 'hex');

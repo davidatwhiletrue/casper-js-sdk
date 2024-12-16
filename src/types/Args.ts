@@ -127,6 +127,10 @@ export class Args {
   })
   public args: Map<string, CLValue>;
 
+  public getByName(argName: string): CLValue | undefined {
+    return this.args.get(argName);
+  }
+
   /**
    * Creates an instance of `Args` from a map of arguments.
    * @param args - A map containing argument names as keys and `CLValue` instances as values.

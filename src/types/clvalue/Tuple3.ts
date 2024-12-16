@@ -54,7 +54,7 @@ export class CLValueTuple3 {
    * Retrieves the values of the tuple as an array.
    * @returns An array containing the three CLValues of the tuple.
    */
-  public getValue(): [CLValue, CLValue, CLValue] {
+  public value(): [CLValue, CLValue, CLValue] {
     return [this.inner1, this.inner2, this.inner3];
   }
 
