@@ -13,6 +13,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+## [5.0.0-rc8] - 2024-12-16
+
+### Added
+
+- `makeCep18TransferDeploy` and `makeNftTransferDeploy` utils
+- `PrivateKey.toBytes` method
+- Rename Key's TypeID to KeyTypeID
+- Add initial list values to `CLValueList.newCLList`
+- `Args.getByName` getter
+- Remove unused `Effects` class
+- Improvements for `TransformKind` transformation parsing
+
+### Fixed
+
+- Issue with `ed25519` private key length
+
+## [5.0.0-rc7] - 2024-12-13
+
+### Added
+
+- Checksummed `PublicKey` hex
+- Improvements in `Transaction` creation from JSON
+- Ability to send `Deploy` with the `RPC.putTransaction` method
+- Renamed `StoredValue.prepaid` to `StoredValue.prepayment`
+- Improvements in RPC client error processing
+
+### Fixed
+
+- Issue with implicit `axios` dependency
+- Issue with `secp256k1` bytes
+- Issue with `StepPayload.executionEffects` annotations
+- Issue with `ExecutionResult` parsing from JSON
+
 ## [5.0.0-rc6] - 2024-12-08
 
 ### Added
