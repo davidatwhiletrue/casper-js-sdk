@@ -52,7 +52,7 @@ export enum PrefixName {
 /**
  * Enum representing different types of blockchain key types used in the system.
  */
-const enum TypeID {
+export const enum KeyTypeID {
   Account = 0,
   Hash,
   URef,
@@ -101,54 +101,54 @@ export enum KeyTypeName {
 }
 
 /**
- * Mapping of key type names to their corresponding TypeID values.
+ * Mapping of key type names to their corresponding KeyTypeID values.
  */
-export const typeIDbyNames = new Map<KeyTypeName, TypeID>([
-  [KeyTypeName.Account, TypeID.Account],
-  [KeyTypeName.Hash, TypeID.Hash],
-  [KeyTypeName.URef, TypeID.URef],
-  [KeyTypeName.Transfer, TypeID.Transfer],
-  [KeyTypeName.Deploy, TypeID.DeployInfo],
-  [KeyTypeName.Era, TypeID.EraId],
-  [KeyTypeName.Bid, TypeID.Bid],
-  [KeyTypeName.Balance, TypeID.Balance],
-  [KeyTypeName.Withdraw, TypeID.Withdraw],
-  [KeyTypeName.Dictionary, TypeID.Dictionary],
-  [KeyTypeName.SystemContractRegistry, TypeID.SystemContractRegistry],
-  [KeyTypeName.EraSummary, TypeID.EraSummary],
-  [KeyTypeName.Unbond, TypeID.Unbond],
-  [KeyTypeName.ChainspecRegistry, TypeID.ChainspecRegistry],
-  [KeyTypeName.ChecksumRegistry, TypeID.ChecksumRegistry]
+export const typeIDbyNames = new Map<KeyTypeName, KeyTypeID>([
+  [KeyTypeName.Account, KeyTypeID.Account],
+  [KeyTypeName.Hash, KeyTypeID.Hash],
+  [KeyTypeName.URef, KeyTypeID.URef],
+  [KeyTypeName.Transfer, KeyTypeID.Transfer],
+  [KeyTypeName.Deploy, KeyTypeID.DeployInfo],
+  [KeyTypeName.Era, KeyTypeID.EraId],
+  [KeyTypeName.Bid, KeyTypeID.Bid],
+  [KeyTypeName.Balance, KeyTypeID.Balance],
+  [KeyTypeName.Withdraw, KeyTypeID.Withdraw],
+  [KeyTypeName.Dictionary, KeyTypeID.Dictionary],
+  [KeyTypeName.SystemContractRegistry, KeyTypeID.SystemContractRegistry],
+  [KeyTypeName.EraSummary, KeyTypeID.EraSummary],
+  [KeyTypeName.Unbond, KeyTypeID.Unbond],
+  [KeyTypeName.ChainspecRegistry, KeyTypeID.ChainspecRegistry],
+  [KeyTypeName.ChecksumRegistry, KeyTypeID.ChecksumRegistry]
 ]);
 
 /**
- * Mapping of blockchain key prefixes to their corresponding TypeID values.
+ * Mapping of blockchain key prefixes to their corresponding KeyKeyTypeID values.
  */
-export const keyIDbyPrefix = new Map<PrefixName, TypeID>([
-  [PrefixName.Account, TypeID.Account],
-  [PrefixName.Hash, TypeID.Hash],
-  [PrefixName.Transfer, TypeID.Transfer],
-  [PrefixName.URef, TypeID.URef],
-  [PrefixName.DeployInfo, TypeID.DeployInfo],
-  [PrefixName.EraId, TypeID.EraId],
-  [PrefixName.Bid, TypeID.Bid],
-  [PrefixName.Balance, TypeID.Balance],
-  [PrefixName.Withdraw, TypeID.Withdraw],
-  [PrefixName.Dictionary, TypeID.Dictionary],
-  [PrefixName.SystemContractRegistry, TypeID.SystemContractRegistry],
-  [PrefixName.EraSummary, TypeID.EraSummary],
-  [PrefixName.Unbond, TypeID.Unbond],
-  [PrefixName.ChainspecRegistry, TypeID.ChainspecRegistry],
-  [PrefixName.ChecksumRegistry, TypeID.ChecksumRegistry],
-  [PrefixName.BidAddr, TypeID.BidAddr],
-  [PrefixName.Package, TypeID.Package],
-  [PrefixName.Entity, TypeID.AddressableEntity],
-  [PrefixName.ByteCode, TypeID.ByteCode],
-  [PrefixName.Message, TypeID.Message],
-  [PrefixName.NamedKey, TypeID.NamedKey],
-  [PrefixName.BlockGlobal, TypeID.BlockGlobal],
-  [PrefixName.BalanceHold, TypeID.BalanceHold],
-  [PrefixName.EntryPoint, TypeID.EntryPoint]
+export const keyIDbyPrefix = new Map<PrefixName, KeyTypeID>([
+  [PrefixName.Account, KeyTypeID.Account],
+  [PrefixName.Hash, KeyTypeID.Hash],
+  [PrefixName.Transfer, KeyTypeID.Transfer],
+  [PrefixName.URef, KeyTypeID.URef],
+  [PrefixName.DeployInfo, KeyTypeID.DeployInfo],
+  [PrefixName.EraId, KeyTypeID.EraId],
+  [PrefixName.Bid, KeyTypeID.Bid],
+  [PrefixName.Balance, KeyTypeID.Balance],
+  [PrefixName.Withdraw, KeyTypeID.Withdraw],
+  [PrefixName.Dictionary, KeyTypeID.Dictionary],
+  [PrefixName.SystemContractRegistry, KeyTypeID.SystemContractRegistry],
+  [PrefixName.EraSummary, KeyTypeID.EraSummary],
+  [PrefixName.Unbond, KeyTypeID.Unbond],
+  [PrefixName.ChainspecRegistry, KeyTypeID.ChainspecRegistry],
+  [PrefixName.ChecksumRegistry, KeyTypeID.ChecksumRegistry],
+  [PrefixName.BidAddr, KeyTypeID.BidAddr],
+  [PrefixName.Package, KeyTypeID.Package],
+  [PrefixName.Entity, KeyTypeID.AddressableEntity],
+  [PrefixName.ByteCode, KeyTypeID.ByteCode],
+  [PrefixName.Message, KeyTypeID.Message],
+  [PrefixName.NamedKey, KeyTypeID.NamedKey],
+  [PrefixName.BlockGlobal, KeyTypeID.BlockGlobal],
+  [PrefixName.BalanceHold, KeyTypeID.BalanceHold],
+  [PrefixName.EntryPoint, KeyTypeID.EntryPoint]
 ]);
 
 /**
@@ -162,7 +162,7 @@ export const KEY_DEFAULT_BYTE_LENGTH = 32;
 @jsonObject
 export class Key {
   @jsonMember({ name: 'Type', constructor: Number })
-  type: TypeID;
+  type: KeyTypeID;
 
   @jsonMember({
     name: 'Account',
@@ -316,56 +316,56 @@ export class Key {
     const typeBytes = new Uint8Array([this.type]);
 
     switch (this.type) {
-      case TypeID.Balance:
+      case KeyTypeID.Balance:
         return Key.concatBytes(typeBytes, this.balance?.toBytes());
-      case TypeID.Bid:
+      case KeyTypeID.Bid:
         return Key.concatBytes(typeBytes, this.bid?.toBytes());
-      case TypeID.Withdraw:
+      case KeyTypeID.Withdraw:
         return Key.concatBytes(typeBytes, this.withdraw?.toBytes());
-      case TypeID.SystemContractRegistry:
+      case KeyTypeID.SystemContractRegistry:
         return Key.concatBytes(
           typeBytes,
           this.systemContactRegistry?.toBytes()
         );
-      case TypeID.Unbond:
+      case KeyTypeID.Unbond:
         return Key.concatBytes(typeBytes, this.unbond?.toBytes());
-      case TypeID.ChainspecRegistry:
+      case KeyTypeID.ChainspecRegistry:
         return Key.concatBytes(typeBytes, this.chainspecRegistry?.toBytes());
-      case TypeID.ChecksumRegistry:
+      case KeyTypeID.ChecksumRegistry:
         return Key.concatBytes(typeBytes, this.checksumRegistry?.toBytes());
-      case TypeID.EraSummary:
+      case KeyTypeID.EraSummary:
         return Key.concatBytes(typeBytes, this.eraSummary?.toBytes());
-      case TypeID.Account:
+      case KeyTypeID.Account:
         return Key.concatBytes(typeBytes, this.account?.toBytes());
-      case TypeID.Hash:
+      case KeyTypeID.Hash:
         return Key.concatBytes(typeBytes, this.hash?.toBytes());
-      case TypeID.EraId:
+      case KeyTypeID.EraId:
         return Key.concatBytes(typeBytes, this.era?.toBytes());
-      case TypeID.URef:
+      case KeyTypeID.URef:
         return Key.concatBytes(typeBytes, this.uRef?.data);
-      case TypeID.Transfer:
+      case KeyTypeID.Transfer:
         return Key.concatBytes(typeBytes, this.transfer?.toBytes());
-      case TypeID.DeployInfo:
+      case KeyTypeID.DeployInfo:
         return Key.concatBytes(typeBytes, this.deploy?.toBytes());
-      case TypeID.Dictionary:
+      case KeyTypeID.Dictionary:
         return Key.concatBytes(typeBytes, this.dictionary?.toBytes());
-      case TypeID.BidAddr:
+      case KeyTypeID.BidAddr:
         return Key.concatBytes(typeBytes, this.bidAddr?.toBytes());
-      case TypeID.Package:
+      case KeyTypeID.Package:
         return Key.concatBytes(typeBytes, this.package?.toBytes());
-      case TypeID.AddressableEntity:
+      case KeyTypeID.AddressableEntity:
         return Key.concatBytes(typeBytes, this.addressableEntity?.toBytes());
-      case TypeID.ByteCode:
+      case KeyTypeID.ByteCode:
         return Key.concatBytes(typeBytes, this.byteCode?.toBytes());
-      case TypeID.Message:
+      case KeyTypeID.Message:
         return Key.concatBytes(typeBytes, this.message?.toBytes());
-      case TypeID.NamedKey:
+      case KeyTypeID.NamedKey:
         return Key.concatBytes(typeBytes, this.namedKey?.toBytes());
-      case TypeID.BlockGlobal:
+      case KeyTypeID.BlockGlobal:
         return Key.concatBytes(typeBytes, this.blockGlobal?.toBytes());
-      case TypeID.BalanceHold:
+      case KeyTypeID.BalanceHold:
         return Key.concatBytes(typeBytes, this.balanceHold?.toBytes());
-      case TypeID.EntryPoint:
+      case KeyTypeID.EntryPoint:
         return Key.concatBytes(typeBytes, this.entryPoint?.toBytes());
       default:
         return new Uint8Array();
@@ -394,59 +394,59 @@ export class Key {
    */
   toPrefixedString(): string {
     switch (this.type) {
-      case TypeID.Account:
+      case KeyTypeID.Account:
         return this.account!.toPrefixedString();
-      case TypeID.Hash:
+      case KeyTypeID.Hash:
         return `${PrefixName.Hash}${this.hash?.toHex()}`;
-      case TypeID.EraId:
+      case KeyTypeID.EraId:
         return `${PrefixName.EraId}${this.era?.toString()}`;
-      case TypeID.URef:
+      case KeyTypeID.URef:
         return this.uRef!.toPrefixedString();
-      case TypeID.Transfer:
+      case KeyTypeID.Transfer:
         return this.transfer!.toPrefixedString();
-      case TypeID.DeployInfo:
+      case KeyTypeID.DeployInfo:
         return `${PrefixName.DeployInfo}${this.deploy!.toHex()}`;
-      case TypeID.Dictionary:
+      case KeyTypeID.Dictionary:
         return `${PrefixName.Dictionary}${this.dictionary!.toHex()}`;
-      case TypeID.Balance:
+      case KeyTypeID.Balance:
         return `${PrefixName.Balance}${this.balance!.toHex()}`;
-      case TypeID.Bid:
+      case KeyTypeID.Bid:
         return `${PrefixName.Bid}${this.bid!.toHex()}`;
-      case TypeID.Withdraw:
+      case KeyTypeID.Withdraw:
         return `${PrefixName.Withdraw}${this.withdraw!.toHex()}`;
-      case TypeID.SystemContractRegistry:
+      case KeyTypeID.SystemContractRegistry:
         return `${
           PrefixName.SystemContractRegistry
         }${this.systemContactRegistry!.toHex()}`;
-      case TypeID.EraSummary:
+      case KeyTypeID.EraSummary:
         return `${PrefixName.EraSummary}${this.eraSummary!.toHex()}`;
-      case TypeID.Unbond:
+      case KeyTypeID.Unbond:
         return `${PrefixName.Unbond}${this.unbond!.toHex()}`;
-      case TypeID.ChainspecRegistry:
+      case KeyTypeID.ChainspecRegistry:
         return `${
           PrefixName.ChainspecRegistry
         }${this.chainspecRegistry!.toHex()}`;
-      case TypeID.ChecksumRegistry:
+      case KeyTypeID.ChecksumRegistry:
         return `${
           PrefixName.ChecksumRegistry
         }${this.checksumRegistry!.toHex()}`;
-      case TypeID.BidAddr:
+      case KeyTypeID.BidAddr:
         return this.bidAddr!.toPrefixedString();
-      case TypeID.Package:
+      case KeyTypeID.Package:
         return `${PrefixName.Package}${this.package!.toHex()}`;
-      case TypeID.AddressableEntity:
+      case KeyTypeID.AddressableEntity:
         return this.addressableEntity!.toPrefixedString();
-      case TypeID.ByteCode:
+      case KeyTypeID.ByteCode:
         return this.byteCode!.toPrefixedString();
-      case TypeID.Message:
+      case KeyTypeID.Message:
         return this.message!.toPrefixedString();
-      case TypeID.NamedKey:
+      case KeyTypeID.NamedKey:
         return this.namedKey!.toPrefixedString();
-      case TypeID.BlockGlobal:
+      case KeyTypeID.BlockGlobal:
         return this.blockGlobal!.toPrefixedString();
-      case TypeID.BalanceHold:
+      case KeyTypeID.BalanceHold:
         return this.balanceHold!.toPrefixedString();
-      case TypeID.EntryPoint:
+      case KeyTypeID.EntryPoint:
         return this.entryPoint!.toPrefixedString();
       default:
         return '';
@@ -468,44 +468,44 @@ export class Key {
    * @throws Error if deserialization fails.
    */
   public static fromBytes(bytes: Uint8Array): IResultWithBytes<Key> {
-    const keyType = bytes[0] as TypeID;
+    const keyType = bytes[0] as KeyTypeID;
     const contentBytes = bytes.subarray(1);
 
     const result = new Key();
     result.type = keyType;
 
     switch (keyType) {
-      case TypeID.Account:
+      case KeyTypeID.Account:
         const accountHash = Hash.fromBytes(contentBytes);
         result.account = new AccountHash(accountHash?.result);
         return { result, bytes: accountHash?.bytes };
-      case TypeID.Hash:
+      case KeyTypeID.Hash:
         const hashParsed = Hash.fromBytes(contentBytes);
         result.hash = hashParsed?.result;
         return { result, bytes: hashParsed?.bytes };
-      case TypeID.URef:
+      case KeyTypeID.URef:
         const uref = URef.fromBytes(contentBytes);
         result.uRef = uref?.result;
         return { result, bytes: uref?.bytes };
-      case TypeID.Transfer:
+      case KeyTypeID.Transfer:
         const [transferBytes, remainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.transfer = new TransferHash(transferBytes);
         return { result, bytes: remainder };
-      case TypeID.DeployInfo:
+      case KeyTypeID.DeployInfo:
         const [deployBytes, deployRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.deploy = Hash.fromBytes(deployBytes)?.result;
         return { result, bytes: deployRemainder };
-      case TypeID.EraId:
+      case KeyTypeID.EraId:
         const [eraBytes, eraRemainder] = splitAt(64, contentBytes);
         result.era = Era.fromBytes(eraBytes);
         return { result, bytes: eraRemainder };
-      case TypeID.Balance:
+      case KeyTypeID.Balance:
         const [balanceBytes, balanceRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
@@ -513,7 +513,7 @@ export class Key {
         result.balance = Hash.fromBytes(balanceBytes)?.result;
 
         return { result, bytes: balanceRemainder };
-      case TypeID.Bid:
+      case KeyTypeID.Bid:
         const [bidBytes, bidRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
@@ -522,7 +522,7 @@ export class Key {
         result.bid = new AccountHash(bidHash);
 
         return { result, bytes: bidRemainder };
-      case TypeID.Withdraw:
+      case KeyTypeID.Withdraw:
         const [withdrawBytes, withDrawRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
@@ -530,104 +530,104 @@ export class Key {
         const withdrawHash = Hash.fromBytes(withdrawBytes)?.result;
         result.withdraw = new AccountHash(withdrawHash);
         return { result, bytes: withDrawRemainder };
-      case TypeID.Dictionary:
+      case KeyTypeID.Dictionary:
         const [dictBytes, dictRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.dictionary = Hash.fromBytes(dictBytes)?.result;
         return { result, bytes: dictRemainder };
-      case TypeID.SystemContractRegistry:
+      case KeyTypeID.SystemContractRegistry:
         const [systemBytes, systenRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.systemContactRegistry = Hash.fromBytes(systemBytes)?.result;
         return { result, bytes: systenRemainder };
-      case TypeID.EraSummary:
+      case KeyTypeID.EraSummary:
         const [eraSummaryBytes, eraSummaryRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.eraSummary = Hash.fromBytes(eraSummaryBytes)?.result;
         return { result, bytes: eraSummaryRemainder };
-      case TypeID.Unbond:
+      case KeyTypeID.Unbond:
         const { result: unbondHash, bytes: unbondBytes } = Hash.fromBytes(
           contentBytes
         );
         result.unbond = new AccountHash(unbondHash);
         return { result, bytes: unbondBytes };
-      case TypeID.ChainspecRegistry:
+      case KeyTypeID.ChainspecRegistry:
         const [chainBytes, chainspecRegistryBytes] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.chainspecRegistry = Hash.fromBytes(chainBytes)?.result;
         return { result, bytes: chainspecRegistryBytes };
-      case TypeID.ChecksumRegistry:
+      case KeyTypeID.ChecksumRegistry:
         const [checksumBytes, checksumRegistry] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.checksumRegistry = Hash.fromBytes(checksumBytes)?.result;
         return { result, bytes: checksumRegistry };
-      case TypeID.BidAddr:
+      case KeyTypeID.BidAddr:
         const { result: bidAddr, bytes: bidAddrBytes } = BidAddr.fromBytes(
           contentBytes
         );
         result.bidAddr = bidAddr;
 
         return { result, bytes: bidAddrBytes };
-      case TypeID.Package:
+      case KeyTypeID.Package:
         const [packageBytes, packageBytesRemainder] = splitAt(
           KEY_DEFAULT_BYTE_LENGTH,
           contentBytes
         );
         result.package = Hash.fromBytes(packageBytes)?.result;
         return { result, bytes: packageBytesRemainder };
-      case TypeID.AddressableEntity:
+      case KeyTypeID.AddressableEntity:
         const {
           result: entityAddr,
           bytes: entityAddrBytes
         } = EntityAddr.fromBytes(contentBytes);
         result.addressableEntity = entityAddr;
         return { result, bytes: entityAddrBytes };
-      case TypeID.ByteCode:
+      case KeyTypeID.ByteCode:
         const { result: byteCode, bytes: byteCodeBytes } = ByteCode.fromBytes(
           contentBytes
         );
         result.byteCode = byteCode;
 
         return { result, bytes: byteCodeBytes };
-      case TypeID.Message:
+      case KeyTypeID.Message:
         const {
           result: messageAddr,
           bytes: messageAddrBytes
         } = MessageAddr.fromBytes(contentBytes);
         result.message = messageAddr;
         return { result, bytes: messageAddrBytes };
-      case TypeID.NamedKey:
+      case KeyTypeID.NamedKey:
         const {
           result: namedKey,
           bytes: namedKeyBytes
         } = NamedKeyAddr.fromBytes(contentBytes);
         result.namedKey = namedKey;
         return { result, bytes: namedKeyBytes };
-      case TypeID.BlockGlobal:
+      case KeyTypeID.BlockGlobal:
         const {
           result: blockGlobal,
           bytes: blockGlobalBytes
         } = BlockGlobalAddr.fromBytes(contentBytes);
         result.blockGlobal = blockGlobal;
         return { result, bytes: blockGlobalBytes };
-      case TypeID.BalanceHold:
+      case KeyTypeID.BalanceHold:
         const {
           result: balanceHold,
           bytes: balanceHoldBytes
         } = BalanceHoldAddr.fromBytes(contentBytes);
         result.balanceHold = balanceHold;
         return { result, bytes: balanceHoldBytes };
-      case TypeID.EntryPoint:
+      case KeyTypeID.EntryPoint:
         const {
           result: entryPoint,
           bytes: entryPointBytes
@@ -642,12 +642,12 @@ export class Key {
   /**
    * Finds the prefix name by matching the source string with a map of prefixes.
    * @param source - The string to check for a matching prefix.
-   * @param prefixes - The map of prefix names to TypeID.
+   * @param prefixes - The map of prefix names to KeyTypeID.
    * @returns The matching PrefixName or undefined if not found.
    */
   static findPrefixByMap(
     source: string,
-    prefixes: Map<PrefixName, TypeID>
+    prefixes: Map<PrefixName, KeyTypeID>
   ): PrefixName {
     let result: PrefixName = '' as PrefixName;
 
@@ -685,110 +685,110 @@ export class Key {
    * @returns A new Key instance.
    * @throws Error if the type is not found or invalid.
    */
-  static createByType(source: string, typeID: TypeID): Key {
+  static createByType(source: string, typeID: KeyTypeID): Key {
     const result = new Key();
     result.type = typeID;
 
     switch (result.type) {
-      case TypeID.EraId:
+      case KeyTypeID.EraId:
         result.era = Era.fromJSON(source.replace(PrefixName.EraId, ''));
 
         break;
-      case TypeID.Hash:
+      case KeyTypeID.Hash:
         result.hash = Hash.fromHex(source.replace(PrefixName.Hash, ''));
         break;
-      case TypeID.URef:
+      case KeyTypeID.URef:
         result.uRef = URef.fromString(source);
         break;
-      case TypeID.Account:
+      case KeyTypeID.Account:
         result.account = AccountHash.fromString(source);
         break;
-      case TypeID.Transfer:
+      case KeyTypeID.Transfer:
         result.transfer = TransferHash.fromJSON(source);
         break;
-      case TypeID.DeployInfo:
+      case KeyTypeID.DeployInfo:
         result.deploy = Hash.fromHex(source.replace(PrefixName.DeployInfo, ''));
         break;
-      case TypeID.Balance:
+      case KeyTypeID.Balance:
         result.balance = Hash.fromHex(source.replace(PrefixName.Balance, ''));
         break;
-      case TypeID.Bid:
+      case KeyTypeID.Bid:
         result.bid = AccountHash.fromString(source.replace(PrefixName.Bid, ''));
         break;
-      case TypeID.Withdraw:
+      case KeyTypeID.Withdraw:
         result.withdraw = AccountHash.fromString(
           source.replace(PrefixName.Withdraw, '')
         );
         break;
-      case TypeID.Dictionary:
+      case KeyTypeID.Dictionary:
         result.dictionary = Hash.fromHex(
           source.replace(PrefixName.Dictionary, '')
         );
         break;
-      case TypeID.SystemContractRegistry:
+      case KeyTypeID.SystemContractRegistry:
         result.systemContactRegistry = Hash.fromHex(
           source.replace(PrefixName.SystemContractRegistry, '')
         );
         break;
-      case TypeID.EraSummary:
+      case KeyTypeID.EraSummary:
         result.eraSummary = Hash.fromHex(
           source.replace(PrefixName.EraSummary, '')
         );
         break;
-      case TypeID.Unbond:
+      case KeyTypeID.Unbond:
         result.unbond = AccountHash.fromString(
           source.replace(PrefixName.Unbond, '')
         );
         break;
-      case TypeID.ChainspecRegistry:
+      case KeyTypeID.ChainspecRegistry:
         result.chainspecRegistry = Hash.fromHex(
           source.replace(PrefixName.ChainspecRegistry, '')
         );
         break;
-      case TypeID.ChecksumRegistry:
+      case KeyTypeID.ChecksumRegistry:
         result.checksumRegistry = Hash.fromHex(
           source.replace(PrefixName.ChecksumRegistry, '')
         );
         break;
-      case TypeID.BidAddr:
+      case KeyTypeID.BidAddr:
         result.bidAddr = BidAddr.fromHex(
           source.replace(PrefixName.BidAddr, '')
         );
         break;
-      case TypeID.Package:
+      case KeyTypeID.Package:
         result.package = Hash.fromHex(source.replace(PrefixName.Package, ''));
         break;
-      case TypeID.AddressableEntity:
+      case KeyTypeID.AddressableEntity:
         result.addressableEntity = EntityAddr.fromPrefixedString(
           source.replace(PrefixName.AddressableEntity, '')
         );
         break;
-      case TypeID.ByteCode:
+      case KeyTypeID.ByteCode:
         result.byteCode = ByteCode.fromJSON(
           source.replace(PrefixName.ByteCode, '')
         );
         break;
-      case TypeID.Message:
+      case KeyTypeID.Message:
         result.message = MessageAddr.fromString(
           source.replace(PrefixName.Message, '')
         );
         break;
-      case TypeID.NamedKey:
+      case KeyTypeID.NamedKey:
         result.namedKey = NamedKeyAddr.fromString(
           source.replace(PrefixName.NamedKey, '')
         );
         break;
-      case TypeID.BlockGlobal:
+      case KeyTypeID.BlockGlobal:
         result.blockGlobal = BlockGlobalAddr.fromString(
           source.replace(PrefixName.BlockGlobal, '')
         );
         break;
-      case TypeID.BalanceHold:
+      case KeyTypeID.BalanceHold:
         result.balanceHold = BalanceHoldAddr.fromString(
           source.replace(PrefixName.BalanceHold, '')
         );
         break;
-      case TypeID.EntryPoint:
+      case KeyTypeID.EntryPoint:
         result.entryPoint = EntryPointAddr.fromString(
           source.replace(PrefixName.EntryPoint, '')
         );
@@ -832,7 +832,7 @@ export class Key {
     if (source.length === Hash.StringHashLen) {
       const defaultHash = Hash.fromHex(source);
       const result = new Key();
-      result.type = TypeID.Hash;
+      result.type = KeyTypeID.Hash;
       result.hash = defaultHash;
       return result;
     }
@@ -842,7 +842,7 @@ export class Key {
     }
 
     if (source.startsWith('00') && source.length === Hash.StringHashLen + 2) {
-      return Key.createByType(source.slice(2), TypeID.Account);
+      return Key.createByType(source.slice(2), KeyTypeID.Account);
     }
 
     const prefix = Key.findPrefixByMap(source, keyIDbyPrefix);
