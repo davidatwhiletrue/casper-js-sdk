@@ -18,6 +18,8 @@ npm install casper-js-sdk --save
 - [Creating a legacy deploy](#creating-a-legacy-deploy)
 - [Creating and sending CSPR transfer deploy](#creating-and-sending-cspr-transfer-deploy)
 - [Creating and sending Auction manager deploy](#creating-and-sending-auction-manager-deploy)
+- [Creating and sending CEP-18 transfer deploy](#creating-and-sending-cep-18-transfer-deploy)
+- [Creating and sending NFT transfer deploy](#creating-and-sending-nft-transfer-deploy)
 
 ## Migration guides
 
@@ -299,6 +301,82 @@ const deploy = makeAuctionManagerDeploy({
   delegatorPublicKeyHex: privateKey.publicKey.toHex(),
   validatorPublicKeyHex: '0123456789awedef...',
   amount: '500000000000' // 500 CSPR
+});
+
+await deploy.sign(privateKey);
+
+const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
+const rpcClient = new RpcClient(rpcHandler);
+
+const result = await rpcClient.putDeploy(deploy);
+
+console.log(`Deploy Hash: ${result.deployHash}`);
+```
+
+### Creating and sending CEP-18 transfer deploy
+
+Example of how to construct a CEP-18 transfer deploy and push it to the network:
+
+```ts
+import {
+  HttpHandler,
+  RpcClient,
+  KeyAlgorithm,
+  PrivateKey,
+  makeCep18TransferDeploy
+} from 'casper-js-sdk';
+
+// get private key fromHex, fromPem or generate it
+const privateKey = await PrivateKey.fromHex(
+  'privateKeyHex',
+  KeyAlgorithm.SECP256K1 // or KeyAlgorithm.ED25519, depends on your private key
+);
+
+const deploy = await makeCep18TransferDeploy({
+  contractHash: '0123456789asdfbcdef...',
+  senderPublicKeyHex: '0123456789asdfbcdef...',
+  recipientPublicKeyHex: '0123456789abcdef...',
+  transferAmount: '25000000000', // 25 CEP-18 with 9 decimals
+  paymentAmount: '3000000000' // 3 CSPR
+});
+
+await deploy.sign(privateKey);
+
+const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
+const rpcClient = new RpcClient(rpcHandler);
+
+const result = await rpcClient.putDeploy(deploy);
+
+console.log(`Deploy Hash: ${result.deployHash}`);
+```
+
+### Creating and sending NFT transfer deploy
+
+Example of how to construct a NFT transfer deploy and push it to the network:
+
+```ts
+import {
+  HttpHandler,
+  RpcClient,
+  KeyAlgorithm,
+  PrivateKey,
+  makeNftTransferDeploy,
+  NFTTokenStandard
+} from 'casper-js-sdk';
+
+// get private key fromHex, fromPem or generate it
+const privateKey = await PrivateKey.fromHex(
+  'privateKeyHex',
+  KeyAlgorithm.SECP256K1 // or KeyAlgorithm.ED25519, depends on your private key
+);
+
+const deploy = await makeNftTransferDeploy({
+  nftStandard: NFTTokenStandard.CEP47,
+  contractPackageHash: '0123456789asdfbcdef...',
+  senderPublicKeyHex: '0123456789asdfbcdef...',
+  recipientPublicKeyHex: '0123456789abcdef...',
+  paymentAmount: '3000000000', // 3 CSPR
+  tokenId: 234
 });
 
 await deploy.sign(privateKey);

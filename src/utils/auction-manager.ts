@@ -26,13 +26,13 @@ export interface IMakeAuctionManagerDeployParams {
 }
 
 /**
- * Creates a deploy for the Auction Manager contract.
+ * Creates a `Deploy` for the Auction Manager contract.
  *
- * This function generates a deploy that interacts with the Auction Manager
+ * This function generates a `Deploy` that interacts with the Auction Manager
  * contract on the Casper network. It supports operations such as delegation,
  * un-delegation, and validator change management.
  *
- * @param params - The parameters required to create the deploy.
+ * @param params - The parameters required to create the Auction Manager deploy.
  * @param params.contractEntryPoint - The entry point to invoke in the Auction Manager contract.
  * @param params.delegatorPublicKeyHex - The delegator's public key in hexadecimal format.
  * @param params.validatorPublicKeyHex - The validator's public key in hexadecimal format.
@@ -46,6 +46,9 @@ export interface IMakeAuctionManagerDeployParams {
  * @param params.chainName - (Optional) The name of the Casper network chain - {CasperNetworkName}.
  *                           Must be either `'casper'` (mainnet) or `'casper-test'` (testnet).
  *                           Defaults to `'CasperNetworkName.Mainnet'` if not specified.
+ * @param params.ttl - (Optional) The time-to-live (TTL) for the `Deploy` in milliseconds.
+ *                      Specifies how long the `Deploy` is valid before it expires.
+ *                      Defaults 1800000 (30 minutes)
  *
  * @returns A deploy object that can be signed and sent to the network.
  *

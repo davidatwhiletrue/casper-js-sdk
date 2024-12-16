@@ -8,3 +8,8 @@ export enum AuctionManagerEntryPoint {
   undelegate = 'undelegate',
   redelegate = 'redelegate'
 }
+
+export enum NFTTokenStandard {
+  CEP47 = 'CEP47',
+  CEP78 = 'CEP78'
+}
