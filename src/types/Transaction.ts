@@ -502,8 +502,6 @@ export class Transaction {
     const hex = new HexBytes(signature);
     const approval = new Approval(publicKey, hex);
 
-    this.approvals.push(approval);
-
     if (this.originTransactionV1) {
       this.originTransactionV1.approvals.push(approval);
     } else if (this.originDeployV1) {
