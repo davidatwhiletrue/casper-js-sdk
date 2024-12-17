@@ -39,3 +39,4 @@ export * from './Conversions';
 export * from './key';
 export * from './clvalue';
 export * from './keypair';
+export * from './ContractWasm';

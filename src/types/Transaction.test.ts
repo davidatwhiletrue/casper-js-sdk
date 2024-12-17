@@ -6,7 +6,11 @@ import { TransactionV1 } from './Transaction';
 import { InitiatorAddr } from './InitiatorAddr';
 import { FixedMode, PricingMode } from './PricingMode';
 import { KeyAlgorithm, PrivateKey, PublicKey } from './keypair';
-import { SessionTarget, TransactionTarget } from './TransactionTarget';
+import {
+  SessionTarget,
+  TransactionRuntime,
+  TransactionTarget
+} from './TransactionTarget';
 import {
   TransactionEntryPoint,
   TransactionEntryPointEnum
@@ -20,7 +24,6 @@ import {
   CLValueUInt64
 } from './clvalue';
 import { TransactionV1Payload } from './TransactionV1Payload';
-import { Hash } from './key';
 
 describe('Test Transaction', () => {
   it('should create a TransactionV1 with correct payload instance', async () => {
@@ -45,13 +48,9 @@ describe('Test Transaction', () => {
 
     const sessionTarget = new SessionTarget();
 
-    sessionTarget.runtime = 'VmCasperV1';
-    sessionTarget.transferredValue = 1000;
+    sessionTarget.runtime = TransactionRuntime.vmCasperV1();
     sessionTarget.moduleBytes = Uint8Array.from([1]);
     sessionTarget.isInstallUpgrade = false;
-    sessionTarget.seed = Hash.fromHex(
-      '8bf9d406ab901428d43ecd3a6f214b864e7ef8316934e5e0f049650a65b40d73'
-    );
 
     const transactionTarget = new TransactionTarget(
       undefined,

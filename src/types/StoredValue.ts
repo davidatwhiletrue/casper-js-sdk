@@ -1,7 +1,7 @@
-import { AnyT, jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
+import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
 
 import { Account } from './Account';
-import { TransferV1 } from './Transfer';
+import { Transfer } from './Transfer';
 import { DeployInfo } from './DeployInfo';
 import { EraInfo } from './EraInfo';
 import { Bid } from './Bid';
@@ -17,6 +17,7 @@ import { Contract } from './Contract';
 import { ContractPackage } from './ContractPackage';
 import { CLValue, CLValueParser } from './clvalue';
 import { SystemByteCode } from './ByteCode';
+import { ContractWasm } from './ContractWasm';
 
 /**
  * Represents a stored value in a decentralized system. The value can be of different types
@@ -57,8 +58,8 @@ export class StoredValue {
   /**
    * The WebAssembly (WASM) bytecode for the contract, represented as `AnyT`.
    */
-  @jsonMember({ name: 'ContractWASM', constructor: AnyT })
-  contractWASM?: any;
+  @jsonMember({ name: 'ContractWasm', constructor: ContractWasm })
+  ContractWasm?: ContractWasm;
 
   /**
    * The stored contract package information.
@@ -67,10 +68,17 @@ export class StoredValue {
   contractPackage?: ContractPackage;
 
   /**
-   * The legacy transfer information, representing a historical transfer.
+   * The transfer information, representing a historical transfer.
    */
-  @jsonMember({ name: 'LegacyTransfer', constructor: TransferV1 })
-  legacyTransfer?: TransferV1;
+  @jsonMember({
+    name: 'Transfer',
+    constructor: Transfer,
+    deserializer: json => {
+      if (!json) return;
+      return Transfer.fromJSON(json);
+    }
+  })
+  transfer?: Transfer;
 
   /**
    * The information related to a deploy operation.
@@ -117,8 +125,8 @@ export class StoredValue {
   /**
    * The stored package information, typically a contract or executable package.
    */
-  @jsonMember({ name: 'Package', constructor: Package })
-  package?: Package;
+  @jsonMember({ name: 'SmartContract', constructor: Package })
+  smartContract?: Package;
 
   /**
    * The stored bytecode, representing compiled contract or executable code.
@@ -162,4 +170,10 @@ export class StoredValue {
    */
   @jsonMember({ name: 'EntryPoint', constructor: EntryPointValue })
   entryPoint?: EntryPointValue;
+
+  /**
+   * Raw bytes. Similar to a [`crate::StoredValue::CLValue`] but does not incur overhead of a [`crate::CLValue`] and [`crate::CLType`].
+   */
+  @jsonMember({ name: 'RawBytes', constructor: String })
+  rawBytes?: string;
 }

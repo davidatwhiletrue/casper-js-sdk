@@ -25,8 +25,8 @@ export enum TransactionEntryPointEnum {
  * These tags are used to simplify storage and facilitate efficient comparison of entry points.
  */
 export enum TransactionEntryPointTag {
-  Custom = 0,
-  Call = 1,
+  Call = 0,
+  Custom = 1,
   Transfer = 2,
   AddBid = 3,
   WithdrawBid = 4,

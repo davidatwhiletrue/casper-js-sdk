@@ -1,17 +1,15 @@
 import isNull from 'lodash/isNull';
 import { BigNumber } from '@ethersproject/bignumber';
+import { concat } from '@ethersproject/bytes';
 
 import { jsonMember, jsonObject, TypedJSON } from 'typedjson';
-import { TransactionRuntime } from './AddressableEntity';
 import { Hash } from './key';
 import {
   CLTypeOption,
   CLTypeUInt32,
-  CLValueBool,
   CLValueOption,
   CLValueString,
-  CLValueUInt32,
-  CLValueUInt64
+  CLValueUInt32
 } from './clvalue';
 import { ExecutableDeployItem } from './ExecutableDeployItem';
 import { CalltableSerialization } from './CalltableSerialization';
@@ -19,7 +17,101 @@ import {
   byteArrayJsonDeserializer,
   byteArrayJsonSerializer
 } from './SerializationUtils';
-import { fromBytesU64 } from './ByteConverters';
+
+/**
+ * Represents a runtime environment for Casper transactions.
+ * This class distinguishes between different versions of the Casper Virtual Machine (VM).
+ */
+@jsonObject
+export class TransactionRuntime {
+  /**
+   * Internal tag representing Casper VM Version 1.
+   */
+  private static readonly VM_CASPER_V1_TAG = 0;
+
+  /**
+   * Internal tag representing Casper VM Version 2.
+   */
+  private static readonly VM_CASPER_V2_TAG = 1;
+
+  /**
+   * The tag used to identify the current VM version.
+   */
+  private _tag: number = TransactionRuntime.VM_CASPER_V1_TAG;
+
+  /**
+   * The index of the field used for tag serialization.
+   */
+  private static readonly TAG_FIELD_INDEX = 0;
+
+  /**
+   * Creates an instance of `TransactionRuntime` from a JSON string.
+   *
+   * @param json - The JSON string representing the type of the transaction runtime.
+   * @returns A `TransactionRuntime` instance matching the specified type.
+   * @throws Will throw an error if the provided JSON does not match known VM versions.
+   */
+  public static fromJSON(json: string): TransactionRuntime {
+    switch (json) {
+      case 'VmCasperV1':
+        return TransactionRuntime.vmCasperV1();
+      case 'VmCasperV2':
+        return TransactionRuntime.vmCasperV2();
+      default:
+        throw new Error(`Unknown TransactionRuntime '${json}'`);
+    }
+  }
+
+  /**
+   * Serializes the current `TransactionRuntime` to a JSON string.
+   *
+   * @returns A JSON string representing the type of the transaction runtime.
+   * @throws Will throw an error if the tag does not match known VM versions.
+   */
+  public toJSON(): string {
+    switch (this._tag) {
+      case TransactionRuntime.VM_CASPER_V1_TAG:
+        return 'VmCasperV1';
+      case TransactionRuntime.VM_CASPER_V2_TAG:
+        return 'VmCasperV2';
+      default:
+        throw new Error(`Unknown TransactionRuntime '${this._tag}'`);
+    }
+  }
+
+  /**
+   * Creates a new instance representing the Casper Version 1 Virtual Machine.
+   *
+   * @returns A `TransactionRuntime` instance configured for VM Version 1.
+   */
+  public static vmCasperV1(): TransactionRuntime {
+    const instance = new TransactionRuntime();
+    instance._tag = TransactionRuntime.VM_CASPER_V1_TAG;
+    return instance;
+  }
+
+  /**
+   * Creates a new instance representing the Casper Version 2 Virtual Machine.
+   *
+   * @returns A `TransactionRuntime` instance configured for VM Version 2.
+   */
+  public static vmCasperV2(): TransactionRuntime {
+    const instance = new TransactionRuntime();
+    instance._tag = TransactionRuntime.VM_CASPER_V2_TAG;
+    return instance;
+  }
+
+  /**
+   * Serializes the current `TransactionRuntime` to a byte array.
+   *
+   * @returns A `Uint8Array` containing the serialized transaction runtime data.
+   */
+  public toBytes(): Uint8Array {
+    return new CalltableSerialization()
+      .addField(TransactionRuntime.TAG_FIELD_INDEX, Uint8Array.of(this._tag))
+      .toBytes();
+  }
+}
 
 /**
  * Represents the invocation target for a transaction identified by a package hash.
@@ -291,27 +383,22 @@ export class StoredTarget {
   /**
    * The runtime associated with the stored transaction.
    */
-  @jsonMember({ name: 'runtime', constructor: String })
+  @jsonMember({
+    name: 'runtime',
+    constructor: TransactionRuntime,
+    deserializer: json => {
+      if (!json) return;
+      return TransactionRuntime.fromJSON(json);
+    },
+    serializer: (value: TransactionRuntime) => value.toJSON()
+  })
   runtime: TransactionRuntime;
-
-  /**
-   * The runtime associated with the stored transaction.
-   */
-  @jsonMember({ name: 'transferred_value', constructor: Number })
-  transferredValue: number;
 
   public toBytes() {
     const calltableSerializer = new CalltableSerialization();
     calltableSerializer.addField(0, Uint8Array.of(1));
     calltableSerializer.addField(1, this.id.toBytes());
-    calltableSerializer.addField(
-      2,
-      CLValueString.newCLString(this.runtime).bytes()
-    );
-    calltableSerializer.addField(
-      3,
-      CLValueUInt64.newCLUint64(this.transferredValue).bytes()
-    );
+    calltableSerializer.addField(2, this.runtime.toBytes());
 
     return calltableSerializer.toBytes();
   }
@@ -336,7 +423,15 @@ export class SessionTarget {
   /**
    * The runtime associated with the session target.
    */
-  @jsonMember({ name: 'runtime', constructor: String })
+  @jsonMember({
+    name: 'runtime',
+    constructor: TransactionRuntime,
+    deserializer: json => {
+      if (!json) return;
+      return TransactionRuntime.fromJSON(json);
+    },
+    serializer: (value: TransactionRuntime) => value.toJSON()
+  })
   runtime: TransactionRuntime;
 
   /**
@@ -345,40 +440,22 @@ export class SessionTarget {
   @jsonMember({ name: 'is_install_upgrade', constructor: Boolean })
   isInstallUpgrade: boolean;
 
-  /**
-   * The runtime associated with the stored transaction.
-   */
-  @jsonMember({ name: 'transferred_value', constructor: Number })
-  transferredValue: number;
-
-  /**
-   * The runtime associated with the stored transaction.
-   */
-  @jsonMember({
-    name: 'seed',
-    constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
-    serializer: value => value.toJSON()
-  })
-  seed: Hash;
-
   public toBytes(): Uint8Array {
+    const moduleBytesLength = new Uint8Array(
+      new Uint32Array([this.moduleBytes.length]).buffer
+    );
+
     const calltableSerializer = new CalltableSerialization();
     calltableSerializer.addField(0, Uint8Array.of(2));
     calltableSerializer.addField(
       1,
-      CLValueBool.fromBoolean(this.isInstallUpgrade).bytes()
+      new Uint8Array([this.isInstallUpgrade ? 0x01 : 0x00])
     );
+    calltableSerializer.addField(2, this.runtime.toBytes());
     calltableSerializer.addField(
-      2,
-      CLValueString.newCLString(this.runtime).bytes()
+      3,
+      concat([moduleBytesLength, this.moduleBytes])
     );
-    calltableSerializer.addField(3, this.moduleBytes);
-    calltableSerializer.addField(
-      4,
-      CLValueUInt64.newCLUint64(this.transferredValue).bytes()
-    );
-    calltableSerializer.addField(5, this.seed.toBytes());
 
     return calltableSerializer.toBytes();
   }
@@ -506,7 +583,7 @@ export class TransactionTarget {
     if (session.moduleBytes !== undefined) {
       const sessionTarget = new SessionTarget();
       sessionTarget.moduleBytes = session.moduleBytes.moduleBytes;
-      sessionTarget.runtime = 'VmCasperV1';
+      sessionTarget.runtime = TransactionRuntime.vmCasperV1();
 
       transactionTarget.session = sessionTarget;
       return transactionTarget;
@@ -516,7 +593,7 @@ export class TransactionTarget {
       const storedTarget = new StoredTarget();
       const invocationTarget = new TransactionInvocationTarget();
       invocationTarget.byHash = session.storedContractByHash.hash.hash;
-      storedTarget.runtime = 'VmCasperV1';
+      storedTarget.runtime = TransactionRuntime.vmCasperV1();
       storedTarget.id = invocationTarget;
 
       transactionTarget.stored = storedTarget;
@@ -528,7 +605,7 @@ export class TransactionTarget {
       const invocationTarget = new TransactionInvocationTarget();
       invocationTarget.byName = session.storedContractByName.name;
 
-      storedTarget.runtime = 'VmCasperV1';
+      storedTarget.runtime = TransactionRuntime.vmCasperV1();
       storedTarget.id = invocationTarget;
 
       transactionTarget.stored = storedTarget;
@@ -560,7 +637,7 @@ export class TransactionTarget {
       invocationTarget.byPackageHash = packageHashInvocationTarget;
 
       const storedTarget = new StoredTarget();
-      storedTarget.runtime = 'VmCasperV1';
+      storedTarget.runtime = TransactionRuntime.vmCasperV1();
       storedTarget.id = invocationTarget;
 
       transactionTarget.stored = storedTarget;
@@ -592,7 +669,7 @@ export class TransactionTarget {
       invocationTarget.byPackageName = packageNameInvocationTarget;
 
       const storedTarget = new StoredTarget();
-      storedTarget.runtime = 'VmCasperV1';
+      storedTarget.runtime = TransactionRuntime.vmCasperV1();
       storedTarget.id = invocationTarget;
 
       transactionTarget.stored = storedTarget;
@@ -601,99 +678,5 @@ export class TransactionTarget {
     }
 
     return new TransactionTarget();
-  }
-
-  /**
-   * Deserializes a `Uint8Array` into a `TransactionTarget` instance.
-   *
-   * This method reconstructs a `TransactionTarget` object from its serialized byte array representation.
-   * The type of transaction target is determined by the tag extracted from the serialized data.
-   *
-   * @param bytes - The serialized byte array representing a `TransactionTarget`.
-   * @returns A deserialized `TransactionTarget` instance.
-   * @throws Error - If the byte array is invalid, missing required fields, or contains an unrecognized tag.
-   *
-   * ### Tags and Their Associated Targets:
-   * - `0`: Represents a Native target.
-   * - `1`: Represents a Stored target, including an invocation target, runtime, and transferred value.
-   * - `2`: Represents a Session target, including module bytes, runtime, transferred value, install upgrade flag, and seed.
-   *
-   * ### Example
-   * ```typescript
-   * const bytes = new Uint8Array([...]); // Provide valid TransactionTarget bytes
-   * const transactionTarget = TransactionTarget.fromBytes(bytes);
-   * console.log(transactionTarget); // Parsed TransactionTarget instance
-   * ```
-   */
-  static fromBytes(bytes: Uint8Array): TransactionTarget {
-    const calltable = CalltableSerialization.fromBytes(bytes);
-
-    const tagBytes = calltable.getField(0);
-    if (!tagBytes || tagBytes.length !== 1) {
-      throw new Error('Invalid or missing tag in serialized TransactionTarget');
-    }
-
-    const tag = tagBytes[0];
-    switch (tag) {
-      case 0:
-        return new TransactionTarget({});
-
-      case 1: {
-        const storedBytes = calltable.getField(1);
-        const runtimeBytes = calltable.getField(2);
-        const transferredValueBytes = calltable.getField(3);
-
-        if (!storedBytes || !runtimeBytes || !transferredValueBytes) {
-          throw new Error('Incomplete serialized data for Stored target');
-        }
-
-        const storedTarget = new StoredTarget();
-        storedTarget.id = TransactionInvocationTarget.fromBytes(storedBytes);
-        storedTarget.runtime = CLValueString.fromBytes(
-          runtimeBytes
-        ).result.toString() as TransactionRuntime;
-        storedTarget.transferredValue = fromBytesU64(
-          transferredValueBytes
-        ).toNumber();
-
-        return new TransactionTarget(undefined, storedTarget);
-      }
-
-      case 2: {
-        const moduleBytes = calltable.getField(3);
-        const runtimeBytesSession = calltable.getField(2);
-        const transferredValueBytesSession = calltable.getField(4);
-        const isInstallUpgradeBytes = calltable.getField(1);
-        const seedBytes = calltable.getField(5);
-
-        if (
-          !moduleBytes ||
-          !runtimeBytesSession ||
-          !transferredValueBytesSession ||
-          !isInstallUpgradeBytes ||
-          !seedBytes
-        ) {
-          throw new Error('Incomplete serialized data for Session target');
-        }
-
-        const sessionTarget = new SessionTarget();
-        sessionTarget.moduleBytes = moduleBytes;
-        sessionTarget.runtime = CLValueString.fromBytes(
-          runtimeBytesSession
-        ).result.toString() as TransactionRuntime;
-        sessionTarget.transferredValue = fromBytesU64(
-          transferredValueBytesSession
-        ).toNumber();
-        sessionTarget.isInstallUpgrade = CLValueBool.fromBytes(
-          isInstallUpgradeBytes
-        ).result.getValue();
-        sessionTarget.seed = Hash.fromBytes(seedBytes).result;
-
-        return new TransactionTarget(undefined, undefined, sessionTarget);
-      }
-
-      default:
-        throw new Error(`Unknown TransactionTarget tag: ${tag}`);
-    }
   }
 }
