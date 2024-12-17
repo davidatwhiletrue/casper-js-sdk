@@ -79,11 +79,20 @@ export class PrivateKey {
   }
 
   /**
+   * Signs a message using the private key.
+   * @param msg - The message to sign.
+   * @returns A promise resolving to the signature bytes.
+   */
+  public async sign(msg: Uint8Array): Promise<Uint8Array> {
+    return await this.priv.sign(msg);
+  }
+
+  /**
    * Signs a message using the private key and includes the algorithm byte in the signature.
    * @param msg - The message to sign.
    * @returns A promise resolving to the signature bytes with the algorithm byte.
    */
-  public async sign(msg: Uint8Array): Promise<Uint8Array> {
+  public async signAndAddAlgorithmBytes(msg: Uint8Array): Promise<Uint8Array> {
     const signature = await this.priv.sign(msg);
     const algBytes = Uint8Array.of(this.alg);
     return concat([algBytes, signature]);
