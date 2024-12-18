@@ -3,6 +3,7 @@ import { concat } from '@ethersproject/bytes';
 import { PublicKey } from './PublicKey';
 import { PrivateKey as Ed25519PrivateKey } from './ed25519/PrivateKey';
 import { PrivateKey as Secp256k1PrivateKey } from './secp256k1/PrivateKey';
+import { KeyAlgorithm } from './Algorithm';
 
 /**
  * Interface representing the structure and methods of a private key, including
@@ -22,14 +23,6 @@ export interface PrivateKeyInternal {
 
   /** Converts the private key to PEM format. */
   toPem(): string;
-}
-
-/**
- * Enum representing supported cryptographic key algorithms.
- */
-enum KeyAlgorithm {
-  ED25519 = 1,
-  SECP256K1 = 2
 }
 
 /**
