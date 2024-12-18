@@ -183,14 +183,17 @@ export class CLValueMap {
     }
 
     for (let i = 0; i < size; i++) {
-      const keyVal = CLValueParser.fromBytesByType(remainder, mapType.key);
-      remainder = keyVal?.bytes;
+      if (remainder.length) {
+        const keyVal = CLValueParser.fromBytesByType(remainder, mapType.key);
 
-      const valVal = CLValueParser.fromBytesByType(u32.bytes(), mapType.val);
+        remainder = keyVal?.bytes;
 
-      remainder = valVal.bytes;
+        const valVal = CLValueParser.fromBytesByType(u32.bytes(), mapType.val);
 
-      mapResult.append(keyVal?.result, valVal?.result);
+        remainder = valVal.bytes;
+
+        mapResult.append(keyVal?.result, valVal?.result);
+      }
     }
 
     return { result: mapResult, bytes: remainder };
