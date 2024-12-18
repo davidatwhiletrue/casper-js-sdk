@@ -130,7 +130,10 @@ export class CLValueList {
    * @param elements - Optional array of CLValues to initialize the list with.
    * @returns A new CLValue instance containing CLTypeList and a CLValueList.
    */
-  public static newCLList(elementType: CLType, elements: CLValue[] = []): CLValue {
+  public static newCLList(
+    elementType: CLType,
+    elements: CLValue[] = []
+  ): CLValue {
     const listType = new CLTypeList(elementType);
     const clValue = new CLValue(listType);
     clValue.list = new CLValueList(listType, elements);
@@ -154,13 +157,15 @@ export class CLValueList {
     const elements: CLValue[] = [];
 
     for (let i = 0; i < size; i++) {
-      const {
-        result: inner,
-        bytes: innerBytes
-      } = CLValueParser.fromBytesByType(remainder, clType.elementsType);
+      if (remainder.length) {
+        const {
+          result: inner,
+          bytes: innerBytes
+        } = CLValueParser.fromBytesByType(remainder, clType.elementsType);
 
-      elements.push(inner);
-      remainder = innerBytes;
+        elements.push(inner);
+        remainder = innerBytes;
+      }
     }
 
     if (elements.length === 0) {
