@@ -1,7 +1,6 @@
 import { jsonObject, jsonMember, TypedJSON } from 'typedjson';
-import { BigNumber } from '@ethersproject/bignumber';
 
-import { AccountHash, Key, Hash, URef } from './key';
+import { Key } from './key';
 import { UnbondingPurse } from './UnbondingPurse';
 import { AddressableEntity } from './AddressableEntity';
 import { Package } from './Package';
@@ -24,7 +23,8 @@ import {
   RawWriteTransferTransform,
   RawWriteUnbonding,
   RawWriteWithdrawals,
-  TranformAddressableEntityRawData
+  TranformAddressableEntityRawData,
+  WriteTransfer
 } from './TransformRaw';
 
 /**
@@ -529,105 +529,4 @@ export class NamedKeyKind {
     serializer: serializeArgs
   })
   public name: Args;
-}
-
-/**
- * Represents a transfer operation in a transaction.
- */
-@jsonObject
-export class WriteTransfer {
-  /**
-   * The optional ID of the transfer.
-   */
-  @jsonMember({ name: 'id', constructor: Number })
-  public id?: number;
-
-  /**
-   * The recipient of the transfer, represented as an `AccountHash`.
-   */
-  @jsonMember({
-    name: 'to',
-    constructor: AccountHash,
-    deserializer: json => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: (value: AccountHash) => {
-      if (!value) return;
-      return value.toJSON();
-    }
-  })
-  public to?: AccountHash;
-
-  /**
-   * The deploy hash associated with the transfer.
-   */
-  @jsonMember({
-    name: 'deploy_hash',
-    constructor: Hash,
-    deserializer: json => {
-      if (!json) return;
-      return Hash.fromJSON(json);
-    },
-    serializer: value => {
-      if (!value) return;
-      return value.toJSON();
-    }
-  })
-  public deployHash: Hash;
-
-  /**
-   * The sender of the transfer, represented as an `AccountHash`.
-   */
-  @jsonMember({
-    name: 'from',
-    constructor: AccountHash,
-    deserializer: json => AccountHash.fromJSON(json),
-    serializer: (value: AccountHash) => value.toJSON()
-  })
-  public from: AccountHash;
-
-  /**
-   * The amount being transferred, represented as a `CLValueUInt512`.
-   */
-  @jsonMember({
-    name: 'amount',
-    constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
-    serializer: (value: CLValueUInt512) => value.toJSON()
-  })
-  public amount: CLValueUInt512;
-
-  /**
-   * The source URef (Universal Reference) of the transfer.
-   */
-  @jsonMember({
-    name: 'source',
-    constructor: URef,
-    deserializer: json => URef.fromJSON(json),
-    serializer: (value: URef) => value.toJSON()
-  })
-  public source: URef;
-
-  /**
-   * The target URef (Universal Reference) of the transfer.
-   */
-  @jsonMember({
-    name: 'target',
-    constructor: URef,
-    deserializer: json => URef.fromJSON(json),
-    serializer: (value: URef) => value.toJSON()
-  })
-  public target: URef;
-
-  /**
-   * The gas used for the transfer.
-   */
-  @jsonMember({
-    name: 'gas',
-    constructor: Number,
-    deserializer: json => BigNumber.from(json).toNumber(),
-    serializer: value => BigNumber.from(value).toString()
-  })
-  public gas: number;
 }

@@ -164,9 +164,8 @@ export class Key {
   @jsonMember({ name: 'Type', constructor: Number })
   type: KeyTypeID;
 
-  @jsonMember({
-    name: 'Account',
-    constructor: () => AccountHash
+  @jsonMember(() => AccountHash, {
+    name: 'Account'
   })
   account?: AccountHash;
 
@@ -206,15 +205,13 @@ export class Key {
   })
   balance?: Hash;
 
-  @jsonMember({
-    name: 'Bid',
-    constructor: () => AccountHash
+  @jsonMember(() => AccountHash, {
+    name: 'Bid'
   })
   bid?: AccountHash;
 
-  @jsonMember({
-    name: 'Withdraw',
-    constructor: () => AccountHash
+  @jsonMember(() => AccountHash, {
+    name: 'Withdraw'
   })
   withdraw?: AccountHash;
 
@@ -236,9 +233,8 @@ export class Key {
   })
   eraSummary?: Hash;
 
-  @jsonMember({
-    name: 'Unbond',
-    constructor: () => AccountHash
+  @jsonMember(() => AccountHash, {
+    name: 'Unbond'
   })
   unbond?: AccountHash;
 

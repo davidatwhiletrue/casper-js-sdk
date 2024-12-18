@@ -1,6 +1,5 @@
 import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
 import { AssociatedKey } from './Account';
-import { MessageTopic } from './MessageTopic';
 import { EntryPointV1 } from './EntryPoint';
 import { AccountHash, URef } from './key';
 import { TransactionRuntime } from './TransactionTarget';
@@ -127,12 +126,6 @@ export class AddressableEntity {
    */
   @jsonMember({ name: 'protocol_version', constructor: String })
   protocolVersion: string;
-
-  /**
-   * A list of topics for messaging associated with this entity.
-   */
-  @jsonArrayMember(MessageTopic, { name: 'message_topics' })
-  messageTopics: MessageTopic[];
 }
 
 /**
