@@ -3,9 +3,7 @@ import { AssociatedKey } from './Account';
 import { MessageTopic } from './MessageTopic';
 import { EntryPointV1 } from './EntryPoint';
 import { AccountHash, URef } from './key';
-
-export type SystemEntityType = string;
-export type TransactionRuntime = 'VmCasperV1' | 'VmCasperV2';
+import { TransactionRuntime } from './TransactionTarget';
 
 /**
  * Defines different kinds of entities within the system, such as system entities,
@@ -17,7 +15,7 @@ export class EntityKind {
    * Represents a system entity type, allowing flexible naming of system-specific entities.
    */
   @jsonMember({ name: 'System', constructor: String })
-  system?: SystemEntityType;
+  system?: string;
 
   /**
    * Represents an account entity, identified by an `AccountHash`.
@@ -35,7 +33,12 @@ export class EntityKind {
    */
   @jsonMember({
     name: 'SmartContract',
-    constructor: String
+    constructor: TransactionRuntime,
+    deserializer: json => {
+      if (!json) return;
+      return TransactionRuntime.fromJSON(json);
+    },
+    serializer: (value: TransactionRuntime) => value.toJSON()
   })
   smartContract?: TransactionRuntime;
 }
