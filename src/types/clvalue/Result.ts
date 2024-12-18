@@ -48,6 +48,17 @@ export class CLValueResult {
   }
 
   /**
+   * Converts the instance to a JSON-compatible format.
+   *
+   * @returns {any} The JSON representation of the inner value.
+   *
+   * Calls `toJSON()` on the inner value to produce its JSON representation.
+   */
+  public toJSON(): any {
+    return this.inner.toJSON();
+  }
+
+  /**
    * Retrieves the inner CLValue of the Result.
    * @returns The CLValue contained within the Result.
    */

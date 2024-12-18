@@ -35,6 +35,7 @@ import { CLValueAny } from './Any';
 interface IValue {
   bytes(): Uint8Array;
   toString(): string;
+  toJSON(): any;
 }
 
 export interface IResultWithBytes<T> {
@@ -94,6 +95,10 @@ export class CLValue {
    */
   public toString(): string {
     return this.getValueByType().toString();
+  }
+
+  public toJSON(): any {
+    return this.getValueByType().toJSON();
   }
 
   /**

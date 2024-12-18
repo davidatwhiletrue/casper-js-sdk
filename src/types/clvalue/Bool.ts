@@ -33,6 +33,15 @@ export class CLValueBool {
   }
 
   /**
+   * Converts the instance to a JSON boolean.
+   *
+   * @returns {boolean} The boolean value of the instance.
+   */
+  public toJSON(): boolean {
+    return this.value;
+  }
+
+  /**
    * Retrieves the boolean value.
    * @returns The stored boolean value.
    */

@@ -312,8 +312,8 @@ export class Key {
    * Converts the key to bytes.
    * @returns A Uint8Array representing the serialized key.
    */
-  bytes(): Uint8Array {
-    const typeBytes = new Uint8Array([this.type]);
+  bytes(withKeyTypeID = true): Uint8Array {
+    const typeBytes = withKeyTypeID ? Uint8Array.from([this.type]) : undefined;
 
     switch (this.type) {
       case KeyTypeID.Balance:
@@ -379,13 +379,26 @@ export class Key {
    * @returns A Uint8Array with concatenated type and field bytes.
    */
   private static concatBytes(
-    typeBytes: Uint8Array,
-    fieldBytes: Uint8Array = Uint8Array.from([])
+    fieldBytes: Uint8Array = Uint8Array.from([]),
+    typeBytes?: Uint8Array
   ): Uint8Array {
-    const result = new Uint8Array(typeBytes.length + fieldBytes.length);
-    result.set(typeBytes);
-    result.set(fieldBytes, typeBytes.length);
-    return result;
+    if (typeBytes) {
+      const result = new Uint8Array(typeBytes.length + fieldBytes.length);
+      result.set(typeBytes);
+      result.set(fieldBytes, typeBytes.length);
+      return result;
+    }
+
+    return fieldBytes;
+  }
+
+  /**
+   * Converts the instance to a JSON-compatible hexadecimal string.
+   *
+   * @returns {string} The hex-encoded string representation of the instance.
+   */
+  public toJSON() {
+    return Buffer.from(this.bytes(false)).toString('hex');
   }
 
   /**

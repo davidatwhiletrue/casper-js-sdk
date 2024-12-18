@@ -42,6 +42,15 @@ export class CLValueUInt64 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible string.
+   *
+   * @returns {string} The string representation of the instance.
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
+
+  /**
    * Creates a new CLValue instance with a UInt64 value.
    * @param val - The value to initialize the UInt64 with. Can be any BigNumberish type.
    * @returns A new CLValue instance containing CLTypeUInt64 and a CLValueUInt64.

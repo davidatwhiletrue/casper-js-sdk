@@ -120,8 +120,8 @@ export class CLValueList {
    * Converts the list to a JSON-compatible representation.
    * @returns An array of string representations of the list elements.
    */
-  public toJSON(): any {
-    return this.elements.map(d => d.toString());
+  public toJSON(): string[] {
+    return this.elements.map(d => d.toJSON());
   }
 
   /**
@@ -130,7 +130,10 @@ export class CLValueList {
    * @param elements - Optional array of CLValues to initialize the list with.
    * @returns A new CLValue instance containing CLTypeList and a CLValueList.
    */
-  public static newCLList(elementType: CLType, elements: CLValue[] = []): CLValue {
+  public static newCLList(
+    elementType: CLType,
+    elements: CLValue[] = []
+  ): CLValue {
     const listType = new CLTypeList(elementType);
     const clValue = new CLValue(listType);
     clValue.list = new CLValueList(listType, elements);

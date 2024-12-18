@@ -51,6 +51,15 @@ export class CLValueTuple3 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible array.
+   *
+   * @returns {any[]} An array containing the JSON representations of inner1, inner2, and inner3.
+   */
+  public toJSON(): any[] {
+    return [this.inner1.toJSON(), this.inner2.toJSON(), this.inner3.toJSON()];
+  }
+
+  /**
    * Retrieves the values of the tuple as an array.
    * @returns An array containing the three CLValues of the tuple.
    */

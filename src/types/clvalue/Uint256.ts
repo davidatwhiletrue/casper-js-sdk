@@ -55,6 +55,15 @@ export class CLValueUInt256 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible string.
+   *
+   * @returns {string} The string representation of the instance.
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
+
+  /**
    * Creates a CLValueUInt256 instance from a Uint8Array.
    * Parses the byte array to retrieve the UInt256 value.
    * @param source - The Uint8Array containing the byte representation of the UInt256 value.
