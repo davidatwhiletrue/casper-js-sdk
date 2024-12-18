@@ -16,8 +16,17 @@ export enum EntryPointType {
  * Enum representing the payment options for an entry point.
  */
 export enum EntryPointPayment {
+  /**
+   * The caller must cover cost.
+   */
   Caller = 'Caller',
-  SelfOnly = 'SelfOnly',
+  /**
+   * Will cover cost to execute self but not cost of any subsequent invoked contracts.
+   */
+  DirectInvocationOnly = 'DirectInvocationOnly',
+  /**
+   * Will cover cost to execute self and the cost of any subsequent invoked contracts.
+   */
   SelfOnward = 'SelfOnward'
 }
 

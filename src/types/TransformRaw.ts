@@ -1,7 +1,7 @@
 import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
 
 import { UnbondingPurse } from './UnbondingPurse';
-import { NamedKeyKind, WriteTransfer } from './Transform';
+import { NamedKeyKind } from './Transform';
 import { AddressableEntity } from './AddressableEntity';
 import { Package } from './Package';
 import { BidKind } from './BidKind';
@@ -10,6 +10,110 @@ import { CLValueUInt512 } from './clvalue';
 import { DeployInfo } from './DeployInfo';
 import { Args } from './Args';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
+import { BigNumber } from '@ethersproject/bignumber';
+import { AccountHash, Hash, URef } from './key';
+
+/**
+ * Represents a transfer operation in a transaction.
+ */
+@jsonObject
+export class WriteTransfer {
+  /**
+   * The optional ID of the transfer.
+   */
+  @jsonMember({ name: 'id', constructor: Number, preserveNull: true })
+  public id?: number;
+
+  /**
+   * The recipient of the transfer, represented as an `AccountHash`.
+   */
+  @jsonMember({
+    name: 'to',
+    constructor: AccountHash,
+    preserveNull: true,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  public to?: AccountHash;
+
+  /**
+   * The deploy hash associated with the transfer.
+   */
+  @jsonMember({
+    name: 'deploy_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  public deployHash: Hash;
+
+  /**
+   * The sender of the transfer, represented as an `AccountHash`.
+   */
+  @jsonMember({
+    name: 'from',
+    constructor: AccountHash,
+    deserializer: json => AccountHash.fromJSON(json),
+    serializer: (value: AccountHash) => value.toJSON()
+  })
+  public from: AccountHash;
+
+  /**
+   * The amount being transferred, represented as a `CLValueUInt512`.
+   */
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: (value: CLValueUInt512) => value.toJSON()
+  })
+  public amount: CLValueUInt512;
+
+  /**
+   * The source URef (Universal Reference) of the transfer.
+   */
+  @jsonMember({
+    name: 'source',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
+  public source: URef;
+
+  /**
+   * The target URef (Universal Reference) of the transfer.
+   */
+  @jsonMember({
+    name: 'target',
+    constructor: URef,
+    deserializer: json => URef.fromJSON(json),
+    serializer: (value: URef) => value.toJSON()
+  })
+  public target: URef;
+
+  /**
+   * The gas used for the transfer.
+   */
+  @jsonMember({
+    name: 'gas',
+    constructor: Number,
+    deserializer: json => BigNumber.from(json).toNumber(),
+    serializer: value => BigNumber.from(value).toString()
+  })
+  public gas: number;
+}
 
 /**
  * Represents raw data for a write operation involving withdrawals.
@@ -31,7 +135,7 @@ export class RawWriteTransferTransform {
   /**
    * The write transfer operation.
    */
-  @jsonMember({ name: 'WriteTransfer', constructor: () => WriteTransfer })
+  @jsonMember({ name: 'WriteTransfer', constructor: WriteTransfer })
   WriteTransfer?: WriteTransfer;
 }
 
@@ -115,7 +219,7 @@ class WriteNamedKey {
   /**
    * The named key in the write operation.
    */
-  @jsonMember({ constructor: () => NamedKeyKind, name: 'NamedKey' })
+  @jsonMember(() => NamedKeyKind, { name: 'NamedKey' })
   NamedKey?: NamedKeyKind;
 }
 
