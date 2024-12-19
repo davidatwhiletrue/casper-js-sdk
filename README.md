@@ -120,7 +120,6 @@ import {
   CLValueUInt64,
   CLValueUInt512,
   Duration,
-  FixedMode,
   HttpHandler,
   InitiatorAddr,
   KeyAlgorithm,
@@ -134,7 +133,8 @@ import {
   TransactionTarget,
   TransactionV1,
   TransactionV1Payload,
-  TransactionEntryPointEnum
+  TransactionEntryPointEnum,
+  PaymentLimitedMode
 } from 'casper-js-sdk';
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
@@ -145,10 +145,11 @@ const timestamp = new Timestamp(new Date());
 const paymentAmount = '20000000000000';
 
 const pricingMode = new PricingMode();
-const fixedMode = new FixedMode();
-fixedMode.gasPriceTolerance = 1;
-fixedMode.additionalComputationFactor = 0;
-pricingMode.fixed = fixedMode;
+const paymentLimitedMode = new PaymentLimitedMode();
+paymentLimitedMode.gasPriceTolerance = 1;
+paymentLimitedMode.paymentAmount = paymentAmount;
+paymentLimitedMode.standardPayment = true;
+pricingMode.paymentLimited = paymentLimitedMode;
 
 const args = Args.fromMap({
   target: CLValue.newCLPublicKey(

@@ -197,10 +197,10 @@ const publicKey = privateKey.publicKey;
 
 ```typescript
 const args = Args.fromMap({
-  target: CLValue.newCLPublicKey(
-    PublicKey.fromHex('<Recipient Public Key>')
-  ),
-  amount: CLValueUInt512.newCLUInt512('2000000000') // 2 CSPR
+   target: CLValue.newCLPublicKey(
+           PublicKey.fromHex('<Recipient Public Key>')
+   ),
+   amount: CLValueUInt512.newCLUInt512('2000000000') // 2 CSPR
 });
 ```
 
@@ -216,7 +216,7 @@ const transactionTarget = new TransactionTarget({}); // Native target;
 
 ```typescript
 const entryPoint = new TransactionEntryPoint(
-  TransactionEntryPointEnum.Transfer
+        TransactionEntryPointEnum.Transfer
 );
 ```
 
@@ -230,30 +230,31 @@ const scheduling = new TransactionScheduling({}); // Standard;
 
 ```typescript
 const pricingMode = new PricingMode();
-const fixedMode = new FixedMode();
-fixedMode.gasPriceTolerance = 2;
-fixedMode.additionalComputationFactor = 0;
+const paymentLimitedMode = new PaymentLimitedMode();
+paymentLimitedMode.gasPriceTolerance = 1;
+paymentLimitedMode.paymentAmount = paymentAmount;
+paymentLimitedMode.standardPayment = true;
 
-pricingMode.fixed = fixedMode;
+pricingMode.paymentLimited = paymentLimitedMode;
 ```
 
 5. **Create and Sign Transaction**:
 
 ```typescript
 const transactionPayload = TransactionV1Payload.build({
-  initiatorAddr: new InitiatorAddr(publicKey),
-  ttl: new Duration(1800000),
-  args,
-  timestamp: new Timestamp(new Date()),
-  entryPoint,
-  scheduling,
-  transactionTarget,
-  chainName: 'casper-net-1',
-  pricingMode
+   initiatorAddr: new InitiatorAddr(publicKey),
+   ttl: new Duration(1800000),
+   args,
+   timestamp: new Timestamp(new Date()),
+   entryPoint,
+   scheduling,
+   transactionTarget,
+   chainName: 'casper-net-1',
+   pricingMode
 });
 
 const transaction = TransactionV1.makeTransactionV1(
-  transactionPayload
+        transactionPayload
 );
 await transaction.sign(privateKey);
 ```
