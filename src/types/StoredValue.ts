@@ -125,8 +125,8 @@ export class StoredValue {
   /**
    * The stored package information, typically a contract or executable package.
    */
-  @jsonMember({ name: 'SmartContract', constructor: Package })
-  smartContract?: Package;
+  @jsonMember({ name: 'Package', constructor: Package })
+  package?: Package;
 
   /**
    * The stored bytecode, representing compiled contract or executable code.
