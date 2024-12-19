@@ -132,7 +132,10 @@ export class DelegationKind {
   @jsonMember({
     name: 'Purse',
     constructor: URef,
-    deserializer: json => URef.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
     serializer: value => value.toJSON(),
     preserveNull: true
   })
