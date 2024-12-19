@@ -43,6 +43,15 @@ export class CLValueString {
   }
 
   /**
+   * Converts the instance to a JSON-compatible string.
+   *
+   * @returns {string} The string representation of the instance.
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
+
+  /**
    * Provides the string value.
    * @returns The string value.
    */

@@ -33,6 +33,15 @@ export class CLValueUInt8 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible string.
+   *
+   * @returns {string} The string representation of the instance.
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
+
+  /**
    * Retrieves the number value of the UInt8.
    * @returns The number representation of the value.
    */

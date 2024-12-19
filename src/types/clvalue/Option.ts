@@ -46,6 +46,18 @@ export class CLValueOption {
   }
 
   /**
+   * Converts the instance to a JSON-compatible format.
+   *
+   * @returns {any} The JSON representation of the inner value or `null` if empty.
+   *
+   * If the instance is empty, it returns `null`. Otherwise, it calls `toJSON()`
+   * on the inner value to produce its JSON representation.
+   */
+  public toJSON(): any {
+    return this.isEmpty() ? null : this.inner!.toJSON();
+  }
+
+  /**
    * Checks if the option is empty.
    * @returns true if the option is empty, false otherwise.
    */

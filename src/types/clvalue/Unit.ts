@@ -55,6 +55,15 @@ export class CLValueUnit {
   }
 
   /**
+   * Converts the instance to a JSON-compatible null value.
+   *
+   * @returns {null} Always returns `null`, representing the absence of a value.
+   */
+  public toJSON(): null {
+    return this.getValue();
+  }
+
+  /**
    * Creates a CLValueUnit instance from a byte array.
    *
    * @param source - The source Uint8Array.

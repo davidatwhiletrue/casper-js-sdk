@@ -44,6 +44,15 @@ export class CLValueTuple1 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible array.
+   *
+   * @returns {any} An array containing the JSON representation of the inner value.
+   */
+  public toJSON(): any[] {
+    return [this.innerVal.toJSON()];
+  }
+
+  /**
    * Creates a new CLValue instance with a Tuple1 value.
    * @param val - The CLValue to be contained in the tuple.
    * @returns A new CLValue instance containing CLTypeTuple1 and a CLValueTuple1.

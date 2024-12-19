@@ -120,8 +120,8 @@ export class CLValueList {
    * Converts the list to a JSON-compatible representation.
    * @returns An array of string representations of the list elements.
    */
-  public toJSON(): any {
-    return this.elements.map(d => d.toString());
+  public toJSON(): string[] {
+    return this.elements.map(d => d.toJSON());
   }
 
   /**

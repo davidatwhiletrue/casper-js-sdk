@@ -25,6 +25,15 @@ export class CLValueByteArray {
   }
 
   /**
+   * Converts the instance to a JSON-compatible byte array.
+   *
+   * @returns {Uint8Array} The byte representation of the instance.
+   */
+  public toJSON(): Uint8Array {
+    return this.bytes();
+  }
+
+  /**
    * Provides a hexadecimal string representation of the byte array.
    * Each byte is represented by two hexadecimal digits.
    * @returns A string representing the byte array in hexadecimal format.

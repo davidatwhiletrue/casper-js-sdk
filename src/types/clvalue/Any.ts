@@ -34,6 +34,15 @@ export class CLValueAny {
   }
 
   /**
+   * Converts the instance to a JSON-compatible byte array.
+   *
+   * @returns {Uint8Array} The byte representation of the instance.
+   */
+  public toJSON(): Uint8Array {
+    return this.bytes();
+  }
+
+  /**
    * Creates a new CLValue instance containing an 'Any' value.
    * @param data - The Uint8Array to be stored within the CLValue.
    * @returns A new CLValue instance encapsulating the 'Any' value.

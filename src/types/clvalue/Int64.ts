@@ -36,6 +36,15 @@ export class CLValueInt64 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible string.
+   *
+   * @returns {string} The string representation of the instance.
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
+
+  /**
    * Retrieves the bigint value of the Int64.
    * @returns The bigint representation of the stored value.
    */

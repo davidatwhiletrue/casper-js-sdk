@@ -90,6 +90,25 @@ export class CLValueMap {
   }
 
   /**
+   * Converts the instance to a JSON-compatible map.
+   *
+   * @returns {any} A Map object representing the instance's key-value pairs.
+   *
+   * This method iterates over the `data` property, extracting key-value
+   * pairs from each tuple and storing them in a new Map.
+   */
+  public toJSON(): any {
+    const map = new Map();
+
+    this.data.forEach(tuple2 => {
+      const [k, v] = tuple2.value();
+      map.set(k, v);
+    });
+
+    return map;
+  }
+
+  /**
    * Finds a value in the map by key.
    * @param key - The key to search for.
    * @returns A tuple containing the found value (or undefined) and a boolean indicating if the key was found.

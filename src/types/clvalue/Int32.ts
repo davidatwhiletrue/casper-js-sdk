@@ -36,6 +36,15 @@ export class CLValueInt32 {
   }
 
   /**
+   * Converts the instance to a JSON-compatible string.
+   *
+   * @returns {string} The string representation of the instance.
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
+
+  /**
    * Retrieves the numeric value of the Int32.
    * @returns The numeric representation of the value.
    */
