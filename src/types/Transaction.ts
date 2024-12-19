@@ -336,7 +336,7 @@ export class Transaction {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   public args: Args;
 

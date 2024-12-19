@@ -46,7 +46,7 @@ export class ModuleBytes {
   @jsonMember({
     name: 'module_bytes',
     constructor: Uint8Array,
-    serializer: byteArrayJsonSerializer,
+    serializer: (bytes: Uint8Array) => byteArrayJsonSerializer(bytes),
     deserializer: byteArrayJsonDeserializer
   })
   moduleBytes!: Uint8Array;
@@ -56,7 +56,7 @@ export class ModuleBytes {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   args: Args;
 
@@ -120,7 +120,7 @@ export class StoredContractByHash {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   args: Args;
 
@@ -171,7 +171,7 @@ export class StoredContractByName {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   args: Args;
 
@@ -227,7 +227,7 @@ export class StoredVersionedContractByHash {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   args: Args;
 
@@ -302,7 +302,7 @@ export class StoredVersionedContractByName {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   args: Args;
 
@@ -348,7 +348,7 @@ export class TransferDeployItem {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   args: Args;
 

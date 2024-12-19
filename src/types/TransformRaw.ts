@@ -237,7 +237,7 @@ export class RawWriteCLValue {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs,
+    serializer: (args: Args) => serializeArgs(args, false),
     name: 'WriteCLValue'
   })
   WriteCLValue?: Args;
@@ -253,7 +253,7 @@ export class WriteCLValue {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs,
+    serializer: (args: Args) => serializeArgs(args, false),
     name: 'CLValue'
   })
   CLValue?: Args;

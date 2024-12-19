@@ -142,7 +142,7 @@ export class EraEndV2 {
    */
   @jsonMapMember(String, Array, {
     name: 'rewards',
-    serializer: serializeRewards,
+    serializer: (map: Map<string, CLValueUInt512[]>) => serializeRewards(map),
     deserializer: deserializeRewards
   })
   public rewards: Map<string, CLValueUInt512[]>;
@@ -252,7 +252,7 @@ export class EraEnd {
   @jsonMapMember(String, CLValueUInt512, {
     name: 'rewards',
     deserializer: deserializeRewards,
-    serializer: serializeRewards
+    serializer: (map: Map<string, CLValueUInt512[]>) => serializeRewards(map),
   })
   public rewards: Map<string, CLValueUInt512[]>;
 
