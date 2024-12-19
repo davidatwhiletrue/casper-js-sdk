@@ -556,10 +556,14 @@ export class TransactionTarget {
       return 'Native';
     } else if (this.stored !== undefined) {
       const serializer = new TypedJSON(StoredTarget);
-      return serializer.toPlainJson(this.stored);
+      return {
+        Stored: serializer.toPlainJson(this.stored)
+      };
     } else if (this.session !== undefined) {
       const serializer = new TypedJSON(SessionTarget);
-      return serializer.toPlainJson(this.session);
+      return {
+        Session: serializer.toPlainJson(this.session)
+      };
     } else {
       throw new Error('unknown target type');
     }
