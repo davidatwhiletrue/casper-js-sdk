@@ -32,6 +32,9 @@ import {
   CLValueUInt8
 } from './clvalue';
 
+/**
+ * Abstract base class for building Transaction V1 instances.
+ */
 abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
   protected _initiatorAddr!: InitiatorAddr;
   protected _chainName!: string;
@@ -43,31 +46,49 @@ abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
   protected _scheduling: TransactionScheduling = new TransactionScheduling({}); // Standard
   protected _runtimeArgs: Args;
 
+  /**
+   * Sets the initiator address using a public key.
+   */
   public from(publicKey: PublicKey): T {
     this._initiatorAddr = new InitiatorAddr(publicKey);
     return (this as unknown) as T;
   }
 
+  /**
+   * Sets the initiator address using an account hash.
+   */
   public fromAccountHash(accountHashKey: AccountHash): T {
     this._initiatorAddr = new InitiatorAddr(undefined, accountHashKey);
     return (this as unknown) as T;
   }
 
+  /**
+   * Sets the chain name for the transaction.
+   */
   public chainName(chainName: string): T {
     this._chainName = chainName;
     return (this as unknown) as T;
   }
 
+  /**
+   * Sets the timestamp for the transaction.
+   */
   public timestamp(timestamp: Timestamp): T {
     this._timestamp = timestamp;
     return (this as unknown) as T;
   }
 
+  /**
+   * Sets the time-to-live for the transaction.
+   */
   public ttl(ttl: number): T {
     this._ttl = new Duration(ttl);
     return (this as unknown) as T;
   }
 
+  /**
+   * Sets the payment amount for the transaction.
+   */
   public payment(paymentAmount: number): T {
     const pricingMode = new PricingMode();
     const paymentLimited = new PaymentLimitedMode();
@@ -80,6 +101,9 @@ abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
     return (this as unknown) as T;
   }
 
+  /**
+   * Builds and returns the TransactionV1 instance.
+   */
   public build(): TransactionV1 {
     const transactionPayload = TransactionV1Payload.build({
       initiatorAddr: this._initiatorAddr,
@@ -97,6 +121,9 @@ abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
   }
 }
 
+/**
+ * Builder for creating Native Transfer transactions.
+ */
 export class NativeTransferBuilder extends TransactionV1Builder<
   NativeTransferBuilder
 > {
@@ -112,26 +139,41 @@ export class NativeTransferBuilder extends TransactionV1Builder<
     );
   }
 
+  /**
+   * Sets the target public key for the transfer.
+   */
   public target(publicKey: PublicKey): NativeTransferBuilder {
     this._target = CLValue.newCLPublicKey(publicKey);
     return this;
   }
 
+  /**
+   * Sets the target account hash for the transfer.
+   */
   public targetAccountHash(accountHashKey: AccountHash): NativeTransferBuilder {
     this._target = CLValueByteArray.newCLByteArray(accountHashKey.toBytes());
     return this;
   }
 
+  /**
+   * Sets the amount to transfer.
+   */
   public amount(amount: BigNumber | string): NativeTransferBuilder {
     this._amount = CLValueUInt512.newCLUInt512(amount);
     return this;
   }
 
+  /**
+   * Sets the transfer ID.
+   */
   public id(id: number): NativeTransferBuilder {
     this._idTransfer = id;
     return this;
   }
 
+  /**
+   * Builds and returns the Native Transfer transaction.
+   */
   public build(): TransactionV1 {
     const runtimeArgs = Args.fromMap({});
 
@@ -146,7 +188,6 @@ export class NativeTransferBuilder extends TransactionV1Builder<
     }
 
     this._runtimeArgs = runtimeArgs;
-
     return super.build();
   }
 }
