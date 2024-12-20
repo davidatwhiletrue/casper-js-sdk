@@ -110,12 +110,13 @@ describe('Test Transaction', () => {
 
     await transaction.sign(sender);
 
-    const transactionPaymentAmount = transaction.payload.fields.args.args
+    const transactionV2 = transaction.getTransactionV1()!;
+    const transactionPaymentAmount = transactionV2.payload.fields.args.args
       .get('amount')!
       .toString();
 
     assert.deepEqual(transaction.approvals[0].signer, sender.publicKey);
     assert.deepEqual(parseInt(transactionPaymentAmount, 10), 25000000000);
-    expect(transaction.payload.chainName).to.deep.equal('casper-net-1');
+    expect(transactionV2.payload.chainName).to.deep.equal('casper-net-1');
   });
 });

@@ -1,12 +1,12 @@
-# TransactionV1 Builders
+# Transaction Builders
 
-TransactionBuilder contains classes and methods for building and managing Casper blockchain transactions. The provided classes extend the `TransactionV1Builder` base class to create specific types of transactions, such as transfers, bids, delegations, and contract calls.
+TransactionBuilder contains classes and methods for building and managing Casper blockchain transactions. The provided classes extend the `TransactionBuilder` base class to create specific types of transactions, such as transfers, bids, delegations, and contract calls.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Classes](#classes)
-  - [TransactionV1Builder](#transactionv1builder)
+  - [TransactionBuilder](#transactionv1builder)
   - [NativeTransferBuilder](#nativetransferbuilder)
   - [NativeAddBidBuilder](#nativeaddbidbuilder)
   - [NativeWithdrawBidBuilder](#nativewithdrawbidbuilder)
@@ -20,11 +20,11 @@ TransactionBuilder contains classes and methods for building and managing Casper
 
 ## Overview
 
-The provided classes allow developers to build, customize, and execute transactions on the Casper blockchain. By using builder patterns, developers can chain methods to configure each aspect of the transaction before calling `build()` to create the final `TransactionV1` instance.
+The provided classes allow developers to build, customize, and execute transactions on the Casper blockchain. By using builder patterns, developers can chain methods to configure each aspect of the transaction before calling `build()` to create the final [Transaction](./Transaction.ts) instance.
 
 ## Classes
 
-### TransactionV1Builder
+### TransactionBuilder
 
 The abstract base class for all transaction builders. This class provides common methods for setting basic transaction parameters such as:
 
@@ -137,12 +137,18 @@ Used to create session transactions.
 ## Usage Example
 
 ```typescript
-import { PublicKey, Args, PrivateKey } from 'casper-js-sdk';
+import {
+  PublicKey,
+  Args,
+  PrivateKey,
+  NativeTransferBuilder,
+  ContractCallBuilder
+} from 'casper-js-sdk';
 
 const sender = await PrivateKey.generate(KeyAlgorithm.ED25519);
 
 // Create a simple native transfer
-const transactionV1 = new NativeTransferBuilder()
+const transaction = new NativeTransferBuilder()
   .from(sender.publicKey)
   .target(PublicKey.fromHex('abcdef0123456789'))
   .amount('25000000000') // Amount in motes
@@ -151,10 +157,10 @@ const transactionV1 = new NativeTransferBuilder()
   .payment(100_000_000)
   .build();
 
-await transactionV1.sign(sender);
+await transaction.sign(sender);
 
 // Create a contract call
-const transactionV1ContractCall = new ContractCallBuilder()
+const contractCallTransaction = new ContractCallBuilder()
   .from(sender.publicKey)
   .byHash('example_contract')
   .entryPoint('unstake')
@@ -163,5 +169,5 @@ const transactionV1ContractCall = new ContractCallBuilder()
   .chainName('casper-net-1')
   .build();
 
-await transactionV1ContractCall.sign(sender);
+await contractCallTransaction.sign(sender);
 ```

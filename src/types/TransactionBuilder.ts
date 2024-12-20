@@ -19,7 +19,7 @@ import { TransactionScheduling } from './TransactionScheduling';
 import { Args } from './Args';
 import { PublicKey } from './keypair';
 import { AccountHash, Hash } from './key';
-import { TransactionV1 } from './Transaction';
+import { Transaction, TransactionV1 } from './Transaction';
 import { TransactionV1Payload } from './TransactionV1Payload';
 import { Duration, Timestamp } from './Time';
 import {
@@ -35,7 +35,7 @@ import {
 /**
  * Abstract base class for building Transaction V1 instances.
  */
-abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
+abstract class TransactionBuilder<T extends TransactionBuilder<T>> {
   protected _initiatorAddr!: InitiatorAddr;
   protected _chainName!: string;
   protected _timestamp = new Timestamp(new Date());
@@ -102,9 +102,9 @@ abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
   }
 
   /**
-   * Builds and returns the TransactionV1 instance.
+   * Builds and returns the Transaction instance.
    */
-  public build(): TransactionV1 {
+  public build(): Transaction {
     const transactionPayload = TransactionV1Payload.build({
       initiatorAddr: this._initiatorAddr,
       timestamp: this._timestamp,
@@ -117,14 +117,15 @@ abstract class TransactionV1Builder<T extends TransactionV1Builder<T>> {
       scheduling: this._scheduling
     });
 
-    return TransactionV1.makeTransactionV1(transactionPayload);
+    const transactionV1 = TransactionV1.makeTransactionV1(transactionPayload);
+    return Transaction.fromTransactionV1(transactionV1);
   }
 }
 
 /**
  * Builder for creating Native Transfer transactions.
  */
-export class NativeTransferBuilder extends TransactionV1Builder<
+export class NativeTransferBuilder extends TransactionBuilder<
   NativeTransferBuilder
 > {
   private _target!: CLValue;
@@ -174,7 +175,7 @@ export class NativeTransferBuilder extends TransactionV1Builder<
   /**
    * Builds and returns the Native Transfer transaction.
    */
-  public build(): TransactionV1 {
+  public build(): Transaction {
     const runtimeArgs = Args.fromMap({});
 
     runtimeArgs.insert('target', this._target);
@@ -192,7 +193,7 @@ export class NativeTransferBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeAddBidBuilder extends TransactionV1Builder<
+export class NativeAddBidBuilder extends TransactionBuilder<
   NativeAddBidBuilder
 > {
   private _validator!: CLValue;
@@ -248,7 +249,7 @@ export class NativeAddBidBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     const runtimeArgs = Args.fromMap({});
 
     runtimeArgs.insert('public_key', this._validator);
@@ -279,7 +280,7 @@ export class NativeAddBidBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeWithdrawBidBuilder extends TransactionV1Builder<
+export class NativeWithdrawBidBuilder extends TransactionBuilder<
   NativeWithdrawBidBuilder
 > {
   private _validator!: CLValue;
@@ -303,7 +304,7 @@ export class NativeWithdrawBidBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     this._runtimeArgs = Args.fromMap({
       public_key: this._validator,
       amount: this._amount
@@ -313,7 +314,7 @@ export class NativeWithdrawBidBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeDelegateBuilder extends TransactionV1Builder<
+export class NativeDelegateBuilder extends TransactionBuilder<
   NativeDelegateBuilder
 > {
   private _validator!: CLValue;
@@ -337,7 +338,7 @@ export class NativeDelegateBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     if (!this._initiatorAddr.publicKey) {
       throw new Error('Initiator addr is not specified');
     }
@@ -352,7 +353,7 @@ export class NativeDelegateBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeUndelegateBuilder extends TransactionV1Builder<
+export class NativeUndelegateBuilder extends TransactionBuilder<
   NativeUndelegateBuilder
 > {
   private _validator!: CLValue;
@@ -376,7 +377,7 @@ export class NativeUndelegateBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     if (!this._initiatorAddr.publicKey) {
       throw new Error('Initiator addr is not specified');
     }
@@ -391,7 +392,7 @@ export class NativeUndelegateBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeRedelegateBuilder extends TransactionV1Builder<
+export class NativeRedelegateBuilder extends TransactionBuilder<
   NativeRedelegateBuilder
 > {
   private _validator!: CLValue;
@@ -421,7 +422,7 @@ export class NativeRedelegateBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     if (!this._initiatorAddr.publicKey) {
       throw new Error('Initiator addr is not specified');
     }
@@ -437,7 +438,7 @@ export class NativeRedelegateBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeActivateBidBuilder extends TransactionV1Builder<
+export class NativeActivateBidBuilder extends TransactionBuilder<
   NativeActivateBidBuilder
 > {
   private _validator!: CLValue;
@@ -455,7 +456,7 @@ export class NativeActivateBidBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     this._runtimeArgs = Args.fromMap({
       validator: this._validator
     });
@@ -464,7 +465,7 @@ export class NativeActivateBidBuilder extends TransactionV1Builder<
   }
 }
 
-export class NativeChangeBidPublicKeyBuilder extends TransactionV1Builder<
+export class NativeChangeBidPublicKeyBuilder extends TransactionBuilder<
   NativeChangeBidPublicKeyBuilder
 > {
   private _public_key!: CLValue;
@@ -490,7 +491,7 @@ export class NativeChangeBidPublicKeyBuilder extends TransactionV1Builder<
     return this;
   }
 
-  public build(): TransactionV1 {
+  public build(): Transaction {
     this._runtimeArgs = Args.fromMap({
       public_key: this._public_key,
       new_public_key: this._new_public_key
@@ -500,7 +501,7 @@ export class NativeChangeBidPublicKeyBuilder extends TransactionV1Builder<
   }
 }
 
-export class ContractCallBuilder extends TransactionV1Builder<
+export class ContractCallBuilder extends TransactionBuilder<
   ContractCallBuilder
 > {
   constructor() {
@@ -581,7 +582,7 @@ export class ContractCallBuilder extends TransactionV1Builder<
   }
 }
 
-export class SessionBuilder extends TransactionV1Builder<SessionBuilder> {
+export class SessionBuilder extends TransactionBuilder<SessionBuilder> {
   private _isInstallOrUpgrade = false;
 
   constructor() {

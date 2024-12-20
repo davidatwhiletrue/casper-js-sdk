@@ -100,13 +100,14 @@ const nativeTarget = new TransactionTarget({});
 const stored = new StoredTarget();
 const invocationTarget = new TransactionInvocationTarget();
 invocationTarget.byHash = new Hash(Uint8Array.from([])); // an example of hash
-storedTarget.runtime = 'VmCasperV1'; // an example of runtime
+storedTarget.runtime = TransactionRuntime.vmCasperV1(); // an example of runtime
 storedTarget.id = invocationTarget;
 
 const storedTransactionTarget = new TransactionTarget(
   undefined,
   stored
 );
+
 // OR
 const storedTransactionTarget1 = new TransactionTarget();
 storedTransactionTarget1.stored = stored;
@@ -117,16 +118,15 @@ storedTransactionTarget1.stored = stored;
 ```typescript
 const sessionTarget = new SessionTarget();
 sessionTarget.moduleBytes = Uint8Array.from([]); // an example of module bytes
-sessionTarget.runtime = 'VmCasperV1'; // an example of runtime
-sessionTarget.transferredValue = 1000; // an example of transferredValue
+sessionTarget.runtime = TransactionRuntime.vmCasperV1(); // an example of runtime
 sessionTarget.isInstallUpgrade = true; // an example of isInstallUpgrade
-sessionTarget.seed = new Hash(Uint8Array.from([])); // an example of seed
 
 const sessionTransactionTarget = new TransactionTarget(
   undefined,
   undefined,
   sessionTarget
 );
+
 // OR
 const sessionTransactionTarget1 = new TransactionTarget();
 sessionTransactionTarget1.session = sessionTarget;
@@ -158,19 +158,20 @@ Specifies how transaction fees are calculated. Supports three modes:
 
 #### Examples:
 
-- **FixedMode**:
+- **PaymentLimitedMode**:
 
 ```typescript
-const fixedMode = new FixedMode();
-fixedMode.gasPriceTolerance = 2;
-fixedMode.additionalComputationFactor = 1;
+const paymentLimited = new PaymentLimitedMode();
+paymentLimited.standardPayment = true;
+paymentLimited.paymentAmount = '250000000';
+paymentLimited.gasPriceTolerance = 1;
 ```
 
 - **Assign Pricing Mode**:
 
 ```typescript
 const pricingMode = new PricingMode();
-pricingMode.fixed = fixedMode;
+pricingMode.paymentLimited = paymentLimited;
 ```
 
 ---
@@ -268,7 +269,7 @@ console.log(`Transaction Hash: ${result.transactionHash}`);
 
 ## Using [TransactionBuilder](./src/types/TransactionBuilder.md)
 
-The TransactionV1Builder is a base class used to create various types of transactions. By extending this class, you can build custom transaction types with specific methods and properties.
+The `TransactionBuilder` is a base class used to create various types of transactions. By extending this class, you can build custom transaction types with specific methods and properties.
 
 #### Example of how to construct a transaction with TransactionBuilder and push it to the network:
 
@@ -279,8 +280,7 @@ import {
   NativeTransferBuilder,
   PrivateKey,
   KeyAlgorithm,
-  PublicKey,
-  Transaction
+  PublicKey
 } from 'casper-js-sdk';
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
@@ -288,7 +288,7 @@ const rpcClient = new RpcClient(rpcHandler);
 
 const privateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
 
-const transactionV1 = new NativeTransferBuilder()
+const transaction = new NativeTransferBuilder()
   .from(sender.publicKey)
   .target(
     PublicKey.fromHex(
@@ -301,12 +301,10 @@ const transactionV1 = new NativeTransferBuilder()
   .payment(100_000_000)
   .build();
 
-await transactionV1.sign(privateKey);
-
-const tx = Transaction.fromTransactionV1(transactionV1);
+await transaction.sign(privateKey);
 
 try {
-  const result = await rpcClient.putTransaction(tx);
+  const result = await rpcClient.putTransaction(transaction);
   console.log(`Transaction Hash: ${result.transactionHash}`);
 } catch (e) {
   console.error(e);

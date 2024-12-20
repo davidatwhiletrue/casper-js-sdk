@@ -119,8 +119,7 @@ import {
   NativeTransferBuilder,
   PrivateKey,
   KeyAlgorithm,
-  PublicKey,
-  Transaction
+  PublicKey
 } from 'casper-js-sdk';
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
@@ -128,7 +127,7 @@ const rpcClient = new RpcClient(rpcHandler);
 
 const privateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
 
-const transactionV1 = new NativeTransferBuilder()
+const transaction = new NativeTransferBuilder()
   .from(privateKey.publicKey)
   .target(
     PublicKey.fromHex(
@@ -141,12 +140,10 @@ const transactionV1 = new NativeTransferBuilder()
   .payment(100_000_000)
   .build();
 
-await transactionV1.sign(privateKey);
-
-const tx = Transaction.fromTransactionV1(transactionV1);
+await transaction.sign(privateKey);
 
 try {
-  const result = await rpcClient.putTransaction(tx);
+  const result = await rpcClient.putTransaction(transaction);
   console.log(`Transaction Hash: ${result.transactionHash}`);
 } catch (e) {
   console.error(e);
