@@ -1,5 +1,5 @@
 import { jsonObject, jsonMember } from 'typedjson';
-import { EntityAddr, Hash } from './key';
+import { Hash } from './key';
 import { ModuleBytes } from './ExecutableDeployItem';
 
 /**
@@ -104,12 +104,12 @@ export class Message {
    * The entity address associated with the message, often the sender or origin.
    */
   @jsonMember({
-    name: 'entity_hash',
-    constructor: EntityAddr,
-    deserializer: json => EntityAddr.fromJSON(json),
+    name: 'hash_addr',
+    constructor: Hash,
+    deserializer: json => Hash.fromJSON(json),
     serializer: value => value.toJSON()
   })
-  entityHash: EntityAddr;
+  hashAddr: Hash;
 
   /**
    * The index of the block where the message was included.

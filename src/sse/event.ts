@@ -265,8 +265,16 @@ export class DeployProcessedPayload {
   })
   account: PublicKey;
 
-  @jsonMember({ name: 'timestamp', constructor: Date })
-  timestamp: Date;
+  @jsonMember({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: json => {
+      if (!json) return;
+      return Timestamp.fromJSON(json);
+    },
+    serializer: value => value.toJSON()
+  })
+  timestamp: Timestamp;
 
   @jsonMember({ name: 'ttl', constructor: String })
   ttl: string;
@@ -438,8 +446,16 @@ export class TransactionProcessedPayload {
   })
   initiatorAddr: InitiatorAddr;
 
-  @jsonMember({ name: 'timestamp', constructor: Date })
-  timestamp: Date;
+  @jsonMember({
+    name: 'timestamp',
+    constructor: Timestamp,
+    deserializer: json => {
+      if (!json) return;
+      return Timestamp.fromJSON(json);
+    },
+    serializer: value => value.toJSON()
+  })
+  timestamp: Timestamp;
 
   @jsonMember({ name: 'ttl', constructor: String })
   ttl: string;

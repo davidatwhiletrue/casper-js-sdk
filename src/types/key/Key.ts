@@ -778,9 +778,7 @@ export class Key {
         );
         break;
       case KeyTypeID.Message:
-        result.message = MessageAddr.fromString(
-          source.replace(PrefixName.Message, '')
-        );
+        result.message = MessageAddr.fromString(source);
         break;
       case KeyTypeID.NamedKey:
         result.namedKey = NamedKeyAddr.fromString(
