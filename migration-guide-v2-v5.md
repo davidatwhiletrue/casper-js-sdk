@@ -197,10 +197,10 @@ const publicKey = privateKey.publicKey;
 
 ```typescript
 const args = Args.fromMap({
-   target: CLValue.newCLPublicKey(
-           PublicKey.fromHex('<Recipient Public Key>')
-   ),
-   amount: CLValueUInt512.newCLUInt512('2000000000') // 2 CSPR
+  target: CLValue.newCLPublicKey(
+    PublicKey.fromHex('<Recipient Public Key>')
+  ),
+  amount: CLValueUInt512.newCLUInt512('2000000000') // 2 CSPR
 });
 ```
 
@@ -216,7 +216,7 @@ const transactionTarget = new TransactionTarget({}); // Native target;
 
 ```typescript
 const entryPoint = new TransactionEntryPoint(
-        TransactionEntryPointEnum.Transfer
+  TransactionEntryPointEnum.Transfer
 );
 ```
 
@@ -242,19 +242,19 @@ pricingMode.paymentLimited = paymentLimitedMode;
 
 ```typescript
 const transactionPayload = TransactionV1Payload.build({
-   initiatorAddr: new InitiatorAddr(publicKey),
-   ttl: new Duration(1800000),
-   args,
-   timestamp: new Timestamp(new Date()),
-   entryPoint,
-   scheduling,
-   transactionTarget,
-   chainName: 'casper-net-1',
-   pricingMode
+  initiatorAddr: new InitiatorAddr(publicKey),
+  ttl: new Duration(1800000),
+  args,
+  timestamp: new Timestamp(new Date()),
+  entryPoint,
+  scheduling,
+  transactionTarget,
+  chainName: 'casper-net-1',
+  pricingMode
 });
 
 const transaction = TransactionV1.makeTransactionV1(
-        transactionPayload
+  transactionPayload
 );
 await transaction.sign(privateKey);
 ```
@@ -264,4 +264,51 @@ await transaction.sign(privateKey);
 ```typescript
 const result = await rpcClient.putTransactionV1(transaction);
 console.log(`Transaction Hash: ${result.transactionHash}`);
+```
+
+## Using [TransactionBuilder](./src/types/TransactionBuilder.md)
+
+The TransactionV1Builder is a base class used to create various types of transactions. By extending this class, you can build custom transaction types with specific methods and properties.
+
+#### Example of how to construct a transaction with TransactionBuilder and push it to the network:
+
+```ts
+import {
+  HttpHandler,
+  RpcClient,
+  NativeTransferBuilder,
+  PrivateKey,
+  KeyAlgorithm,
+  PublicKey,
+  Transaction
+} from 'casper-js-sdk';
+
+const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
+const rpcClient = new RpcClient(rpcHandler);
+
+const privateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
+
+const transactionV1 = new NativeTransferBuilder()
+  .from(sender.publicKey)
+  .target(
+    PublicKey.fromHex(
+      '0202f5a92ab6da536e7b1a351406f3744224bec85d7acbab1497b65de48a1a707b64'
+    )
+  )
+  .amount('25000000000') // Amount in motes
+  .id(Date.now())
+  .chainName('casper-net-1')
+  .payment(100_000_000)
+  .build();
+
+await transactionV1.sign(privateKey);
+
+const tx = Transaction.fromTransactionV1(transactionV1);
+
+try {
+  const result = await rpcClient.putTransaction(tx);
+  console.log(`Transaction Hash: ${result.transactionHash}`);
+} catch (e) {
+  console.error(e);
+}
 ```

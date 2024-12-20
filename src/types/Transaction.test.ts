@@ -24,6 +24,7 @@ import {
   CLValueUInt64
 } from './clvalue';
 import { TransactionV1Payload } from './TransactionV1Payload';
+import { NativeTransferBuilder } from './TransactionBuilder';
 
 describe('Test Transaction', () => {
   it('should create a TransactionV1 with correct payload instance', async () => {
@@ -89,5 +90,32 @@ describe('Test Transaction', () => {
     expect(transaction.payload.fields.args).to.deep.equal(args);
     expect(transaction.payload.fields.scheduling).to.deep.equal(scheduling);
     expect(transaction.payload.fields.entryPoint).to.deep.equal(entryPoint);
+  });
+
+  it('should create native transfer TransactionV1 with builder', async () => {
+    const sender = await PrivateKey.generate(KeyAlgorithm.ED25519);
+
+    const transaction = new NativeTransferBuilder()
+      .from(sender.publicKey)
+      .target(
+        PublicKey.fromHex(
+          '0202f5a92ab6da536e7b1a351406f3744224bec85d7acbab1497b65de48a1a707b64'
+        )
+      )
+      .amount('25000000000')
+      .id(Date.now())
+      .chainName('casper-net-1')
+      .payment(100_000_000)
+      .build();
+
+    await transaction.sign(sender);
+
+    const transactionPaymentAmount = transaction.payload.fields.args.args
+      .get('amount')!
+      .toString();
+
+    assert.deepEqual(transaction.approvals[0].signer, sender.publicKey);
+    assert.deepEqual(parseInt(transactionPaymentAmount, 10), 25000000000);
+    expect(transaction.payload.chainName).to.deep.equal('casper-net-1');
   });
 });
