@@ -122,7 +122,7 @@ export class Args {
    * The map of argument names to `CLValue` values.
    */
   @jsonMapMember(String, CLValue, {
-    serializer: serRA,
+    serializer: (map: Map<string, CLValue>) => serRA(map),
     deserializer: desRA
   })
   public args: Map<string, CLValue>;

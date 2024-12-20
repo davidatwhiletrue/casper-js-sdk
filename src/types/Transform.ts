@@ -517,7 +517,7 @@ export class NamedKeyKind {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   public namedKey: Args;
 
@@ -526,7 +526,7 @@ export class NamedKeyKind {
    */
   @jsonMember(() => Args, {
     deserializer: deserializeArgs,
-    serializer: serializeArgs
+    serializer: (args: Args) => serializeArgs(args, false)
   })
   public name: Args;
 }
