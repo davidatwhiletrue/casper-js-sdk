@@ -269,7 +269,9 @@ export class Deploy {
    * @param keys The private key used to sign the deploy.
    */
   public async sign(keys: PrivateKey): Promise<void> {
-    const signatureBytes = await keys.sign(this.hash.toBytes());
+    const signatureBytes = await keys.signAndAddAlgorithmBytes(
+      this.hash.toBytes()
+    );
     const signature = new HexBytes(signatureBytes);
     this.approvals.push(new Approval(keys.publicKey, signature));
   }

@@ -114,81 +114,40 @@ Example of how to construct a transaction and push it to the network:
 
 ```ts
 import {
-  Args,
-  CLValue,
-  CLValueOption,
-  CLValueUInt64,
-  CLValueUInt512,
-  Duration,
   HttpHandler,
-  InitiatorAddr,
-  KeyAlgorithm,
-  PricingMode,
-  PrivateKey,
-  PublicKey,
   RpcClient,
-  Timestamp,
-  TransactionEntryPoint,
-  TransactionScheduling,
-  TransactionTarget,
-  TransactionV1,
-  TransactionV1Payload,
-  TransactionEntryPointEnum,
-  PaymentLimitedMode
+  NativeTransferBuilder,
+  PrivateKey,
+  KeyAlgorithm,
+  PublicKey
 } from 'casper-js-sdk';
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
 const rpcClient = new RpcClient(rpcHandler);
 
 const privateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
-const timestamp = new Timestamp(new Date());
-const paymentAmount = '20000000000000';
 
-const pricingMode = new PricingMode();
-const paymentLimitedMode = new PaymentLimitedMode();
-paymentLimitedMode.gasPriceTolerance = 1;
-paymentLimitedMode.paymentAmount = paymentAmount;
-paymentLimitedMode.standardPayment = true;
-pricingMode.paymentLimited = paymentLimitedMode;
-
-const args = Args.fromMap({
-  target: CLValue.newCLPublicKey(
+const transaction = new NativeTransferBuilder()
+  .from(privateKey.publicKey)
+  .target(
     PublicKey.fromHex(
       '0202f5a92ab6da536e7b1a351406f3744224bec85d7acbab1497b65de48a1a707b64'
     )
-  ),
-  amount: CLValueUInt512.newCLUInt512(paymentAmount),
-  id: CLValueOption.newCLOption(CLValueUInt64.newCLUint64(3)) // memo ( optional )
-});
+  )
+  .amount('25000000000') // Amount in motes
+  .id(Date.now())
+  .chainName('casper-net-1')
+  .payment(100_000_000)
+  .build();
 
-const transactionTarget = new TransactionTarget({}); // Native target;
-const entryPoint = new TransactionEntryPoint(
-  TransactionEntryPointEnum.Transfer
-);
-const scheduling = new TransactionScheduling({}); // Standard;
+await transaction.sign(privateKey);
 
-const transactionPayload = TransactionV1Payload.build({
-  initiatorAddr: new InitiatorAddr(privateKey.publicKey),
-  ttl: new Duration(1800000),
-  args,
-  timestamp,
-  entryPoint,
-  scheduling,
-  transactionTarget,
-  chainName: 'casper-net-1',
-  pricingMode
-});
-
-const transactionV1 = TransactionV1.makeTransactionV1(
-  transactionPayload
-);
-await transactionV1.sign(privateKey);
-
-const tx = Transaction.fromTransactionV1(transactionV1);
-
-const result = await rpcClient.putTransaction(tx);
-
-console.log(`Transaction Hash: ${result.transactionHash}`);
+try {
+  const result = await rpcClient.putTransaction(transaction);
+  console.log(`Transaction Hash: ${result.transactionHash}`);
+} catch (e) {
+  console.error(e);
+}
 ```
 
 ### Creating a legacy deploy

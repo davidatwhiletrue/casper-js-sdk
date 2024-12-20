@@ -170,7 +170,9 @@ export class TransactionV1 {
    * @param keys The private key to sign the transaction.
    */
   async sign(keys: PrivateKey): Promise<void> {
-    const signatureBytes = await keys.sign(this.hash.toBytes());
+    const signatureBytes = await keys.signAndAddAlgorithmBytes(
+      this.hash.toBytes()
+    );
     const signature = new HexBytes(signatureBytes);
 
     if (!this.approvals) {
@@ -467,7 +469,10 @@ export class Transaction {
   }
 
   public getTransactionWrapper(): TransactionWrapper {
-    return new TransactionWrapper(this.originDeployV1, this.originTransactionV1);
+    return new TransactionWrapper(
+      this.originDeployV1,
+      this.originTransactionV1
+    );
   }
 
   /**
@@ -489,7 +494,9 @@ export class Transaction {
    * @param key The private key to sign the transaction.
    */
   async sign(key: PrivateKey): Promise<void> {
-    const signatureBytes = await key.sign(this.hash.toBytes());
+    const signatureBytes = await key.signAndAddAlgorithmBytes(
+      this.hash.toBytes()
+    );
     this.setSignature(signatureBytes, key.publicKey);
   }
 
