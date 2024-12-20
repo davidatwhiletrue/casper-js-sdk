@@ -313,56 +313,56 @@ export class Key {
 
     switch (this.type) {
       case KeyTypeID.Balance:
-        return Key.concatBytes(typeBytes, this.balance?.toBytes());
+        return Key.concatBytes(this.balance?.toBytes(), typeBytes);
       case KeyTypeID.Bid:
-        return Key.concatBytes(typeBytes, this.bid?.toBytes());
+        return Key.concatBytes(this.bid?.toBytes(), typeBytes);
       case KeyTypeID.Withdraw:
-        return Key.concatBytes(typeBytes, this.withdraw?.toBytes());
+        return Key.concatBytes(this.withdraw?.toBytes(), typeBytes);
       case KeyTypeID.SystemContractRegistry:
         return Key.concatBytes(
-          typeBytes,
-          this.systemContactRegistry?.toBytes()
+          this.systemContactRegistry?.toBytes(),
+          typeBytes
         );
       case KeyTypeID.Unbond:
-        return Key.concatBytes(typeBytes, this.unbond?.toBytes());
+        return Key.concatBytes(this.unbond?.toBytes(), typeBytes);
       case KeyTypeID.ChainspecRegistry:
-        return Key.concatBytes(typeBytes, this.chainspecRegistry?.toBytes());
+        return Key.concatBytes(this.chainspecRegistry?.toBytes(), typeBytes);
       case KeyTypeID.ChecksumRegistry:
-        return Key.concatBytes(typeBytes, this.checksumRegistry?.toBytes());
+        return Key.concatBytes(this.checksumRegistry?.toBytes(), typeBytes);
       case KeyTypeID.EraSummary:
-        return Key.concatBytes(typeBytes, this.eraSummary?.toBytes());
+        return Key.concatBytes(this.eraSummary?.toBytes(), typeBytes);
       case KeyTypeID.Account:
-        return Key.concatBytes(typeBytes, this.account?.toBytes());
+        return Key.concatBytes(this.account?.toBytes(), typeBytes);
       case KeyTypeID.Hash:
-        return Key.concatBytes(typeBytes, this.hash?.toBytes());
+        return Key.concatBytes(this.hash?.toBytes(), typeBytes);
       case KeyTypeID.EraId:
-        return Key.concatBytes(typeBytes, this.era?.toBytes());
+        return Key.concatBytes(this.era?.toBytes(), typeBytes);
       case KeyTypeID.URef:
-        return Key.concatBytes(typeBytes, this.uRef?.data);
+        return Key.concatBytes(this.uRef?.data, typeBytes);
       case KeyTypeID.Transfer:
-        return Key.concatBytes(typeBytes, this.transfer?.toBytes());
+        return Key.concatBytes(this.transfer?.toBytes(), typeBytes);
       case KeyTypeID.DeployInfo:
-        return Key.concatBytes(typeBytes, this.deploy?.toBytes());
+        return Key.concatBytes(this.deploy?.toBytes(), typeBytes);
       case KeyTypeID.Dictionary:
-        return Key.concatBytes(typeBytes, this.dictionary?.toBytes());
+        return Key.concatBytes(this.dictionary?.toBytes(), typeBytes);
       case KeyTypeID.BidAddr:
-        return Key.concatBytes(typeBytes, this.bidAddr?.toBytes());
+        return Key.concatBytes(this.bidAddr?.toBytes(), typeBytes);
       case KeyTypeID.Package:
-        return Key.concatBytes(typeBytes, this.package?.toBytes());
+        return Key.concatBytes(this.package?.toBytes(), typeBytes);
       case KeyTypeID.AddressableEntity:
-        return Key.concatBytes(typeBytes, this.addressableEntity?.toBytes());
+        return Key.concatBytes(this.addressableEntity?.toBytes(), typeBytes);
       case KeyTypeID.ByteCode:
-        return Key.concatBytes(typeBytes, this.byteCode?.toBytes());
+        return Key.concatBytes(this.byteCode?.toBytes(), typeBytes);
       case KeyTypeID.Message:
-        return Key.concatBytes(typeBytes, this.message?.toBytes());
+        return Key.concatBytes(this.message?.toBytes(), typeBytes);
       case KeyTypeID.NamedKey:
-        return Key.concatBytes(typeBytes, this.namedKey?.toBytes());
+        return Key.concatBytes(this.namedKey?.toBytes(), typeBytes);
       case KeyTypeID.BlockGlobal:
-        return Key.concatBytes(typeBytes, this.blockGlobal?.toBytes());
+        return Key.concatBytes(this.blockGlobal?.toBytes(), typeBytes);
       case KeyTypeID.BalanceHold:
-        return Key.concatBytes(typeBytes, this.balanceHold?.toBytes());
+        return Key.concatBytes(this.balanceHold?.toBytes(), typeBytes);
       case KeyTypeID.EntryPoint:
-        return Key.concatBytes(typeBytes, this.entryPoint?.toBytes());
+        return Key.concatBytes(this.entryPoint?.toBytes(), typeBytes);
       default:
         return new Uint8Array();
     }

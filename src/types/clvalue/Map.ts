@@ -207,7 +207,7 @@ export class CLValueMap {
 
         remainder = keyVal?.bytes;
 
-        const valVal = CLValueParser.fromBytesByType(u32.bytes(), mapType.val);
+        const valVal = CLValueParser.fromBytesByType(remainder, mapType.val);
 
         remainder = valVal.bytes;
 
