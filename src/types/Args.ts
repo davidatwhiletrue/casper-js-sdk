@@ -2,7 +2,12 @@ import { concat } from '@ethersproject/bytes';
 import { jsonMapMember, jsonObject } from 'typedjson';
 
 import { CLValue, CLValueParser } from './clvalue';
-import { toBytesString, toBytesU32, writeInteger } from './ByteConverters';
+import {
+  expandBuffer,
+  toBytesString,
+  toBytesU32,
+  writeInteger
+} from './ByteConverters';
 
 /**
  * Represents a named argument with a name and associated `CLValue`, which can be serialized to bytes.
@@ -43,19 +48,25 @@ export class NamedArg {
    * ```
    */
   public static toBytesWithNamedArg(source: NamedArg): Uint8Array {
-    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
-    // encoded data, with room for edge cases. If inputs exceed this size, revisit
-    // the implementation.
-    const buffer = new ArrayBuffer(1024);
-    const view = new DataView(buffer);
+    const bufferSize = 1024;
+    let buffer = new ArrayBuffer(bufferSize);
+    let view = new DataView(buffer);
     let offset = 0;
 
     const nameBytes = new TextEncoder().encode(source.name);
+    if (offset + 4 + nameBytes.length > buffer.byteLength) {
+      buffer = expandBuffer(buffer, offset + 4 + nameBytes.length);
+      view = new DataView(buffer);
+    }
     offset = writeInteger(view, offset, nameBytes.length);
     new Uint8Array(buffer, offset).set(nameBytes);
     offset += nameBytes.length;
 
     const valueBytes = CLValueParser.toBytesWithType(source.value);
+    if (offset + valueBytes.length > buffer.byteLength) {
+      buffer = expandBuffer(buffer, offset + valueBytes.length);
+      view = new DataView(buffer);
+    }
     new Uint8Array(buffer, offset).set(valueBytes);
     offset += valueBytes.length;
 
