@@ -236,7 +236,7 @@ export class InfoGetDeployResult {
   @jsonArrayMember(DeployExecutionResult, {
     name: 'execution_results'
   })
-  executionResultsV1: DeployExecutionResult[];
+  executionResultsV1?: DeployExecutionResult[];
 
   rawJSON: any;
 
