@@ -13,6 +13,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.0-beta1] - 2024-12-20
+
+### Added
+
+- Feat utils and fixes by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/464 and https://github.com/casper-ecosystem/casper-js-sdk/pull/467
+- Added `toJSON` method for each `CLValue` representation by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/470
+- Added `transaction` builders by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/473
+
+### Changed
+
+- Updated `TransactionRuntime` / `TransactionTarget` serialization by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/466
+- Updated `MessageTopic` serialization, `MessageAddr` key parsing by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/472
+
+### Fixed
+
+- Transform Raw serialization, removed message topics from `AddressableEntity`, `EntryPointPayment` change by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/468
+- Map and List `fromBytes` methods by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/469
+- Derializers by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/471
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.0-rc8...5.0.0-beta1
+
 ## [5.0.0-rc8] - 2024-12-16
 
 ### Added
