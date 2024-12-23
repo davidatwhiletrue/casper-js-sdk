@@ -10,7 +10,12 @@ import { TransactionScheduling } from './TransactionScheduling';
 import { CalltableSerialization } from './CalltableSerialization';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
 import { CLValueString, CLValueUInt64 } from './clvalue';
-import { writeBytes, writeInteger, writeUShort } from './ByteConverters';
+import {
+  expandBuffer,
+  writeBytes,
+  writeInteger,
+  writeUShort
+} from './ByteConverters';
 
 /**
  * Interface representing the parameters required to build a `TransactionV1Payload`.
@@ -186,17 +191,24 @@ export class PayloadFields {
    *
    */
   toBytes(): Uint8Array {
-    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
-    // encoded data, with room for edge cases. If inputs exceed this size, revisit
-    // the implementation.
-    const fieldsBytes = new ArrayBuffer(1024);
-    const view = new DataView(fieldsBytes);
+    const bufferSize = 1024;
+    let fieldsBytes = new ArrayBuffer(bufferSize);
+    let view = new DataView(fieldsBytes);
     let offset = 0;
 
     offset = writeInteger(view, offset, this.fields.size);
 
     for (const [field, value] of Array.from(this.fields.entries())) {
+      if (offset + 2 > fieldsBytes.byteLength) {
+        fieldsBytes = expandBuffer(fieldsBytes, offset + 2);
+        view = new DataView(fieldsBytes);
+      }
       offset = writeUShort(view, offset, field);
+
+      if (offset + value.length > fieldsBytes.byteLength) {
+        fieldsBytes = expandBuffer(fieldsBytes, offset + value.length);
+        view = new DataView(fieldsBytes);
+      }
       offset = writeBytes(view, offset, value);
     }
 
@@ -269,22 +281,32 @@ export class TransactionV1Payload {
    * @returns A `Uint8Array` representing the serialized transaction payload.
    */
   toBytes(): Uint8Array {
-    // The buffer size is fixed at 1024 bytes based on the expected maximum size of
-    // encoded data, with room for edge cases. If inputs exceed this size, revisit
-    // the implementation.
-    const runtimeArgsBuffer = new ArrayBuffer(1024);
-    const runtimeArgsView = new DataView(runtimeArgsBuffer);
+    const bufferSize = 1024;
+    let runtimeArgsBuffer = new ArrayBuffer(bufferSize);
+    let runtimeArgsView = new DataView(runtimeArgsBuffer);
     let offset = 0;
 
     runtimeArgsView.setUint8(offset, 0x00);
     offset += 1;
 
+    if (offset + 4 > runtimeArgsBuffer.byteLength) {
+      runtimeArgsBuffer = expandBuffer(runtimeArgsBuffer, offset + 4);
+      runtimeArgsView = new DataView(runtimeArgsBuffer);
+    }
     runtimeArgsView.setUint32(offset, this.fields.args.args.size, true);
     offset += 4;
 
     for (const [name, value] of Array.from(this.fields.args.args.entries())) {
       const namedArg = new NamedArg(name, value);
       const argBytes = NamedArg.toBytesWithNamedArg(namedArg);
+
+      if (offset + argBytes.length > runtimeArgsBuffer.byteLength) {
+        runtimeArgsBuffer = expandBuffer(
+          runtimeArgsBuffer,
+          offset + argBytes.length
+        );
+        runtimeArgsView = new DataView(runtimeArgsBuffer);
+      }
       new Uint8Array(runtimeArgsBuffer, offset).set(argBytes);
       offset += argBytes.length;
     }

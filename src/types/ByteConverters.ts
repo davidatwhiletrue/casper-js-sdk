@@ -254,8 +254,40 @@ export const writeBytes = (
   offset: number,
   value: Uint8Array
 ): number => {
-  value.forEach((byte, index) => {
-    view.setUint8(offset + index, byte);
-  });
+  for (let i = 0; i < value.length; i++) {
+    view.setUint8(offset + i, value[i]);
+  }
   return offset + value.length;
+};
+
+/**
+ * Expands the size of an existing ArrayBuffer to accommodate additional data if necessary.
+ *
+ * This function creates a new `ArrayBuffer` with a size that is at least as large as
+ * the required size. The buffer's size grows exponentially (doubles) to minimize
+ * reallocations and improve performance for large data handling.
+ * The existing data from the old buffer is copied into the new buffer.
+ *
+ * @param currentBuffer - The current `ArrayBuffer` that needs to be expanded.
+ * @param requiredSize - The minimum size required for the buffer.
+ * @returns A new `ArrayBuffer` with enough space to accommodate the required size.
+ *
+ * @example
+ * ```typescript
+ * let buffer = new ArrayBuffer(1024);
+ * const updatedBuffer = expandBuffer(buffer, 2048);
+ * console.log(updatedBuffer.byteLength); // 2048 or larger (depending on initial size and required size)
+ * ```
+ */
+export const expandBuffer = (
+  currentBuffer: ArrayBuffer,
+  requiredSize: number
+): ArrayBuffer => {
+  let newSize = currentBuffer.byteLength;
+  while (newSize < requiredSize) {
+    newSize *= 2; // Double the buffer size until it fits
+  }
+  const newBuffer = new ArrayBuffer(newSize);
+  new Uint8Array(newBuffer).set(new Uint8Array(currentBuffer)); // Copy existing data
+  return newBuffer;
 };
