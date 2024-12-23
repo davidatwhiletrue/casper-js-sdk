@@ -265,7 +265,7 @@ export class TransactionV1 {
    * @param transaction The `TransactionV1` object.
    * @returns A JSON version of the `TransactionV1`.
    */
-  public static toJson = (transaction: TransactionV1) => {
+  public static toJSON = (transaction: TransactionV1) => {
     const serializer = new TypedJSON(TransactionV1);
 
     return serializer.toPlainJson(transaction);
@@ -550,7 +550,7 @@ export class Transaction {
     return Deploy.newTransactionFromDeploy(deploy);
   }
 
-  static fromJson(json: any): Transaction {
+  static fromJSON(json: any): Transaction {
     try {
       const txV1 = TransactionV1.fromJSON(json);
 

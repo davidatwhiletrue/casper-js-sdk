@@ -25,7 +25,7 @@ export interface IMakeNftTransferDeployParams {
   senderPublicKeyHex: string;
   recipientPublicKeyHex: string;
   paymentAmount: string;
-  chainName?: CasperNetworkName;
+  chainName?: string;
   ttl?: number;
   tokenId?: string;
   tokenHash?: string;
