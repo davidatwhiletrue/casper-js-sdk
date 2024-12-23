@@ -163,6 +163,10 @@ export class CLValueList {
           bytes: innerBytes
         } = CLValueParser.fromBytesByType(remainder, clType.elementsType);
 
+        if (!inner) {
+          continue;
+        }
+
         elements.push(inner);
         remainder = innerBytes;
       }
