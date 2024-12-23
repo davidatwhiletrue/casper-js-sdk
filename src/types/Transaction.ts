@@ -566,9 +566,16 @@ export class Transaction {
     throw new Error("The JSON can't be parsed as a Transaction.");
   }
 
-  static toJSON(tx: Transaction) {
-    const serializer = new TypedJSON(Transaction);
-    return serializer.toPlainJson(tx);
+  toJSON() {
+    if (this.originTransactionV1) {
+      return TransactionV1.toJson(this.originTransactionV1);
+    }
+
+    if (this.originDeployV1) {
+      return Deploy.toJson(this.originDeployV1)
+    }
+
+    throw new Error('Incorrect Transaction instance. Missing origin value');
   }
 }
 
