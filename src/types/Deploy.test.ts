@@ -62,7 +62,7 @@ describe('Deploy', () => {
     await deploy.sign(senderKey);
     await deploy.sign(recipientKey);
 
-    const json = Deploy.toJson(deploy);
+    const json = Deploy.toJSON(deploy);
 
     deploy = Deploy.fromJSON(json);
 
