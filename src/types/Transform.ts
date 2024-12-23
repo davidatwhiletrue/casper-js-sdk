@@ -85,6 +85,15 @@ export class TransformKind {
   }
 
   /**
+   * Checks if the transformation is a WriteCLValue.
+   *
+   * @returns `true` if the transformation is a WriteCLValue, otherwise `false`.
+   */
+  public isCLValueWrite(): boolean {
+    return this.isTransformation('WriteCLValue');
+  }
+
+  /**
    * Checks if the transformation is a WriteContract.
    *
    * @returns `true` if the transformation is a WriteContract, otherwise `false`.
