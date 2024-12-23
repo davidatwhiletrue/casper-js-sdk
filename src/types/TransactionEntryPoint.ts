@@ -125,14 +125,8 @@ export class TransactionEntryPoint {
       this.type === TransactionEntryPointEnum.Custom &&
       this.customEntryPoint
     ) {
-      const customSerialization = new CalltableSerialization();
-      customSerialization.addField(0, Uint8Array.from([1]));
-      customSerialization.addField(
-        1,
-        CLValueString.newCLString(this.customEntryPoint).bytes()
-      );
-
-      calltableSerialization.addField(1, customSerialization.toBytes());
+      const entryPointBytes = CLValueString.newCLString(this.customEntryPoint).bytes()
+      calltableSerialization.addField(1, entryPointBytes);
     }
 
     return calltableSerialization.toBytes();
