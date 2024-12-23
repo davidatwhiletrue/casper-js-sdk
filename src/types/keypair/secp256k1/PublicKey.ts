@@ -36,10 +36,10 @@ export class PublicKey {
    * @param signature - The signature to verify. Supports both raw (64-byte R || S) and DER formats.
    * @returns A promise that resolves to `true` if the signature is valid, or `false` otherwise.
    */
-  async verifySignature(
+  verifySignature(
     message: Uint8Array,
     signature: Uint8Array
-  ): Promise<boolean> {
+  ): boolean {
     let compactSignature: Uint8Array;
 
     if (signature.length === 64) {

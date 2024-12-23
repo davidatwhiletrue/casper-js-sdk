@@ -1,6 +1,10 @@
 import * as secp256k1 from '@noble/secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
+import { hmac } from '@noble/hashes/hmac';
 import { PrivateKeyInternal } from "../PrivateKey";
+
+secp256k1.utils.hmacSha256Sync = (k, ...m) =>
+  hmac(sha256, k, secp256k1.utils.concatBytes(...m));
 
 /** PEM prefix for a private key. */
 const PemPrivateKeyPrefix = '-----BEGIN PRIVATE KEY-----';
@@ -28,7 +32,7 @@ export class PrivateKey implements PrivateKeyInternal {
    * Generates a new random secp256k1 private key.
    * @returns A promise that resolves to a new PrivateKey instance.
    */
-  static async generate(): Promise<PrivateKey> {
+  static generate(): PrivateKey {
     const privateKey = secp256k1.utils.randomPrivateKey();
     return new PrivateKey(privateKey);
   }
@@ -37,7 +41,7 @@ export class PrivateKey implements PrivateKeyInternal {
    * Retrieves the byte array of the public key in compressed format.
    * @returns A promise that resolves to the compressed public key bytes.
    */
-  async publicKeyBytes(): Promise<Uint8Array> {
+  publicKeyBytes(): Uint8Array {
     return secp256k1.getPublicKey(this.key, true);
   }
 
@@ -59,9 +63,9 @@ export class PrivateKey implements PrivateKeyInternal {
    * @param message - The message to sign.
    * @returns A promise that resolves to the signature bytes in compact format.
    */
-  async sign(message: Uint8Array): Promise<Uint8Array> {
+  sign(message: Uint8Array): Uint8Array {
     const hash = sha256(message);
-    return await secp256k1.sign(hash, this.key, { der: false });
+    return secp256k1.signSync(hash, this.key, { der: false });
   }
 
   /**

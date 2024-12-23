@@ -38,8 +38,8 @@ export class PublicKey {
   verifySignature(
     message: Uint8Array,
     signature: Uint8Array
-  ): Promise<boolean> {
-    return ed25519.verify(signature, message, this.key);
+  ): boolean {
+    return ed25519.sync.verify(signature, message, this.key);
   }
 
   /**

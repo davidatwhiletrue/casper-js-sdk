@@ -157,7 +157,7 @@ const transaction = new NativeTransferBuilder()
   .payment(100_000_000)
   .build();
 
-await transaction.sign(sender);
+transaction.sign(sender);
 
 // Create a contract call
 const contractCallTransaction = new ContractCallBuilder()
@@ -169,5 +169,5 @@ const contractCallTransaction = new ContractCallBuilder()
   .chainName('casper-net-1')
   .build();
 
-await contractCallTransaction.sign(sender);
+contractCallTransaction.sign(sender);
 ```

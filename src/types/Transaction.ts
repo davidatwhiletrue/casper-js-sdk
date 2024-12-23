@@ -169,8 +169,8 @@ export class TransactionV1 {
    * Signs the transaction using the provided private key.
    * @param keys The private key to sign the transaction.
    */
-  async sign(keys: PrivateKey): Promise<void> {
-    const signatureBytes = await keys.signAndAddAlgorithmBytes(
+  sign(keys: PrivateKey): void {
+    const signatureBytes = keys.signAndAddAlgorithmBytes(
       this.hash.toBytes()
     );
     const signature = new HexBytes(signatureBytes);
@@ -493,8 +493,8 @@ export class Transaction {
    * Signs the transaction using the provided private key.
    * @param key The private key to sign the transaction.
    */
-  async sign(key: PrivateKey): Promise<void> {
-    const signatureBytes = await key.signAndAddAlgorithmBytes(
+  sign(key: PrivateKey): void {
+    const signatureBytes = key.signAndAddAlgorithmBytes(
       this.hash.toBytes()
     );
     this.setSignature(signatureBytes, key.publicKey);
@@ -566,9 +566,16 @@ export class Transaction {
     throw new Error("The JSON can't be parsed as a Transaction.");
   }
 
-  static toJSON(tx: Transaction) {
-    const serializer = new TypedJSON(Transaction);
-    return serializer.toPlainJson(tx);
+  toJSON() {
+    if (this.originTransactionV1) {
+      return TransactionV1.toJSON(this.originTransactionV1);
+    }
+
+    if (this.originDeployV1) {
+      return Deploy.toJSON(this.originDeployV1)
+    }
+
+    throw new Error('Incorrect Transaction instance. Missing origin value');
   }
 }
 
