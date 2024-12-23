@@ -233,6 +233,11 @@ export class InfoGetDeployResult {
   })
   executionResults: DeployExecutionInfo;
 
+  @jsonArrayMember(DeployExecutionResult, {
+    name: 'execution_results'
+  })
+  executionResultsV1?: DeployExecutionResult[];
+
   rawJSON: any;
 
   toInfoGetTransactionResult(): InfoGetTransactionResult {
