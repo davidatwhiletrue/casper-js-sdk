@@ -257,7 +257,7 @@ const transactionPayload = TransactionV1Payload.build({
 const transaction = TransactionV1.makeTransactionV1(
   transactionPayload
 );
-await transaction.sign(privateKey);
+transaction.sign(privateKey);
 ```
 
 6. **Submit Transaction**:
@@ -301,7 +301,7 @@ const transaction = new NativeTransferBuilder()
   .payment(100_000_000)
   .build();
 
-await transaction.sign(privateKey);
+transaction.sign(privateKey);
 
 try {
   const result = await rpcClient.putTransaction(transaction);

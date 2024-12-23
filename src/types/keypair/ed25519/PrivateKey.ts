@@ -1,5 +1,8 @@
 import * as ed25519 from '@noble/ed25519';
 import { PrivateKeyInternal } from "../PrivateKey";
+import { sha512 } from '@noble/hashes/sha512';
+
+ed25519.utils.sha512Sync = (...m) => sha512(ed25519.utils.concatBytes(...m));
 
 /**
  * Represents an Ed25519 private key, supporting key generation, signing, and PEM encoding.
@@ -24,7 +27,7 @@ export class PrivateKey implements PrivateKeyInternal {
    * Generates a new random Ed25519 private key.
    * @returns A promise that resolves to a new PrivateKey instance.
    */
-  static async generate(): Promise<PrivateKey> {
+  static generate(): PrivateKey {
     const keyPair = ed25519.utils.randomPrivateKey();
     return new PrivateKey(keyPair);
   }
@@ -33,8 +36,8 @@ export class PrivateKey implements PrivateKeyInternal {
    * Retrieves the byte array of the associated public key.
    * @returns A promise that resolves to the public key bytes.
    */
-  async publicKeyBytes(): Promise<Uint8Array> {
-    return ed25519.getPublicKey(this.key);
+  publicKeyBytes(): Uint8Array {
+    return ed25519.sync.getPublicKey(this.key);
   }
 
   toBytes(): Uint8Array {
@@ -46,8 +49,8 @@ export class PrivateKey implements PrivateKeyInternal {
    * @param message - The message to sign.
    * @returns A promise that resolves to the signature bytes.
    */
-  async sign(message: Uint8Array): Promise<Uint8Array> {
-    return ed25519.sign(message, this.key);
+  sign(message: Uint8Array): Uint8Array {
+    return ed25519.sync.sign(message, this.key);
   }
 
   /**

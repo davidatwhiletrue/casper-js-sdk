@@ -76,7 +76,7 @@ describe('Test Transaction', () => {
     });
 
     const transaction = TransactionV1.makeTransactionV1(transactionPayload);
-    await transaction.sign(keys);
+    transaction.sign(keys);
 
     const transactionPaymentAmount = transaction.payload.fields.args.args
       .get('amount')!
@@ -108,7 +108,7 @@ describe('Test Transaction', () => {
       .payment(100_000_000)
       .build();
 
-    await transaction.sign(sender);
+    transaction.sign(sender);
 
     const transactionV1 = transaction.getTransactionV1()!;
     const transactionPaymentAmount = transactionV1.payload.fields.args.args

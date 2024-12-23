@@ -60,8 +60,8 @@ describe('Deploy', () => {
 
     const payment = ExecutableDeployItem.standardPayment(paymentAmount);
     let deploy = Deploy.makeDeploy(deployHeader, payment, executableDeployItem);
-    await deploy.sign(senderKey);
-    await deploy.sign(recipientKey);
+    deploy.sign(senderKey);
+    deploy.sign(recipientKey);
 
     const json = Deploy.toJson(deploy);
 

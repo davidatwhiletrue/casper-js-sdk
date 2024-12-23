@@ -11,7 +11,7 @@ import { KeyAlgorithm } from './Algorithm';
  */
 export interface PrivateKeyInternal {
   /** Retrieves the public key bytes. */
-  publicKeyBytes(): Promise<Uint8Array>;
+  publicKeyBytes(): Uint8Array;
   toBytes(): Uint8Array;
 
   /**
@@ -19,7 +19,7 @@ export interface PrivateKeyInternal {
    * @param message - The message to sign.
    * @returns A promise resolving to the signature bytes.
    */
-  sign(message: Uint8Array): Promise<Uint8Array>;
+  sign(message: Uint8Array): Uint8Array;
 
   /** Converts the private key to PEM format. */
   toPem(): string;
@@ -76,8 +76,8 @@ export class PrivateKey {
    * @param msg - The message to sign.
    * @returns A promise resolving to the signature bytes.
    */
-  public async sign(msg: Uint8Array): Promise<Uint8Array> {
-    return await this.priv.sign(msg);
+  public sign(msg: Uint8Array): Uint8Array {
+    return this.priv.sign(msg);
   }
 
   /**
@@ -85,8 +85,8 @@ export class PrivateKey {
    * @param msg - The message to sign.
    * @returns A promise resolving to the signature bytes with the algorithm byte.
    */
-  public async signAndAddAlgorithmBytes(msg: Uint8Array): Promise<Uint8Array> {
-    const signature = await this.priv.sign(msg);
+  public signAndAddAlgorithmBytes(msg: Uint8Array): Uint8Array {
+    const signature = this.priv.sign(msg);
     const algBytes = Uint8Array.of(this.alg);
     return concat([algBytes, signature]);
   }
@@ -105,9 +105,9 @@ export class PrivateKey {
    * @param algorithm - The cryptographic algorithm to use.
    * @returns A promise resolving to a new PrivateKey instance.
    */
-  public static async generate(algorithm: KeyAlgorithm): Promise<PrivateKey> {
-    const priv = await PrivateKeyFactory.createPrivateKey(algorithm);
-    const pubBytes = await priv.publicKeyBytes();
+  public static generate(algorithm: KeyAlgorithm): PrivateKey {
+    const priv = PrivateKeyFactory.createPrivateKey(algorithm);
+    const pubBytes = priv.publicKeyBytes();
     const algBytes = Uint8Array.of(algorithm);
     const pub = PublicKey.fromBuffer(concat([algBytes, pubBytes]));
     return new PrivateKey(algorithm, pub, priv);
@@ -139,15 +139,15 @@ export class PrivateKey {
    * @param algorithm - The cryptographic algorithm to use.
    * @returns A promise resolving to a PrivateKey instance.
    */
-  public static async fromHex(
+  public static fromHex(
     key: string,
     algorithm: KeyAlgorithm
-  ): Promise<PrivateKey> {
-    const priv = await PrivateKeyFactory.createPrivateKeyFromHex(
+  ): PrivateKey {
+    const priv = PrivateKeyFactory.createPrivateKeyFromHex(
       key,
       algorithm
     );
-    const pubBytes = await priv.publicKeyBytes();
+    const pubBytes = priv.publicKeyBytes();
     const algBytes = Uint8Array.of(algorithm);
     const pub = PublicKey.fromBuffer(concat([algBytes, pubBytes]));
     return new PrivateKey(algorithm, pub, priv);
@@ -165,9 +165,9 @@ class PrivateKeyFactory {
    * @returns A promise resolving to a PrivateKeyInternal instance.
    * @throws Error if the algorithm is unsupported.
    */
-  public static async createPrivateKey(
+  public static createPrivateKey(
     algorithm: KeyAlgorithm
-  ): Promise<PrivateKeyInternal> {
+  ): PrivateKeyInternal {
     switch (algorithm) {
       case KeyAlgorithm.ED25519:
         return Ed25519PrivateKey.generate();
@@ -206,10 +206,10 @@ class PrivateKeyFactory {
    * @returns A promise resolving to a PrivateKeyInternal instance.
    * @throws Error if the algorithm is unsupported.
    */
-  public static async createPrivateKeyFromHex(
+  public static createPrivateKeyFromHex(
     key: string,
     algorithm: KeyAlgorithm
-  ): Promise<PrivateKeyInternal> {
+  ): PrivateKeyInternal {
     switch (algorithm) {
       case KeyAlgorithm.ED25519:
         return Ed25519PrivateKey.fromHex(key);

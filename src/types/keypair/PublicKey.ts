@@ -50,7 +50,7 @@ interface PublicKeyInternal {
    * @param sig - The signature to verify.
    * @returns A promise that resolves to a boolean indicating the validity of the signature.
    */
-  verifySignature(message: Uint8Array, sig: Uint8Array): Promise<boolean>;
+  verifySignature(message: Uint8Array, sig: Uint8Array): boolean;
 }
 
 /**
@@ -233,15 +233,15 @@ export class PublicKey {
    * @returns A promise that resolves to a boolean indicating the validity of the signature.
    * @throws Error if the signature or public key is empty, or if the signature is invalid.
    */
-  async verifySignature(
+  verifySignature(
     message: Uint8Array,
     sig: Uint8Array
-  ): Promise<boolean> {
+  ): boolean {
     if (sig.length <= 1) throw ErrEmptySignature;
     if (!this.key) throw ErrEmptyPublicKey;
 
     const sigWithoutAlgByte = sig.slice(1);
-    const signature = await this.key.verifySignature(
+    const signature = this.key.verifySignature(
       message,
       sigWithoutAlgByte
     );

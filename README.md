@@ -140,7 +140,7 @@ const transaction = new NativeTransferBuilder()
   .payment(100_000_000)
   .build();
 
-await transaction.sign(privateKey);
+transaction.sign(privateKey);
 
 try {
   const result = await rpcClient.putTransaction(transaction);
@@ -194,7 +194,7 @@ deployHeader.account = senderKey.publicKey;
 deployHeader.chainName = 'casper-test';
 
 const deploy = Deploy.makeDeploy(deployHeader, payment, session);
-await deploy.sign(senderKey);
+deploy.sign(senderKey);
 
 const result = await rpcClient.putDeploy(deploy);
 
@@ -226,7 +226,7 @@ const deploy = makeCsprTransferDeploy({
   transferAmount: '2500000000' // 2.5 CSPR
 });
 
-await deploy.sign(privateKey);
+deploy.sign(privateKey);
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
 const rpcClient = new RpcClient(rpcHandler);
@@ -263,7 +263,7 @@ const deploy = makeAuctionManagerDeploy({
   amount: '500000000000' // 500 CSPR
 });
 
-await deploy.sign(privateKey);
+deploy.sign(privateKey);
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
 const rpcClient = new RpcClient(rpcHandler);
@@ -300,7 +300,7 @@ const deploy = await makeCep18TransferDeploy({
   paymentAmount: '3000000000' // 3 CSPR
 });
 
-await deploy.sign(privateKey);
+deploy.sign(privateKey);
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
 const rpcClient = new RpcClient(rpcHandler);
@@ -339,7 +339,7 @@ const deploy = await makeNftTransferDeploy({
   tokenId: 234
 });
 
-await deploy.sign(privateKey);
+deploy.sign(privateKey);
 
 const rpcHandler = new HttpHandler('http://<Node Address>:7777/rpc');
 const rpcClient = new RpcClient(rpcHandler);
