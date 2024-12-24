@@ -1,13 +1,13 @@
 import { jsonObject, jsonMember, TypedJSON } from 'typedjson';
 
-import { Key } from './key';
+import { AccountHash, Key } from './key';
 import { UnbondingPurse } from './UnbondingPurse';
 import { AddressableEntity } from './AddressableEntity';
 import { Package } from './Package';
 import { BidKind } from './BidKind';
 import { MessageChecksum, MessageTopicSummary } from './MessageTopic';
 import { DeployInfo } from './DeployInfo';
-import { CLValueUInt512 } from './clvalue';
+import { CLValue, CLValueUInt512 } from './clvalue';
 import { Args } from './Args';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
 import {
@@ -17,6 +17,7 @@ import {
   RawDataMessageTopic,
   RawDataNamedKey,
   RawUInt512,
+  RawWriteAccount,
   RawWriteCLValue,
   RawWriteCLValueV2,
   RawWriteDeployInfo,
@@ -40,14 +41,23 @@ export class TransformKind {
    *
    * @param data The transformation data as a string.
    */
-  constructor(data = '') {
+  constructor(data: any) {
     this.data = data;
+  }
+
+  /**
+   * Getter for transformation data.
+   *
+   * @returns The transformation data.
+   */
+  public get transformationData(): any {
+    return this.data;
   }
 
   /**
    * Creates a `TransformKind` instance from a JSON string.
    *
-   * @param data The transformation data as a string.
+   * @param json The transformation data as a string.
    * @returns The `TransformKind` instance.
    */
   static fromJSON(json: any): TransformKind | undefined {
@@ -62,7 +72,7 @@ export class TransformKind {
    *
    * @returns The transformation data as a string.
    */
-  public toJSON(): string {
+  public toJSON(): any {
     return this.data;
   }
 
@@ -374,6 +384,22 @@ export class TransformKind {
    *
    * @returns A `DeployInfo` object if the data matches, otherwise `throw an error`.
    */
+  public parseAsWriteAccount(): AccountHash {
+    const serializer = new TypedJSON(RawWriteAccount);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.WriteAccount) {
+      throw new Error(`Error parsing as DeployInfo`);
+    }
+
+    return jsonRes.WriteAccount;
+  }
+
+  /**
+   * Attempts to parse the transformation as a WriteDeployInfo.
+   *
+   * @returns A `DeployInfo` object if the data matches, otherwise `throw an error`.
+   */
   public parseAsWriteDeployInfo(): DeployInfo {
     const serializer = new TypedJSON(RawWriteDeployInfo);
     const jsonRes = serializer.parse(this.data);
@@ -390,7 +416,7 @@ export class TransformKind {
    *
    * @returns The `Args` object if the data matches, otherwise `throw an error`.
    */
-  public parseAsWriteCLValue(): Args {
+  public parseAsWriteCLValue(): CLValue {
     const serializer = new TypedJSON(RawWriteCLValue);
     const jsonRes = serializer.parse(this.data);
 

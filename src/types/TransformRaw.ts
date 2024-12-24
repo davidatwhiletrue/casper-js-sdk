@@ -6,10 +6,8 @@ import { AddressableEntity } from './AddressableEntity';
 import { Package } from './Package';
 import { BidKind } from './BidKind';
 import { MessageTopicSummary } from './MessageTopic';
-import { CLValueUInt512 } from './clvalue';
+import { CLValue, CLValueParser, CLValueUInt512 } from './clvalue';
 import { DeployInfo } from './DeployInfo';
-import { Args } from './Args';
-import { deserializeArgs, serializeArgs } from './SerializationUtils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { AccountHash, Hash, URef } from './key';
 
@@ -331,6 +329,26 @@ export class RawWriteDeployInfo {
 }
 
 /**
+ * Represents raw write data for account hash.
+ */
+@jsonObject
+export class RawWriteAccount {
+  /**
+   * The account information in the write operation.
+   */
+  @jsonMember({
+    constructor: AccountHash,
+    name: 'WriteAccount',
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => value.toJSON()
+  })
+  WriteAccount?: AccountHash;
+}
+
+/**
  * Represents raw write data for a CLValue.
  * Used for serializing and deserializing the arguments of a CLValue write operation.
  */
@@ -339,12 +357,18 @@ export class RawWriteCLValue {
   /**
    * The write operation on a CLValue represented as `Args`.
    */
-  @jsonMember(() => Args, {
-    deserializer: deserializeArgs,
-    serializer: (args: Args) => serializeArgs(args, false),
+  @jsonMember(() => CLValue, {
+    deserializer: json => {
+      if (!json) return;
+      return CLValueParser.fromJSON(json);
+    },
+    serializer: (value: CLValue) => {
+      if (!value) return;
+      return CLValueParser.toJSON(value);
+    },
     name: 'WriteCLValue'
   })
-  WriteCLValue?: Args;
+  WriteCLValue?: CLValue;
 }
 
 /**
@@ -355,12 +379,18 @@ export class WriteCLValue {
   /**
    * The CLValue write operation represented as `Args`.
    */
-  @jsonMember(() => Args, {
-    deserializer: deserializeArgs,
-    serializer: (args: Args) => serializeArgs(args, false),
+  @jsonMember(() => CLValue, {
+    deserializer: json => {
+      if (!json) return;
+      return CLValueParser.fromJSON(json);
+    },
+    serializer: (value: CLValue) => {
+      if (!value) return;
+      return CLValueParser.toJSON(value);
+    },
     name: 'CLValue'
   })
-  CLValue?: Args;
+  CLValue?: CLValue;
 }
 
 /**
