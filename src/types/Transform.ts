@@ -389,7 +389,7 @@ export class TransformKind {
     const jsonRes = serializer.parse(this.data);
 
     if (!jsonRes || !jsonRes.WriteAccount) {
-      throw new Error(`Error parsing as DeployInfo`);
+      throw new Error(`Error parsing as WriteAccount`);
     }
 
     return jsonRes.WriteAccount;
