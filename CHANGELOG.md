@@ -13,6 +13,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.1-beta2] - 2024-12-24
+
+### Fixed
+
+- `TransactionEntryPoint` serialization in https://github.com/casper-ecosystem/casper-js-sdk/pull/482
+
+### Added
+
+- `parseAsWriteAccount` method / getter for `TransformKind` data, unit tests for different scenarios of parsing `TransformKind` data
+- `RawWriteAccount` class for parsing `WriteAccount` data
+
+### Changed
+
+- `RawWriteCLValue` / `WriteCLValue` values from `Args` to `CLValue`
+
+### [5.0.0-beta2] - 2024-12-23
+
+### Added
+
+- Check for `WriteCLValue` to `TransformKind`, added `executionResultsV1` to `InfoGetDeployResult` by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/481
+
+### Fixed
+
+- `Tuple3` constructor inconsistency, aligned Numerics `CLValue` by value type by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/476
+- Offset is outside the bounds of the `DataView` issue for `TransactionV1` by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/479
+
+### Changed
+
+- Aligned casing for `fromJSON` and `toJSON`, updated type for chain name for utils by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/477
+- Feat sync keys and fixes by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/480
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.0-beta1...5.0.0-beta2
+
 ### [5.0.0-beta1] - 2024-12-20
 
 ### Added
