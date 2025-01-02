@@ -195,7 +195,7 @@ export class CLValueMap {
 
     const { result: u32, bytes: u32Bytes } = CLValueUInt32.fromBytes(bytes);
     const size = u32.toNumber();
-    const remainder = u32Bytes;
+    let remainder = u32Bytes;
 
     if (size === 0) {
       return { result: mapResult, bytes: remainder };
@@ -204,14 +204,16 @@ export class CLValueMap {
     for (let i = 0; i < size; i++) {
       if (remainder.length) {
         const keyVal = CLValueParser.fromBytesByType(remainder, mapType.key);
+        remainder = keyVal.bytes;
 
-        if (!keyVal.result) {
+        if (!keyVal.bytes || !keyVal.result) {
           continue;
         }
 
         const valVal = CLValueParser.fromBytesByType(remainder, mapType.val);
+        remainder = valVal.bytes;
 
-        if (!valVal.result) {
+        if (!valVal.bytes || !valVal.result) {
           continue;
         }
 
@@ -232,6 +234,6 @@ export class CLValueMap {
     const mapType = new CLTypeMap(keyType, valType);
     const clValue = new CLValue(mapType);
     clValue.map = new CLValueMap(mapType);
-    return new CLValue(mapType);
+    return clValue;
   }
 }

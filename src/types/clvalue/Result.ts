@@ -98,7 +98,7 @@ export class CLValueResult {
     clType: CLTypeResult
   ): IResultWithBytes<CLValueResult> {
     const { result: u8, bytes: u8Bytes } = CLValueUInt8.fromBytes(source);
-    const resultTag = u8?.getValue();
+    const resultTag = u8?.toNumber();
     const isSuccess = resultTag === 1;
     const innerType = isSuccess ? clType.innerOk : clType.innerErr;
 
