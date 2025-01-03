@@ -13,6 +13,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.2-beta2] - 2024-12-24
+
+### Fixed
+
+- CLValueMap deserialization from bytes
+- Deserialization of Deploy from RPC
+
 ### [5.0.1-beta2] - 2024-12-24
 
 ### Fixed
