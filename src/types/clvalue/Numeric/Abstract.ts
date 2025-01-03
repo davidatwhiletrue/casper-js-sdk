@@ -5,14 +5,14 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
  * Provides common methods and properties for numeric types.
  */
 export abstract class CLValueNumeric {
-  protected value: BigNumberish;
+  protected value: BigNumber;
 
   /**
    * The constructor is protected to ensure this class cannot be instantiated directly.
    * Subclasses can call this constructor using `super`.
    */
   protected constructor(value: BigNumberish) {
-    this.value = value;
+    this.value = BigNumber.from(value);
   }
 
   /**
@@ -34,8 +34,7 @@ export abstract class CLValueNumeric {
    * @returns The numeric value as a JavaScript number.
    */
   public toNumber(): number {
-    const bigNumber = BigNumber.from(this.value);
-    return bigNumber.toNumber();
+    return this.value.toNumber();
   }
 
   /**
@@ -50,7 +49,7 @@ export abstract class CLValueNumeric {
    * Retrieves the numeric value.
    * @returns The numeric representation of the value.
    */
-  public getValue(): BigNumberish {
+  public getValue(): BigNumber {
     return this.value;
   }
 }

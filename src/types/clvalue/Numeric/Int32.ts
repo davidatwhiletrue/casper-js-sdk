@@ -45,7 +45,7 @@ export class CLValueInt32 extends CLValueNumeric {
       throw new Error('buffer size is too small');
     }
     const i32Bytes = Uint8Array.from(source.subarray(0, 4));
-    const i32 = BigNumber.from(i32Bytes.slice().reverse());
+    const i32 = BigNumber.from(i32Bytes.slice().reverse()).fromTwos(32);
 
     return { result: new CLValueInt32(i32), bytes: source.subarray(4) };
   }
