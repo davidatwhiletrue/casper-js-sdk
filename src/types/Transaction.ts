@@ -170,9 +170,7 @@ export class TransactionV1 {
    * @param keys The private key to sign the transaction.
    */
   sign(keys: PrivateKey): void {
-    const signatureBytes = keys.signAndAddAlgorithmBytes(
-      this.hash.toBytes()
-    );
+    const signatureBytes = keys.signAndAddAlgorithmBytes(this.hash.toBytes());
     const signature = new HexBytes(signatureBytes);
 
     if (!this.approvals) {
@@ -494,9 +492,7 @@ export class Transaction {
    * @param key The private key to sign the transaction.
    */
   sign(key: PrivateKey): void {
-    const signatureBytes = key.signAndAddAlgorithmBytes(
-      this.hash.toBytes()
-    );
+    const signatureBytes = key.signAndAddAlgorithmBytes(this.hash.toBytes());
     this.setSignature(signatureBytes, key.publicKey);
   }
 
@@ -572,7 +568,7 @@ export class Transaction {
     }
 
     if (this.originDeployV1) {
-      return Deploy.toJSON(this.originDeployV1)
+      return Deploy.toJSON(this.originDeployV1);
     }
 
     throw new Error('Incorrect Transaction instance. Missing origin value');

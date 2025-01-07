@@ -432,6 +432,13 @@ export class InfoGetTransactionResultV1Compatible {
     }
     throw new Error('Incorrect RPC response structure');
   }
+
+  public static fromJSON(
+    json: any
+  ): InfoGetTransactionResultV1Compatible | undefined {
+    const serializer = new TypedJSON(InfoGetTransactionResultV1Compatible);
+    return serializer.parse(json);
+  }
 }
 
 @jsonObject

@@ -70,21 +70,6 @@ export class EntryPointArg {
 }
 
 /**
- * Class representing access control options for an entry point.
- * This class is used for controlling the permissions required to call the entry point.
- *
- * TODO: Match with Go code when ready
- */
-@jsonObject
-export class EntryPointAccess {
-  /**
-   * The access control options for this entry point.
-   */
-  @jsonMember({ name: 'access_control_options', constructor: AnyT })
-  accessControlOptions: any;
-}
-
-/**
  * Class representing version 1 of an entry point in the Casper VM.
  * It contains the entry point's access, arguments, type, payment type, name, and return type.
  */
@@ -95,9 +80,9 @@ export class EntryPointV1 {
    */
   @jsonMember({
     name: 'access',
-    constructor: EntryPointAccess
+    constructor: AnyT
   })
-  access: EntryPointAccess;
+  access: any;
 
   /**
    * A list of arguments for the entry point.
@@ -157,7 +142,7 @@ export class EntryPointV1 {
    * @param ret The return type of the entry point.
    */
   constructor(
-    access: EntryPointAccess,
+    access: any,
     args: EntryPointArg[],
     entryPointType: EntryPointType,
     entryPointPayment: EntryPointPayment,
