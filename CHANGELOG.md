@@ -13,6 +13,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.3-beta2] - 2024-01-25
+
+### Added
+
+- Transform parsing functions
+- `fromJSON` method for `InfoGetTransactionResultV1Compatible`
+
+### Fixed
+
+- Issue with TransactionEntryPoint deserialization
+
 ### [5.0.2-beta2] - 2024-12-24
 
 ### Fixed
