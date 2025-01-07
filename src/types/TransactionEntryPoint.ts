@@ -125,7 +125,9 @@ export class TransactionEntryPoint {
       this.type === TransactionEntryPointEnum.Custom &&
       this.customEntryPoint
     ) {
-      const entryPointBytes = CLValueString.newCLString(this.customEntryPoint).bytes()
+      const entryPointBytes = CLValueString.newCLString(
+        this.customEntryPoint
+      ).bytes();
       calltableSerialization.addField(1, entryPointBytes);
     }
 
@@ -156,7 +158,7 @@ export class TransactionEntryPoint {
    * @throws An error if the JSON is invalid or the entry point is unknown.
    */
   static fromJSON(json: any): TransactionEntryPoint {
-    if (json instanceof Object && json.Custom) {
+    if (json?.Custom) {
       return new TransactionEntryPoint(
         TransactionEntryPointEnum.Custom,
         json.Custom

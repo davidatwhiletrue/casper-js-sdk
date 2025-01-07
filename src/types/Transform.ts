@@ -20,6 +20,8 @@ import {
   RawWriteAccount,
   RawWriteCLValue,
   RawWriteCLValueV2,
+  RawWriteContract,
+  RawWriteContractPackage,
   RawWriteDeployInfo,
   RawWriteTransferTransform,
   RawWriteUnbonding,
@@ -27,6 +29,8 @@ import {
   TranformAddressableEntityRawData,
   WriteTransfer
 } from './TransformRaw';
+import { Contract } from './Contract';
+import { ContractPackage } from './ContractPackage';
 
 /**
  * Represents different types of transformation that can be applied.
@@ -109,7 +113,20 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteContract, otherwise `false`.
    */
   public isWriteContract(): boolean {
-    return this.isTransformation('WriteContract');
+    /**
+     * v1 compatible check
+     */
+    if (this.isTransformation('WriteContract')) {
+      return true;
+    }
+
+    /**
+     * v2 compatible check
+     */
+    const serializer = new TypedJSON(RawWriteContract);
+    const jsonRes = serializer.parse(this.data);
+
+    return !!jsonRes?.Write?.Contract;
   }
 
   /**
@@ -218,6 +235,28 @@ export class TransformKind {
    */
   public isWriteDeployInfo(): boolean {
     return this.isTransformation('WriteDeployInfo');
+  }
+
+  /**
+   * Checks if the transformation is a WriteContractPackage.
+   *
+   * @returns `true` if the transformation is a WriteContractPackage, otherwise `false`.
+   */
+  public isWriteContractPackage(): boolean {
+    /**
+     * v1 compatible check
+     */
+    if (this.isTransformation('WriteContractPackage')) {
+      return true;
+    }
+
+    /**
+     * v2 compatible check
+     */
+    const serializer = new TypedJSON(RawWriteContractPackage);
+    const jsonRes = serializer.parse(this.data);
+
+    return !!jsonRes?.Write?.ContractPackage;
   }
 
   /**
@@ -432,6 +471,38 @@ export class TransformKind {
     }
 
     return jsonRes2.Write?.CLValue;
+  }
+
+  /**
+   * Attempts to parse the transformation as a WriteContract.
+   *
+   * @returns A `Contract` object if the data matches, otherwise `throw an error`.
+   */
+  public parseAsWriteContract(): Contract {
+    const serializer = new TypedJSON(RawWriteContract);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.Write?.Contract) {
+      throw new Error(`Error parsing as WriteContract`);
+    }
+
+    return jsonRes.Write.Contract;
+  }
+
+  /**
+   * Attempts to parse the transformation as a WriteContractPackage.
+   *
+   * @returns A `ContractPackage` object if the data matches, otherwise `throw an error`.
+   */
+  public parseAsWriteContractPackage(): ContractPackage {
+    const serializer = new TypedJSON(RawWriteContractPackage);
+    const jsonRes = serializer.parse(this.data);
+
+    if (!jsonRes || !jsonRes.Write?.ContractPackage) {
+      throw new Error(`Error parsing as WriteContractPackage`);
+    }
+
+    return jsonRes.Write.ContractPackage;
   }
 
   /**

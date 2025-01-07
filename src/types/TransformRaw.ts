@@ -10,6 +10,8 @@ import { CLValue, CLValueParser, CLValueUInt512 } from './clvalue';
 import { DeployInfo } from './DeployInfo';
 import { BigNumber } from '@ethersproject/bignumber';
 import { AccountHash, Hash, URef } from './key';
+import { Contract } from './Contract';
+import { ContractPackage } from './ContractPackage';
 
 /**
  * Represents a transfer operation in a transaction.
@@ -406,4 +408,40 @@ export class RawWriteCLValueV2 {
     constructor: WriteCLValue
   })
   Write?: WriteCLValue;
+}
+
+@jsonObject
+export class WriteContract {
+  @jsonMember({
+    name: 'Contract',
+    constructor: Contract
+  })
+  Contract?: Contract;
+}
+
+@jsonObject
+export class RawWriteContract {
+  @jsonMember({
+    name: 'Write',
+    constructor: WriteContract
+  })
+  Write?: WriteContract;
+}
+
+@jsonObject
+export class WriteContractPackage {
+  @jsonMember({
+    name: 'ContractPackage',
+    constructor: ContractPackage
+  })
+  ContractPackage?: ContractPackage;
+}
+
+@jsonObject
+export class RawWriteContractPackage {
+  @jsonMember({
+    name: 'Write',
+    constructor: WriteContractPackage
+  })
+  Write?: WriteContractPackage;
 }
