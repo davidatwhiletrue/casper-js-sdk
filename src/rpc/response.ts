@@ -94,10 +94,10 @@ export class RpcAddressableEntity {
   @jsonMember({ name: 'entity', constructor: RpcAddressableEntity })
   entity: RpcAddressableEntity;
 
-  @jsonMember({ name: 'named_keys', constructor: NamedKey })
+  @jsonArrayMember(NamedKey, { name: 'named_keys' })
   namedKeys: NamedKey[];
 
-  @jsonMember({ name: 'entry_points', constructor: EntryPointValue })
+  @jsonArrayMember(EntryPointValue, { name: 'entry_points' })
   entryPoints?: EntryPointValue[];
 }
 

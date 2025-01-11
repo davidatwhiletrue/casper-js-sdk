@@ -1,4 +1,4 @@
-import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
+import { jsonObject, jsonMember } from 'typedjson';
 import { IResultWithBytes } from '../clvalue';
 import { Conversions } from '../Conversions';
 import { concat } from '@ethersproject/bytes';
@@ -34,7 +34,7 @@ export const ByteHashLen = 32;
 @jsonObject
 export class URef {
   /** The unique data (hash) associated with the URef, represented as a 32-byte array. */
-  @jsonArrayMember(Number)
+  @jsonMember(Uint8Array)
   data: Uint8Array;
 
   /** The access permissions assigned to this URef, defined by the `UrefAccess` enum. */
