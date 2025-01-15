@@ -1,8 +1,12 @@
 import * as ed25519 from '@noble/ed25519';
-import { PrivateKeyInternal } from "../PrivateKey";
+import { PrivateKeyInternal } from '../PrivateKey';
 import { sha512 } from '@noble/hashes/sha512';
+import { Conversions } from '../../Conversions';
+import { readBase64WithPEM } from '../utils';
 
 ed25519.utils.sha512Sync = (...m) => sha512(ed25519.utils.concatBytes(...m));
+
+const ED25519_PEM_SECRET_KEY_TAG = 'PRIVATE KEY';
 
 /**
  * Represents an Ed25519 private key, supporting key generation, signing, and PEM encoding.
@@ -89,13 +93,33 @@ export class PrivateKey implements PrivateKeyInternal {
    * @returns A PEM-encoded string of the private key.
    */
   toPem(): string {
-    const seed = this.key.slice(0, 32);
+    const derPrefix = Buffer.from([
+      48,
+      46,
+      2,
+      1,
+      0,
+      48,
+      5,
+      6,
+      3,
+      43,
+      101,
+      112,
+      4,
+      34,
+      4,
+      32
+    ]);
+    const encoded = Conversions.encodeBase64(
+      Buffer.concat([derPrefix, Buffer.from(this.key)])
+    );
 
-    const prefix = Buffer.alloc(PrivateKey.PemFramePrivateKeyPrefixSize);
-    const fullKey = Buffer.concat([prefix, Buffer.from(seed)]);
-
-    const pemString = fullKey.toString('base64');
-    return `-----BEGIN PRIVATE KEY-----\n${pemString}\n-----END PRIVATE KEY-----`;
+    return (
+      `-----BEGIN ${ED25519_PEM_SECRET_KEY_TAG}-----\n` +
+      `${encoded}\n` +
+      `-----END ${ED25519_PEM_SECRET_KEY_TAG}-----\n`
+    );
   }
 
   /**
@@ -106,18 +130,27 @@ export class PrivateKey implements PrivateKeyInternal {
    * @throws Error if the content cannot be properly parsed.
    */
   static fromPem(content: string): PrivateKey {
-    const base64Content = content
-      .replace('-----BEGIN PRIVATE KEY-----', '')
-      .replace('-----END PRIVATE KEY-----', '')
-      .replace(/\n/g, '');
-    const fullKey = Buffer.from(base64Content, 'base64');
+    const privateKeyBytes = readBase64WithPEM(content);
 
-    const data = fullKey.slice(PrivateKey.PemFramePrivateKeyPrefixSize);
+    return new PrivateKey(
+      new Uint8Array(Buffer.from(PrivateKey.parsePrivateKey(privateKeyBytes)))
+    );
+  }
 
-    const seed = data.slice(-32);
-    const privateEdDSA = ed25519.utils.randomPrivateKey();
-    privateEdDSA.set(seed);
+  private static parsePrivateKey(bytes: Uint8Array) {
+    const len = bytes.length;
 
-    return new PrivateKey(privateEdDSA);
+    // prettier-ignore
+    const key =
+      (len === 32) ? bytes :
+        (len === 64) ? Buffer.from(bytes).slice(0, 32) :
+          (len > 32 && len < 64) ? Buffer.from(bytes).slice(len % 32) :
+            null;
+
+    if (key == null || key.length !== 32) {
+      throw Error(`Unexpected key length: ${len}`);
+    }
+
+    return key;
   }
 }

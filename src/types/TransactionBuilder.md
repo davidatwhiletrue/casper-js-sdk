@@ -159,6 +159,18 @@ const transaction = new NativeTransferBuilder()
 
 transaction.sign(sender);
 
+// Create a simple native transfer for 1.5 network
+const transactionFromDeploy = new NativeTransferBuilder()
+  .from(sender.publicKey)
+  .target(PublicKey.fromHex('abcdef0123456789'))
+  .amount('25000000000') // Amount in motes
+  .id(Date.now())
+  .chainName('casper')
+  .payment(100_000_000)
+  .buildFor1_5();
+
+transaction.sign(sender);
+
 // Create a contract call
 const contractCallTransaction = new ContractCallBuilder()
   .from(sender.publicKey)
@@ -168,6 +180,18 @@ const contractCallTransaction = new ContractCallBuilder()
   .payment(3_000000000) // Amount in motes
   .chainName('casper-net-1')
   .build();
+
+contractCallTransaction.sign(sender);
+
+// Create a contract call for 1.5 network
+const contractCallTransactionFromDeploy = new ContractCallBuilder()
+  .from(sender.publicKey)
+  .byHash('example_contract')
+  .entryPoint('unstake')
+  .runtimeArgs(Args.fromMap({ key: 'value' }))
+  .payment(3_000000000) // Amount in motes
+  .chainName('casper-net-1')
+  .buildFor1_5();
 
 contractCallTransaction.sign(sender);
 ```

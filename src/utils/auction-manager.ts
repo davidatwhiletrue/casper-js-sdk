@@ -15,7 +15,7 @@ import { AuctionManagerEntryPoint, CasperNetworkName } from '../@types';
 import { AuctionManagerContractHashMap } from './constants';
 
 export interface IMakeAuctionManagerDeployParams {
-  contractEntryPoint: AuctionManagerEntryPoint;
+  contractEntryPoint: AuctionManagerEntryPoint.delegate | AuctionManagerEntryPoint.undelegate | AuctionManagerEntryPoint.redelegate;
   delegatorPublicKeyHex: string;
   validatorPublicKeyHex: string;
   newValidatorPublicKeyHex?: string;

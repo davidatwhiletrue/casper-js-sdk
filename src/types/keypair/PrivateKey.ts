@@ -119,15 +119,15 @@ export class PrivateKey {
    * @param algorithm - The cryptographic algorithm to use.
    * @returns A promise resolving to a PrivateKey instance.
    */
-  public static async fromPem(
+  public static fromPem(
     content: string,
     algorithm: KeyAlgorithm
-  ): Promise<PrivateKey> {
-    const priv = await PrivateKeyFactory.createPrivateKeyFromPem(
+  ): PrivateKey {
+    const priv = PrivateKeyFactory.createPrivateKeyFromPem(
       content,
       algorithm
     );
-    const pubBytes = await priv.publicKeyBytes();
+    const pubBytes = priv.publicKeyBytes();
     const algBytes = Uint8Array.of(algorithm);
     const pub = PublicKey.fromBuffer(concat([algBytes, pubBytes]));
     return new PrivateKey(algorithm, pub, priv);
@@ -185,10 +185,10 @@ class PrivateKeyFactory {
    * @returns A promise resolving to a PrivateKeyInternal instance.
    * @throws Error if the algorithm is unsupported.
    */
-  public static async createPrivateKeyFromPem(
+  public static createPrivateKeyFromPem(
     content: string,
     algorithm: KeyAlgorithm
-  ): Promise<PrivateKeyInternal> {
+  ): PrivateKeyInternal {
     switch (algorithm) {
       case KeyAlgorithm.ED25519:
         return Ed25519PrivateKey.fromPem(content);

@@ -11,12 +11,12 @@ import {
   Key,
   KeyTypeID,
   PublicKey,
-  StoredContractByHash
+  StoredVersionedContractByHash
 } from '../types';
 import { CasperNetworkName } from '../@types';
 
 export interface IMakeCep18TransferDeployParams {
-  contractHash: string;
+  contractPackageHash: string;
   senderPublicKeyHex: string;
   recipientPublicKeyHex: string;
   transferAmount: string;
@@ -29,8 +29,8 @@ export interface IMakeCep18TransferDeployParams {
  * This function generates a `Deploy` for transferring CEP-18 from one account to another.
  *
  * @param params - The parameters required to create the CEP-18 transfer deploy.
- * @param params.contractHash - The hash of the contract to interact with.
- *                              This is a 64-character hexadecimal string representing the contract.
+ * @param params.contractPackageHash - The hash of the contract package to interact with.
+ *                              This is a 64-character hexadecimal string representing the contract package.
  * @param params.senderPublicKeyHex - The sender's public key in hexadecimal format.
  * @param params.recipientPublicKeyHex - The recipient's public key in hexadecimal format.
  * @param params.transferAmount - The amount of CSPR to transfer.
@@ -62,7 +62,7 @@ export interface IMakeCep18TransferDeployParams {
  */
 
 export const makeCep18TransferDeploy = ({
-  contractHash,
+  contractPackageHash,
   senderPublicKeyHex,
   recipientPublicKeyHex,
   transferAmount,
@@ -75,8 +75,8 @@ export const makeCep18TransferDeploy = ({
 
   const session = new ExecutableDeployItem();
 
-  session.storedContractByHash = new StoredContractByHash(
-    ContractHash.newContract(contractHash),
+  session.storedVersionedContractByHash = new StoredVersionedContractByHash(
+    ContractHash.newContract(contractPackageHash),
     'transfer',
     Args.fromMap({
       recipient: CLValue.newCLKey(
@@ -86,7 +86,7 @@ export const makeCep18TransferDeploy = ({
         )
       ),
       amount: CLValueUInt256.newCLUInt256(transferAmount)
-    })
+    }),
   );
 
   const payment = ExecutableDeployItem.standardPayment(paymentAmount);

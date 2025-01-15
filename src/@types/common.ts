@@ -7,7 +7,10 @@ export enum CasperNetworkName {
 export enum AuctionManagerEntryPoint {
   delegate = 'delegate',
   undelegate = 'undelegate',
-  redelegate = 'redelegate'
+  redelegate = 'redelegate',
+  addBid = 'add_bid',
+  withdrawBid = 'withdraw_bid',
+  activateBid = 'activate_bid',
 }
 
 export enum NFTTokenStandard {

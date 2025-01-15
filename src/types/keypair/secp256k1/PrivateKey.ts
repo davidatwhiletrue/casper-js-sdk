@@ -1,16 +1,15 @@
 import * as secp256k1 from '@noble/secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
 import { hmac } from '@noble/hashes/hmac';
-import { PrivateKeyInternal } from "../PrivateKey";
+import { PrivateKeyInternal } from '../PrivateKey';
+import KeyEncoder from 'key-encoder';
+import { Conversions } from '../../Conversions';
+import { readBase64WithPEM } from '../utils';
 
 secp256k1.utils.hmacSha256Sync = (k, ...m) =>
   hmac(sha256, k, secp256k1.utils.concatBytes(...m));
 
-/** PEM prefix for a private key. */
-const PemPrivateKeyPrefix = '-----BEGIN PRIVATE KEY-----';
-
-/** PEM suffix for a private key. */
-const PemPrivateKeySuffix = '-----END PRIVATE KEY-----';
+const keyEncoder = new KeyEncoder('secp256k1');
 
 /**
  * Represents a secp256k1 private key, supporting key generation, signing, and PEM encoding.
@@ -111,8 +110,11 @@ export class PrivateKey implements PrivateKeyInternal {
    * @returns A PEM-encoded string of the private key.
    */
   toPem(): string {
-    const keyBase64 = Buffer.from(this.key).toString('base64');
-    return `${PemPrivateKeyPrefix}\n${keyBase64}\n${PemPrivateKeySuffix}`;
+    return keyEncoder.encodePrivate(
+      Conversions.encodeBase16(this.key),
+      'raw',
+      'pem'
+    );
   }
 
   /**
@@ -122,11 +124,14 @@ export class PrivateKey implements PrivateKeyInternal {
    * @throws Error if the content cannot be properly parsed.
    */
   static fromPem(content: string): PrivateKey {
-    const base64Key = content
-      .replace(PemPrivateKeyPrefix, '')
-      .replace(PemPrivateKeySuffix, '')
-      .replace(/\s+/g, '');
-    const keyBuffer = Buffer.from(base64Key, 'base64');
-    return new PrivateKey(new Uint8Array(keyBuffer));
+    const privateKeyBytes = readBase64WithPEM(content);
+
+    const rawKeyHex = keyEncoder.encodePrivate(
+      Buffer.from(privateKeyBytes),
+      'der',
+      'raw'
+    );
+
+    return new PrivateKey(new Uint8Array(Buffer.from(rawKeyHex, 'hex')));
   }
 }

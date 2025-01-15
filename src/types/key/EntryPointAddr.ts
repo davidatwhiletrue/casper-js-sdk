@@ -1,4 +1,4 @@
-import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
+import { jsonMember, jsonObject } from 'typedjson';
 import { concat } from '@ethersproject/bytes';
 
 import { EntityAddr } from './EntityAddr';
@@ -57,7 +57,7 @@ class VmCasperV1 {
   })
   entityAddr: EntityAddr;
 
-  @jsonArrayMember(Uint8Array, { name: 'NameBytes' })
+  @jsonMember(Uint8Array, { name: 'NameBytes' })
   nameBytes: Uint8Array;
 
   constructor(entityAddr: EntityAddr, nameBytes: Uint8Array) {
