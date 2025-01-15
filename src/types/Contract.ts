@@ -1,7 +1,7 @@
 import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
 import { ContractHash, ContractPackageHash } from './key';
-import { EntryPointV1 } from './EntryPoint';
 import { NamedKeys } from './NamedKey';
+import { NamedEntryPoint } from './AddressableEntity';
 
 /**
  * Represents a smart contract on the blockchain, including its unique identifiers, entry points, named keys, and protocol version.
@@ -33,8 +33,8 @@ export class Contract {
   /**
    * The list of entry points (functions) that can be called on this contract.
    */
-  @jsonArrayMember(EntryPointV1, { name: 'entry_points' })
-  entryPoints: EntryPointV1[];
+  @jsonArrayMember(NamedEntryPoint, { name: 'entry_points' })
+  entryPoints: NamedEntryPoint[];
 
   /**
    * The named keys associated with the contract, providing access to specific values or data stored by the contract.
@@ -59,7 +59,7 @@ export class Contract {
   constructor(
     contractPackageHash: ContractPackageHash,
     contractWasmHash: ContractHash,
-    entryPoints: EntryPointV1[],
+    entryPoints: NamedEntryPoint[],
     namedKeys: NamedKeys,
     protocolVersion: string
   ) {

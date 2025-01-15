@@ -1,6 +1,7 @@
 export enum CasperNetworkName {
   Mainnet = 'casper',
-  Testnet = 'casper-test'
+  Testnet = 'casper-test',
+  Integration = 'integration-test'
 }
 
 export enum AuctionManagerEntryPoint {

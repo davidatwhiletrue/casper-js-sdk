@@ -410,8 +410,7 @@ export class ExecutionResult {
         const transfer = new Transfer();
         transfer.amount = writeTransfer.amount;
         transfer.transactionHash = new TransactionHash(
-          undefined,
-          transform.key.transfer
+          writeTransfer?.deployHash
         );
         transfer.from = new InitiatorAddr(undefined, writeTransfer.from);
         transfer.gas = writeTransfer.gas;

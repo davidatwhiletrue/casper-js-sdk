@@ -118,7 +118,10 @@ export class NamedUserGroup {
   @jsonArrayMember(URef, {
     name: 'group_users',
     serializer: (value: URef[]) => value.map(it => it.toJSON()),
-    deserializer: (json: any) => json.map((it: string) => URef.fromJSON(it))
+    deserializer: (json: any) => {
+      if (!json) return;
+      return json.map((it: string) => URef.fromJSON(it));
+    }
   })
   groupUsers: URef[];
 

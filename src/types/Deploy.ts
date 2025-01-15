@@ -269,9 +269,7 @@ export class Deploy {
    * @param keys The private key used to sign the deploy.
    */
   public sign(keys: PrivateKey): void {
-    const signatureBytes = keys.signAndAddAlgorithmBytes(
-      this.hash.toBytes()
-    );
+    const signatureBytes = keys.signAndAddAlgorithmBytes(this.hash.toBytes());
     const signature = new HexBytes(signatureBytes);
     this.approvals.push(new Approval(keys.publicKey, signature));
   }
@@ -412,7 +410,7 @@ export class Deploy {
       deploy.session.getArgs(),
       TransactionTarget.newTransactionTargetFromSession(deploy.session),
       transactionEntryPoint,
-      new TransactionScheduling({ standard: {} }),
+      new TransactionScheduling({}), // Standard
       deploy.approvals,
       undefined,
       deploy
