@@ -1,32 +1,10 @@
-import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
+import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from 'typedjson';
 import { ContractHash, URef } from './key';
+import { deserializeDisabledVersions } from './SerializationUtils';
 
-/**
- * Represents a disabled contract version, marking specific versions as incompatible with the current protocol.
- */
-@jsonObject
-class DisabledContractVersion {
-  /**
-   * The version number of the contract.
-   */
-  @jsonMember({ name: 'contract_version', constructor: Number })
-  contractVersion: number;
-
-  /**
-   * Major version of the protocol that disables this contract version.
-   */
-  @jsonMember({ name: 'protocol_version_major', constructor: Number })
-  protocolVersionMajor: number;
-
-  /**
-   * Constructs a new `DisabledContractVersion` instance.
-   * @param contractVersion - The version of the contract.
-   * @param protocolVersionMajor - The major protocol version disabling this contract version.
-   */
-  constructor(contractVersion: number, protocolVersionMajor: number) {
-    this.contractVersion = contractVersion;
-    this.protocolVersionMajor = protocolVersionMajor;
-  }
+export interface IDisabledVersion {
+  protocol_version_major: number;
+  contract_version: number;
 }
 
 /**
@@ -37,27 +15,46 @@ export class ContractGroup {
   /**
    * The name of the group.
    */
-  @jsonMember({ name: 'group', constructor: String })
-  group: string;
+  @jsonMember({ name: 'group_name', constructor: String, preserveNull: true })
+  groupName: string;
 
   /**
    * The list of URef keys associated with this group, defining permissions for contract interaction.
    */
   @jsonArrayMember(URef, {
-    name: 'keys',
+    name: 'group_users',
     serializer: (value: URef[]) => value.map(it => it.toJSON()),
-    deserializer: (json: any) => json.map((it: string) => URef.fromJSON(it))
+    deserializer: (json: any) => {
+      if (!json) return;
+      return json.map((it: string) => URef.fromJSON(it));
+    }
   })
-  keys: URef[];
+  groupUsers: URef[];
 
   /**
-   * Constructs a new `ContractGroup` instance.
-   * @param group - The name of the group.
-   * @param keys - An array of URef keys associated with the group.
+   * Converts a plain JSON object into an instance of `ContractGroup`.
+   *
+   * @param json The JSON object to parse.
+   * @returns An instance of `ContractGroup` or `undefined` if parsing fails.
    */
-  constructor(group: string, keys: URef[]) {
-    this.group = group;
-    this.keys = keys;
+  public static fromJSON(json: any): ContractGroup | undefined {
+    const serializer = new TypedJSON(ContractGroup);
+    const contractGroup = serializer.parse(json);
+
+    // V1 Compatible
+    if (contractGroup) {
+      if (Array.isArray(json?.keys)) {
+        contractGroup.groupUsers = json.keys.map((it: any) =>
+          URef.fromJSON(it)
+        );
+      }
+
+      if (typeof json?.group === 'string') {
+        contractGroup.groupName = json.group;
+      }
+    }
+
+    return contractGroup;
   }
 }
 
@@ -125,13 +122,26 @@ export class ContractPackage {
   /**
    * Array of disabled contract versions, marking incompatible versions.
    */
-  @jsonArrayMember(DisabledContractVersion, { name: 'disabled_versions' })
-  disabledVersions: DisabledContractVersion[];
+  @jsonArrayMember(Number, {
+    name: 'disabled_versions',
+    dimensions: 2,
+    deserializer: json => {
+      if (!json) return;
+      return deserializeDisabledVersions(json);
+    }
+  })
+  disabledVersions: number[][];
 
   /**
    * Array of contract groups, managing access control with sets of URef keys.
    */
-  @jsonArrayMember(ContractGroup, { name: 'groups' })
+  @jsonArrayMember(ContractGroup, {
+    name: 'groups',
+    deserializer: json => {
+      if (!json) return;
+      return json.map((it: ContractGroup) => ContractGroup.fromJSON(it));
+    }
+  })
   groups: ContractGroup[];
 
   /**
@@ -156,7 +166,7 @@ export class ContractPackage {
    */
   constructor(
     accessKey: URef,
-    disabledVersions: DisabledContractVersion[],
+    disabledVersions: number[][],
     groups: ContractGroup[],
     versions: ContractVersion[],
     lockStatus: string

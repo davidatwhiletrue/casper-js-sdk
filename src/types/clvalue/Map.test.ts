@@ -37,6 +37,9 @@ describe('CLValue CLMap implementation', () => {
     testMap.append(myKey, myVal);
 
     expect(testMap.get('ABC')).to.be.deep.eq(myVal);
+    expect(testMap.get('ABC')?.i32?.toNumber()).to.be.deep.eq(
+      myVal.i32?.toNumber()
+    );
   });
 
   it('Get() should return undefined on non-existing key', () => {
@@ -82,5 +85,8 @@ describe('CLValue CLMap implementation', () => {
 
     expect(fromJson).to.be.deep.eq(clValueMap);
     expect(json).to.be.deep.eq(expectedJson);
+    expect(fromJson.map?.get('ABC')?.i32?.toNumber()).to.be.deep.eq(
+      myVal.i32?.toNumber()
+    );
   });
 });

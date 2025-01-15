@@ -219,13 +219,6 @@ export class CLValueParser {
         );
         result.tuple3 = tuple3?.result;
         return { result, bytes: tuple3?.bytes };
-      // case TypeID.Dynamic:
-      //   const typeData = CLTypeParser.matchBytesToCLType(bytes);
-      //   result.type = new CLTypeDynamic(
-      //     typeData.result?.getTypeID(),
-      //     typeData?.result
-      //   );
-      //   return { result, bytes: typeData?.bytes };
       default:
         throw ErrUnsupportedCLType;
     }

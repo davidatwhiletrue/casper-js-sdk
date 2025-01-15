@@ -662,4 +662,20 @@ export class TransactionHash {
     this.deploy = deploy;
     this.transactionV1 = transactionV1;
   }
+
+  /**
+   * Converts the `TransactionHash` to a hexadecimal string representation.
+   *
+   * @returns {string} The hexadecimal string of the deploy or transactionV1,
+   *                   or an empty string if neither is available.
+   */
+  public toString(): string {
+    if (this.deploy) {
+      return this.deploy.toHex();
+    } else if (this.transactionV1) {
+      return this.transactionV1.toHex();
+    }
+
+    return '';
+  }
 }

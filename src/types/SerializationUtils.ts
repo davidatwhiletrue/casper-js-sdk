@@ -3,6 +3,7 @@ import humanizeDuration from 'humanize-duration';
 import { Args } from './Args';
 import { Conversions } from './Conversions';
 import { CLValueUInt512 } from './clvalue';
+import { IDisabledVersion } from './ContractPackage';
 
 /**
  * Serializes a `Uint8Array` into a hexadecimal string.
@@ -207,4 +208,29 @@ export const serializeRewards = (map: Map<string, CLValueUInt512[]>) => {
     const serializedValue = value.map(item => item.toJSON());
     return [key, serializedValue];
   });
+};
+
+/**
+ * Parses disabled versions into a standardized array of tuples.
+ *
+ * @param disabledVersions - The input array, which can be:
+ *   - An array of tuples (`[number, number][]`), or
+ *   - An array of objects with `protocol_version_major` and `contract_version` properties.
+ * @returns An array of tuples (`[number, number][]`) representing `[protocol_version_major, contract_version]`.
+ */
+export const deserializeDisabledVersions = (
+  disabledVersions: [number, number][] | IDisabledVersion[]
+): [number, number][] => {
+  // V2 Compatible
+  if (Array.isArray(disabledVersions) && Array.isArray(disabledVersions[0])) {
+    return disabledVersions as [number, number][];
+  }
+
+  // V1 Compatible
+  return (disabledVersions as IDisabledVersion[]).map(
+    ({ protocol_version_major, contract_version }) => [
+      contract_version,
+      protocol_version_major
+    ]
+  );
 };
