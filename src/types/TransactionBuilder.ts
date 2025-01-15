@@ -18,7 +18,7 @@ import {
 import { TransactionScheduling } from './TransactionScheduling';
 import { Args } from './Args';
 import { PublicKey } from './keypair';
-import { AccountHash, Hash } from './key';
+import { AccountHash, ContractHash, Hash } from './key';
 import { Transaction, TransactionV1 } from './Transaction';
 import { TransactionV1Payload } from './TransactionV1Payload';
 import { Duration, Timestamp } from './Time';
@@ -31,6 +31,17 @@ import {
   CLValueUInt64,
   CLValueUInt8
 } from './clvalue';
+import {
+  ExecutableDeployItem,
+  StoredContractByHash,
+  StoredContractByName,
+  StoredVersionedContractByHash,
+  StoredVersionedContractByName,
+  TransferDeployItem
+} from './ExecutableDeployItem';
+import { Deploy, DeployHeader } from './Deploy';
+import { AuctionManagerContractHashMap } from '../utils';
+import { AuctionManagerEntryPoint, CasperNetworkName } from '../@types';
 
 /**
  * Abstract base class for building Transaction V1 instances.
@@ -101,6 +112,25 @@ abstract class TransactionBuilder<T extends TransactionBuilder<T>> {
     return (this as unknown) as T;
   }
 
+  protected _getDefaultDeployHeader(): DeployHeader {
+    const deployHeader = DeployHeader.default();
+    deployHeader.account = this._initiatorAddr.publicKey;
+    deployHeader.chainName = this._chainName;
+    deployHeader.ttl = this._ttl;
+
+    return deployHeader;
+  }
+
+  protected _getStandardPayment(): ExecutableDeployItem {
+    if (!this._pricingMode.paymentLimited?.paymentAmount) {
+      throw new Error('PaymentAmount is not specified');
+    }
+
+    return ExecutableDeployItem.standardPayment(
+      this._pricingMode.paymentLimited.paymentAmount.toString()
+    );
+  }
+
   /**
    * Builds and returns the Transaction instance.
    */
@@ -129,7 +159,9 @@ export class NativeTransferBuilder extends TransactionBuilder<
   NativeTransferBuilder
 > {
   private _target!: CLValue;
+  private _publicKey: PublicKey;
   private _amount: CLValue = CLValueUInt512.newCLUInt512('0');
+  private _amountRow: BigNumber | string = '0';
   private _idTransfer?: number;
 
   constructor() {
@@ -144,6 +176,7 @@ export class NativeTransferBuilder extends TransactionBuilder<
    * Sets the target public key for the transfer.
    */
   public target(publicKey: PublicKey): NativeTransferBuilder {
+    this._publicKey = publicKey;
     this._target = CLValue.newCLPublicKey(publicKey);
     return this;
   }
@@ -160,6 +193,7 @@ export class NativeTransferBuilder extends TransactionBuilder<
    * Sets the amount to transfer.
    */
   public amount(amount: BigNumber | string): NativeTransferBuilder {
+    this._amountRow = amount;
     this._amount = CLValueUInt512.newCLUInt512(amount);
     return this;
   }
@@ -190,6 +224,29 @@ export class NativeTransferBuilder extends TransactionBuilder<
 
     this._runtimeArgs = runtimeArgs;
     return super.build();
+  }
+
+  /**
+   * Builds and returns the Native Transfer transaction.
+   */
+  public buildFor1_5(): Transaction {
+    const session = new ExecutableDeployItem();
+    session.transfer = TransferDeployItem.newTransfer(
+      this._amountRow,
+      this._publicKey,
+      undefined,
+      this._idTransfer
+    );
+
+    const payment = ExecutableDeployItem.standardPayment('100000000');
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      payment,
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
   }
 }
 
@@ -278,6 +335,57 @@ export class NativeAddBidBuilder extends TransactionBuilder<
 
     return super.build();
   }
+
+  public buildFor1_5(): Transaction {
+    if (!this._initiatorAddr.publicKey) {
+      throw new Error('Initiator addr is not specified');
+    }
+
+    const runtimeArgs = Args.fromMap({});
+
+    runtimeArgs.insert('public_key', this._validator);
+    runtimeArgs.insert('amount', this._amount);
+    runtimeArgs.insert('delegation_rate', this._delegationRate);
+
+    if (this._minimumDelegationAmount) {
+      runtimeArgs.insert(
+        'minimum_delegation_amount',
+        this._minimumDelegationAmount
+      );
+    }
+
+    if (this._maximumDelegationAmount) {
+      runtimeArgs.insert(
+        'maximum_delegation_amount',
+        this._maximumDelegationAmount
+      );
+    }
+
+    if (this._reservedSlots) {
+      runtimeArgs.insert('reserved_slots', this._reservedSlots);
+    }
+
+    this._runtimeArgs = runtimeArgs;
+
+    const contractHash =
+      AuctionManagerContractHashMap[this._chainName as CasperNetworkName] ??
+      AuctionManagerContractHashMap.casper;
+
+    const session = new ExecutableDeployItem();
+    session.storedContractByHash = new StoredContractByHash(
+      ContractHash.newContract(contractHash),
+      AuctionManagerEntryPoint.addBid,
+      runtimeArgs
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
+  }
 }
 
 export class NativeWithdrawBidBuilder extends TransactionBuilder<
@@ -311,6 +419,32 @@ export class NativeWithdrawBidBuilder extends TransactionBuilder<
     });
 
     return super.build();
+  }
+
+  public buildFor1_5(): Transaction {
+    this._runtimeArgs = Args.fromMap({
+      public_key: this._validator,
+      amount: this._amount
+    });
+
+    const contractHash =
+      AuctionManagerContractHashMap[this._chainName as CasperNetworkName] ??
+      AuctionManagerContractHashMap.casper;
+
+    const session = new ExecutableDeployItem();
+    session.storedContractByHash = new StoredContractByHash(
+      ContractHash.newContract(contractHash),
+      AuctionManagerEntryPoint.withdrawBid,
+      this._runtimeArgs
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
   }
 }
 
@@ -351,6 +485,35 @@ export class NativeDelegateBuilder extends TransactionBuilder<
 
     return super.build();
   }
+
+  public buildFor1_5(): Transaction {
+    if (!this._initiatorAddr.publicKey) {
+      throw new Error('Initiator addr is not specified');
+    }
+
+    const contractHash =
+      AuctionManagerContractHashMap[this._chainName as CasperNetworkName] ??
+      AuctionManagerContractHashMap.casper;
+
+    const session = new ExecutableDeployItem();
+    session.storedContractByHash = new StoredContractByHash(
+      ContractHash.newContract(contractHash),
+      AuctionManagerEntryPoint.delegate,
+      Args.fromMap({
+        validator: this._validator,
+        delegator: CLValue.newCLPublicKey(this._initiatorAddr.publicKey),
+        amount: this._amount
+      })
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
+  }
 }
 
 export class NativeUndelegateBuilder extends TransactionBuilder<
@@ -389,6 +552,35 @@ export class NativeUndelegateBuilder extends TransactionBuilder<
     });
 
     return super.build();
+  }
+
+  public buildFor1_5(): Transaction {
+    if (!this._initiatorAddr.publicKey) {
+      throw new Error('Initiator addr is not specified');
+    }
+
+    const contractHash =
+      AuctionManagerContractHashMap[this._chainName as CasperNetworkName] ??
+      AuctionManagerContractHashMap.casper;
+
+    const session = new ExecutableDeployItem();
+    session.storedContractByHash = new StoredContractByHash(
+      ContractHash.newContract(contractHash),
+      AuctionManagerEntryPoint.undelegate,
+      Args.fromMap({
+        validator: this._validator,
+        delegator: CLValue.newCLPublicKey(this._initiatorAddr.publicKey),
+        amount: this._amount
+      })
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
   }
 }
 
@@ -436,6 +628,36 @@ export class NativeRedelegateBuilder extends TransactionBuilder<
 
     return super.build();
   }
+
+  public buildFor1_5(): Transaction {
+    if (!this._initiatorAddr.publicKey) {
+      throw new Error('Initiator addr is not specified');
+    }
+
+    const contractHash =
+      AuctionManagerContractHashMap[this._chainName as CasperNetworkName] ??
+      AuctionManagerContractHashMap.casper;
+
+    const session = new ExecutableDeployItem();
+    session.storedContractByHash = new StoredContractByHash(
+      ContractHash.newContract(contractHash),
+      AuctionManagerEntryPoint.redelegate,
+      Args.fromMap({
+        validator: this._validator,
+        new_validator: this._newValidator,
+        delegator: CLValue.newCLPublicKey(this._initiatorAddr.publicKey),
+        amount: this._amount
+      })
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
+  }
 }
 
 export class NativeActivateBidBuilder extends TransactionBuilder<
@@ -462,6 +684,31 @@ export class NativeActivateBidBuilder extends TransactionBuilder<
     });
 
     return super.build();
+  }
+
+  public buildFor1_5(): Transaction {
+    this._runtimeArgs = Args.fromMap({
+      validator: this._validator
+    });
+
+    const contractHash =
+      AuctionManagerContractHashMap[this._chainName as CasperNetworkName] ??
+      AuctionManagerContractHashMap.casper;
+
+    const session = new ExecutableDeployItem();
+    session.storedContractByHash = new StoredContractByHash(
+      ContractHash.newContract(contractHash),
+      AuctionManagerEntryPoint.activateBid,
+      this._runtimeArgs
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
   }
 }
 
@@ -508,9 +755,12 @@ export class ContractCallBuilder extends TransactionBuilder<
     super();
   }
 
+  private _transactionInvocationTarget: TransactionInvocationTarget;
+
   public byHash(contractHash: string): ContractCallBuilder {
     const invocationTarget = new TransactionInvocationTarget();
     invocationTarget.byHash = Hash.fromHex(contractHash);
+    this._transactionInvocationTarget = invocationTarget;
 
     const storedTarget = new StoredTarget();
     storedTarget.id = invocationTarget;
@@ -523,6 +773,7 @@ export class ContractCallBuilder extends TransactionBuilder<
   public byName(name: string): ContractCallBuilder {
     const invocationTarget = new TransactionInvocationTarget();
     invocationTarget.byName = name;
+    this._transactionInvocationTarget = invocationTarget;
 
     const storedTarget = new StoredTarget();
     storedTarget.id = invocationTarget;
@@ -541,6 +792,7 @@ export class ContractCallBuilder extends TransactionBuilder<
     packageHashInvocationTarget.version = version;
     const transactionInvocationTarget = new TransactionInvocationTarget();
     transactionInvocationTarget.byPackageHash = packageHashInvocationTarget;
+    this._transactionInvocationTarget = transactionInvocationTarget;
 
     const storedTarget = new StoredTarget();
 
@@ -557,6 +809,7 @@ export class ContractCallBuilder extends TransactionBuilder<
     packageNameInvocationTarget.version = version;
     const transactionInvocationTarget = new TransactionInvocationTarget();
     transactionInvocationTarget.byPackageName = packageNameInvocationTarget;
+    this._transactionInvocationTarget = transactionInvocationTarget;
 
     const storedTarget = new StoredTarget();
 
@@ -579,6 +832,54 @@ export class ContractCallBuilder extends TransactionBuilder<
   public runtimeArgs(args: Args): ContractCallBuilder {
     this._runtimeArgs = args;
     return this;
+  }
+
+  public buildFor1_5(): Transaction {
+    if (!this._entryPoint.customEntryPoint) {
+      throw new Error('EntryPoint is not specified');
+    }
+
+    const session = new ExecutableDeployItem();
+
+    if (this._transactionInvocationTarget.byHash) {
+      session.storedContractByHash = new StoredContractByHash(
+        ContractHash.newContract(
+          this._transactionInvocationTarget.byHash.toHex()
+        ),
+        this._entryPoint.customEntryPoint,
+        this._runtimeArgs
+      );
+    } else if (this._transactionInvocationTarget.byPackageHash) {
+      session.storedVersionedContractByHash = new StoredVersionedContractByHash(
+        ContractHash.newContract(
+          this._transactionInvocationTarget.byPackageHash.addr.toHex()
+        ),
+        this._entryPoint.customEntryPoint,
+        this._runtimeArgs,
+        this._transactionInvocationTarget.byPackageHash.version
+      );
+    } else if (this._transactionInvocationTarget.byName) {
+      session.storedContractByName = new StoredContractByName(
+        this._transactionInvocationTarget.byName,
+        this._entryPoint.customEntryPoint,
+        this._runtimeArgs
+      );
+    } else if (this._transactionInvocationTarget.byPackageName) {
+      session.storedVersionedContractByName = new StoredVersionedContractByName(
+        this._transactionInvocationTarget.byPackageName.name,
+        this._entryPoint.customEntryPoint,
+        this._runtimeArgs,
+        this._transactionInvocationTarget.byPackageName.version
+      );
+    }
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
   }
 }
 
@@ -618,5 +919,24 @@ export class SessionBuilder extends TransactionBuilder<SessionBuilder> {
   public runtimeArgs(args: Args): SessionBuilder {
     this._runtimeArgs = args;
     return this;
+  }
+
+  public buildFor1_5(): Transaction {
+    if (!this._invocationTarget.session?.moduleBytes) {
+      throw new Error('EntryPoint is not specified');
+    }
+
+    const session = ExecutableDeployItem.newModuleBytes(
+      this._invocationTarget.session.moduleBytes,
+      this._runtimeArgs
+    );
+
+    const deploy = Deploy.makeDeploy(
+      this._getDefaultDeployHeader(),
+      this._getStandardPayment(),
+      session
+    );
+
+    return Transaction.fromDeploy(deploy);
   }
 }
