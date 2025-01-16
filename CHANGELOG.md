@@ -13,6 +13,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.4-beta2] - 2025-01-16
+
+### Added
+
+- Ability to build `Deploy` with `TransactionBuilder` `buildFor1_5` method
+- Update `makeCep18TransferDeploy` to use `contractPackageHash` instead of `contractHash`
+- New auction contract hash for integration-test network, fixed deserialization of CES schema, Update contract package parsing compatible 1.x, added unit tests to cover mentioned bugs / features
+
+### Fixed
+
+- Issue with PEM file creation and parsing
+- Issue with typo in transaction scheduling creation
+- Issue with compatible transforms parsing
+- Issues with `@jsonArrayMember`
+
 ### [5.0.3-beta2] - 2024-01-25
 
 ### Added
