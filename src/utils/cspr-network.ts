@@ -1,42 +1,199 @@
-import {RpcClient} from "../rpc";
-import {NativeDelegateBuilder, PublicKey} from "../types";
+import { RpcClient } from '../rpc';
+import {
+  ContractCallBuilder,
+  NativeDelegateBuilder,
+  NativeRedelegateBuilder,
+  NativeTransferBuilder,
+  NativeUndelegateBuilder,
+  PublicKey,
+  Transaction,
+  TransactionHash
+} from '../types';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export class CasperNetwork {
-    private apiVersion: number;
-    private rpcClient: RpcClient;
+  private rpcClient: RpcClient;
+  private apiVersion: number;
 
-    constructor(apiVersion: number, rpcClient: RpcClient) {
-        this.apiVersion = apiVersion;
-        this.rpcClient = rpcClient;
+  constructor(rpcClient: RpcClient, apiVersion: number) {
+    this.rpcClient = rpcClient;
+    this.apiVersion = apiVersion;
+  }
+
+  public static async create(
+    rpcClient: RpcClient,
+    apiVersion?: number
+  ): Promise<CasperNetwork> {
+    if (!apiVersion) {
+      const status = await rpcClient.getStatus();
+
+      apiVersion = status.apiVersion.startsWith('2.') ? 2 : 1;
     }
 
-    public DelegateTransaction(delegatorPublicKeyHex: PublicKey,
-                               validatorPublicKeyHex: PublicKey,
-                               networkName: string,
-                               amountMotes: string,
-                               deployCost: number,
-                               ttl: number) {
-        const delegationBuilder = new NativeDelegateBuilder()
-            .validator(validatorPublicKeyHex)
-            .from(delegatorPublicKeyHex)
-            .amount(amountMotes)
-            .chainName(networkName)
-            .payment(deployCost)
-            .ttl(ttl)
+    return new CasperNetwork(rpcClient, apiVersion);
+  }
 
-        if(this.apiVersion === 2) {
-            return delegationBuilder.build();
-        }
-
-        return delegationBuilder.buildV1();
+  public createDelegateTransaction(
+    delegatorPublicKey: PublicKey,
+    validatorPublicKey: PublicKey,
+    networkName: string,
+    amountMotes: string | BigNumber,
+    deployCost: number,
+    ttl: number,
+    contractHash?: string
+  ) {
+    if (this.apiVersion === 2) {
+      new NativeDelegateBuilder()
+        .validator(validatorPublicKey)
+        .from(delegatorPublicKey)
+        .amount(amountMotes)
+        .chainName(networkName)
+        .payment(deployCost)
+        .ttl(ttl)
+        .build();
     }
 
-    // create native transfer transaction
-    // create delegate transaction
-    // create undelegate transaction
-    // create redelegate transaction
-    // create transfer transaction
+    if (contractHash) {
+      // need to provide contract hash
+      return (
+        new ContractCallBuilder()
+          .from(delegatorPublicKey)
+          .byHash(contractHash)
+          .entryPoint('delegate')
+          .chainName(networkName)
+          // .amount(amountMotes)
+          .ttl(ttl)
+          .buildFor1_5()
+      );
+    }
 
-    // get transaction
-    // put transaction
+    return new Error('Need to provide contract hash');
+  }
+
+  public createUndelegateTransaction(
+    delegatorPublicKey: PublicKey,
+    validatorPublicKey: PublicKey,
+    networkName: string,
+    amountMotes: string | BigNumber,
+    deployCost: number,
+    ttl: number,
+    contractHash?: string
+  ) {
+    if (this.apiVersion === 2) {
+      new NativeUndelegateBuilder()
+        .validator(validatorPublicKey)
+        .from(delegatorPublicKey)
+        .amount(amountMotes)
+        .chainName(networkName)
+        .payment(deployCost)
+        .ttl(ttl)
+        .build();
+    }
+
+    if (contractHash) {
+      // need to provide contract hash
+      return (
+        new ContractCallBuilder()
+          .from(delegatorPublicKey)
+          .byHash(contractHash)
+          .entryPoint('undelegate')
+          .chainName(networkName)
+          // .amount(amountMotes)
+          .ttl(ttl)
+          .buildFor1_5()
+      );
+    }
+
+    return new Error('Need to provide contract hash');
+  }
+
+  public createRedelegateTransaction(
+    delegatorPublicKey: PublicKey,
+    validatorPublicKey: PublicKey,
+    networkName: string,
+    amountMotes: string | BigNumber,
+    deployCost: number,
+    ttl: number,
+    contractHash?: string
+  ) {
+    if (this.apiVersion === 2) {
+      new NativeRedelegateBuilder()
+        .validator(validatorPublicKey)
+        .from(delegatorPublicKey)
+        .amount(amountMotes)
+        .chainName(networkName)
+        .payment(deployCost)
+        .ttl(ttl)
+        .build();
+    }
+
+    if (contractHash) {
+      // need to provide contract hash
+      return (
+        new ContractCallBuilder()
+          .from(delegatorPublicKey)
+          .byHash(contractHash)
+          .entryPoint('redelegate')
+          .chainName(networkName)
+          // .amount(amountMotes)
+          .ttl(ttl)
+          .buildFor1_5()
+      );
+    }
+
+    return new Error('Need to provide contract hash');
+  }
+
+  public createTransferTransaction(
+    senderPublicKey: PublicKey,
+    recepientPublicKey: PublicKey,
+    networkName: string,
+    amountMotes: string,
+    deployCost: number,
+    ttl: number
+  ) {
+    const transferBuilder = new NativeTransferBuilder()
+      .from(senderPublicKey)
+      .target(recepientPublicKey)
+      .amount(amountMotes)
+      .chainName(networkName)
+      .payment(deployCost)
+      .ttl(ttl);
+    if (this.apiVersion === 2) {
+      return transferBuilder.build();
+    }
+
+    return transferBuilder.buildFor1_5();
+  }
+
+  public async putTransaction(transaction: Transaction) {
+    if (this.apiVersion == 2) {
+      return await this.rpcClient.putTransaction(transaction);
+    }
+
+    const deploy = transaction.getDeploy();
+    if (deploy) {
+      return await this.rpcClient.putDeploy(deploy);
+    }
+
+    return Promise.reject('Transaction does not have a deploy');
+  }
+
+  public async getTransaction(hash: TransactionHash) {
+    if (this.apiVersion == 2) {
+      if (hash.transactionV1) {
+        return await this.rpcClient.getTransactionByTransactionHash(
+          hash.transactionV1?.toHex()
+        );
+      }
+    }
+
+    if (hash.deploy) {
+      return await this.rpcClient.getTransactionByDeployHash(
+        hash.deploy.toHex()
+      );
+    }
+
+    return Promise.reject('Hash is not valid');
+  }
 }
