@@ -1,5 +1,8 @@
 import { RpcClient } from '../rpc';
 import {
+  Args,
+  CLValue,
+  CLValueUInt512,
   ContractCallBuilder,
   NativeDelegateBuilder,
   NativeRedelegateBuilder,
@@ -54,17 +57,20 @@ export class CasperNetwork {
     }
 
     if (contractHash) {
-      // need to provide contract hash
-      return (
-        new ContractCallBuilder()
-          .from(delegatorPublicKey)
-          .byHash(contractHash)
-          .entryPoint('delegate')
-          .chainName(networkName)
-          // .amount(amountMotes)
-          .ttl(ttl)
-          .buildFor1_5()
-      );
+      return new ContractCallBuilder()
+        .from(delegatorPublicKey)
+        .byHash(contractHash)
+        .entryPoint('delegate')
+        .chainName(networkName)
+        .runtimeArgs(
+          Args.fromMap({
+            validator: CLValue.newCLPublicKey(validatorPublicKey),
+            delegator: CLValue.newCLPublicKey(delegatorPublicKey),
+            amount: CLValueUInt512.newCLUInt512(amountMotes)
+          })
+        )
+        .ttl(ttl)
+        .buildFor1_5();
     }
 
     return new Error('Need to provide contract hash');
@@ -91,17 +97,20 @@ export class CasperNetwork {
     }
 
     if (contractHash) {
-      // need to provide contract hash
-      return (
-        new ContractCallBuilder()
-          .from(delegatorPublicKey)
-          .byHash(contractHash)
-          .entryPoint('undelegate')
-          .chainName(networkName)
-          // .amount(amountMotes)
-          .ttl(ttl)
-          .buildFor1_5()
-      );
+      return new ContractCallBuilder()
+        .from(delegatorPublicKey)
+        .byHash(contractHash)
+        .entryPoint('undelegate')
+        .chainName(networkName)
+        .ttl(ttl)
+        .runtimeArgs(
+          Args.fromMap({
+            validator: CLValue.newCLPublicKey(validatorPublicKey),
+            delegator: CLValue.newCLPublicKey(delegatorPublicKey),
+            amount: CLValueUInt512.newCLUInt512(amountMotes)
+          })
+        )
+        .buildFor1_5();
     }
 
     return new Error('Need to provide contract hash');
