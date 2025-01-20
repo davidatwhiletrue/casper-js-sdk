@@ -1,4 +1,10 @@
-import { RpcClient } from '../rpc';
+import {
+  InfoGetDeployResult,
+  InfoGetTransactionResult,
+  PutDeployResult,
+  PutTransactionResult,
+  RpcClient
+} from '../rpc';
 import {
   Args,
   CLValue,
@@ -44,7 +50,7 @@ export class CasperNetwork {
     deployCost: number,
     ttl: number,
     auctionContractHash?: string
-  ) {
+  ): Transaction {
     if (this.apiVersion === 2) {
       new NativeDelegateBuilder()
         .validator(validatorPublicKey)
@@ -73,7 +79,7 @@ export class CasperNetwork {
         .buildFor1_5();
     }
 
-    return new Error(
+    throw new Error(
       'Auction contract hash is required when creating a transaction on Casper Network 1.5.x'
     );
   }
@@ -86,7 +92,7 @@ export class CasperNetwork {
     deployCost: number,
     ttl: number,
     auctionContractHash?: string
-  ) {
+  ): Transaction {
     if (this.apiVersion === 2) {
       new NativeUndelegateBuilder()
         .validator(validatorPublicKey)
@@ -115,7 +121,7 @@ export class CasperNetwork {
         .buildFor1_5();
     }
 
-    return new Error(
+    throw new Error(
       'Auction contract hash is required when creating a transaction on Casper Network 1.5.x'
     );
   }
@@ -129,7 +135,7 @@ export class CasperNetwork {
     deployCost: number,
     ttl: number,
     auctionContractHash?: string
-  ) {
+  ): Transaction {
     if (this.apiVersion === 2) {
       new NativeRedelegateBuilder()
         .validator(validatorPublicKey)
@@ -164,7 +170,7 @@ export class CasperNetwork {
         .buildFor1_5();
     }
 
-    return new Error(
+    throw new Error(
       'Auction contract hash is required when creating a transaction on Casper Network 1.5.x'
     );
   }
@@ -176,7 +182,7 @@ export class CasperNetwork {
     amountMotes: string,
     deployCost: number,
     ttl: number
-  ) {
+  ): Transaction {
     const transferBuilder = new NativeTransferBuilder()
       .from(senderPublicKey)
       .target(recepientPublicKey)
@@ -191,7 +197,9 @@ export class CasperNetwork {
     return transferBuilder.buildFor1_5();
   }
 
-  public async putTransaction(transaction: Transaction) {
+  public async putTransaction(
+    transaction: Transaction
+  ): Promise<PutTransactionResult | PutDeployResult> {
     if (this.apiVersion == 2) {
       return await this.rpcClient.putTransaction(transaction);
     }
@@ -206,7 +214,9 @@ export class CasperNetwork {
     );
   }
 
-  public async getTransaction(hash: TransactionHash) {
+  public async getTransaction(
+    hash: TransactionHash
+  ): Promise<InfoGetTransactionResult | InfoGetDeployResult> {
     if (this.apiVersion == 2) {
       if (hash.transactionV1) {
         return await this.rpcClient.getTransactionByTransactionHash(
