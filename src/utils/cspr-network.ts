@@ -43,7 +43,7 @@ export class CasperNetwork {
     amountMotes: string | BigNumber,
     deployCost: number,
     ttl: number,
-    contractHash?: string
+    auctionContractHash?: string
   ) {
     if (this.apiVersion === 2) {
       new NativeDelegateBuilder()
@@ -56,10 +56,10 @@ export class CasperNetwork {
         .build();
     }
 
-    if (contractHash) {
+    if (auctionContractHash) {
       return new ContractCallBuilder()
         .from(delegatorPublicKey)
-        .byHash(contractHash)
+        .byHash(auctionContractHash)
         .entryPoint('delegate')
         .chainName(networkName)
         .runtimeArgs(
@@ -73,7 +73,9 @@ export class CasperNetwork {
         .buildFor1_5();
     }
 
-    return new Error('Need to provide contract hash');
+    return new Error(
+      'Auction contract hash is required when creating a transaction on Casper Network 1.5.x'
+    );
   }
 
   public createUndelegateTransaction(
@@ -83,7 +85,7 @@ export class CasperNetwork {
     amountMotes: string | BigNumber,
     deployCost: number,
     ttl: number,
-    contractHash?: string
+    auctionContractHash?: string
   ) {
     if (this.apiVersion === 2) {
       new NativeUndelegateBuilder()
@@ -96,10 +98,10 @@ export class CasperNetwork {
         .build();
     }
 
-    if (contractHash) {
+    if (auctionContractHash) {
       return new ContractCallBuilder()
         .from(delegatorPublicKey)
-        .byHash(contractHash)
+        .byHash(auctionContractHash)
         .entryPoint('undelegate')
         .chainName(networkName)
         .ttl(ttl)
@@ -113,21 +115,25 @@ export class CasperNetwork {
         .buildFor1_5();
     }
 
-    return new Error('Need to provide contract hash');
+    return new Error(
+      'Auction contract hash is required when creating a transaction on Casper Network 1.5.x'
+    );
   }
 
   public createRedelegateTransaction(
     delegatorPublicKey: PublicKey,
     validatorPublicKey: PublicKey,
+    newValidatorPublicKey: PublicKey,
     networkName: string,
     amountMotes: string | BigNumber,
     deployCost: number,
     ttl: number,
-    contractHash?: string
+    auctionContractHash?: string
   ) {
     if (this.apiVersion === 2) {
       new NativeRedelegateBuilder()
         .validator(validatorPublicKey)
+        .newValidator(newValidatorPublicKey)
         .from(delegatorPublicKey)
         .amount(amountMotes)
         .chainName(networkName)
@@ -136,21 +142,31 @@ export class CasperNetwork {
         .build();
     }
 
-    if (contractHash) {
-      // need to provide contract hash
-      return (
-        new ContractCallBuilder()
-          .from(delegatorPublicKey)
-          .byHash(contractHash)
-          .entryPoint('redelegate')
-          .chainName(networkName)
-          // .amount(amountMotes)
-          .ttl(ttl)
-          .buildFor1_5()
-      );
+    if (auctionContractHash) {
+      return new ContractCallBuilder()
+        .from(delegatorPublicKey)
+        .byHash(auctionContractHash)
+        .entryPoint('redelegate')
+        .chainName(networkName)
+        .runtimeArgs(
+          Args.fromMap({
+            validator: CLValue.newCLPublicKey(validatorPublicKey),
+            delegator: CLValue.newCLPublicKey(delegatorPublicKey),
+            amount: CLValueUInt512.newCLUInt512(amountMotes),
+            ...(newValidatorPublicKey
+              ? {
+                  new_validator: CLValue.newCLPublicKey(newValidatorPublicKey)
+                }
+              : {})
+          })
+        )
+        .ttl(ttl)
+        .buildFor1_5();
     }
 
-    return new Error('Need to provide contract hash');
+    return new Error(
+      'Auction contract hash is required when creating a transaction on Casper Network 1.5.x'
+    );
   }
 
   public createTransferTransaction(
@@ -185,7 +201,9 @@ export class CasperNetwork {
       return await this.rpcClient.putDeploy(deploy);
     }
 
-    return Promise.reject('Transaction does not have a deploy');
+    return Promise.reject(
+      'Legacy deploy transaction is required when submitting to Casper Network 1.5'
+    );
   }
 
   public async getTransaction(hash: TransactionHash) {
@@ -195,12 +213,16 @@ export class CasperNetwork {
           hash.transactionV1?.toHex()
         );
       }
+
+      if (hash.deploy) {
+        return await this.rpcClient.getTransactionByDeployHash(
+          hash.deploy.toHex()
+        );
+      }
     }
 
     if (hash.deploy) {
-      return await this.rpcClient.getTransactionByDeployHash(
-        hash.deploy.toHex()
-      );
+      return await this.rpcClient.getDeploy(hash.deploy.toHex());
     }
 
     return Promise.reject('Hash is not valid');
