@@ -113,7 +113,19 @@ export class Conversions {
    * const cspr = Conversions.motesToCSPR(motes);
    * console.log(cspr.toString()); // Outputs: "1"
    */
-  static motesToCSPR(motes: BigNumberish): BigNumber {
-    return BigNumber.from(motes).div('1000000000');
+  static motesToCSPR(motes: BigNumberish): string {
+    const motesBigNumber = BigNumber.from(motes);
+
+    if (motesBigNumber.lt(0)) {
+      throw new Error('Motes cannot be negative number');
+    }
+
+    const result = motesBigNumber.toBigInt() * BigInt(10 ** 9) / BigInt(10 ** 9);
+    const resultStr = result.toString();
+
+    const integerPart = resultStr.slice(0, -9) || "0";
+    const decimalPart = resultStr.slice(-9).padStart(9, '0');
+
+    return `${integerPart}.${decimalPart}`.replace(/\.?0+$/, '');
   }
 }
