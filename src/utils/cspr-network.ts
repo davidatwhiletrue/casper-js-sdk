@@ -15,6 +15,7 @@ import {
   NativeTransferBuilder,
   NativeUndelegateBuilder,
   PublicKey,
+  SessionBuilder,
   Transaction,
   TransactionHash
 } from '../types';
@@ -197,6 +198,80 @@ export class CasperNetwork {
     return transferBuilder.buildFor1_5();
   }
 
+  public createContractCallTransaction(
+    senderPublicKey: PublicKey,
+    contractHash: string,
+    entryPoint: string,
+    networkName: string,
+    deployCost: number,
+    ttl: number,
+    args: Args
+  ): Transaction {
+    const contractCall = new ContractCallBuilder()
+      .byHash(contractHash)
+      .from(senderPublicKey)
+      .entryPoint(entryPoint)
+      .chainName(networkName)
+      .runtimeArgs(args)
+      .ttl(ttl)
+      .payment(deployCost);
+
+    if (this.apiVersion === 2) {
+      return contractCall.build();
+    }
+
+    return contractCall.buildFor1_5();
+  }
+
+  public createContractPackageTransaction(
+    senderPublicKey: PublicKey,
+    contractPackageHash: string,
+    entryPoint: string,
+    networkName: string,
+    deployCost: number,
+    args: Args,
+    ttl: number,
+    contractVersion?: number
+  ): Transaction {
+    const contractCall = new ContractCallBuilder()
+      .byPackageHash(contractPackageHash, contractVersion)
+      .from(senderPublicKey)
+      .entryPoint(entryPoint)
+      .chainName(networkName)
+      .runtimeArgs(args)
+      .ttl(ttl)
+      .payment(deployCost);
+
+    if (this.apiVersion === 2) {
+      return contractCall.build();
+    }
+
+    return contractCall.buildFor1_5();
+  }
+
+  public createSessionWasmTransaction(
+    senderPublicKey: PublicKey,
+    networkName: string,
+    deployCost: number,
+    ttl: number,
+    bytes: Uint8Array,
+    args: Args
+  ): Transaction {
+    const sessionWasm = new SessionBuilder()
+      .from(senderPublicKey)
+      .chainName(networkName)
+      .payment(deployCost)
+      .ttl(ttl)
+      .wasm(bytes)
+      .runtimeArgs(args);
+
+    if (this.apiVersion === 2) {
+      return sessionWasm.build();
+    }
+
+    return sessionWasm.buildFor1_5();
+  }
+
   public async putTransaction(
     transaction: Transaction
   ): Promise<PutTransactionResult | PutDeployResult> {
@@ -216,7 +291,7 @@ export class CasperNetwork {
 
   public async getTransaction(
     hash: TransactionHash
-  ): Promise<InfoGetTransactionResult | InfoGetDeployResult> {
+  ): Promise<InfoGetTransactionResult> {
     if (this.apiVersion == 2) {
       if (hash.transactionV1) {
         return await this.rpcClient.getTransactionByTransactionHash(
@@ -232,7 +307,10 @@ export class CasperNetwork {
     }
 
     if (hash.deploy) {
-      return await this.rpcClient.getDeploy(hash.deploy.toHex());
+      const getDeployResult = await this.rpcClient.getDeploy(
+        hash.deploy.toHex()
+      );
+      return getDeployResult.toInfoGetTransactionResult();
     }
 
     return Promise.reject('Hash is not valid');
