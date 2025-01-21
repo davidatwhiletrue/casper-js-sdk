@@ -1,5 +1,4 @@
 import {
-  InfoGetDeployResult,
   InfoGetTransactionResult,
   PutDeployResult,
   PutTransactionResult,
