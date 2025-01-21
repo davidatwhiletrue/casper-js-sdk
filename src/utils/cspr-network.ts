@@ -53,7 +53,7 @@ export class CasperNetwork {
     auctionContractHash?: string
   ): Transaction {
     if (this.apiVersion === 2) {
-      new NativeDelegateBuilder()
+      return new NativeDelegateBuilder()
         .validator(validatorPublicKey)
         .from(delegatorPublicKey)
         .amount(amountMotes)
@@ -95,7 +95,7 @@ export class CasperNetwork {
     auctionContractHash?: string
   ): Transaction {
     if (this.apiVersion === 2) {
-      new NativeUndelegateBuilder()
+      return new NativeUndelegateBuilder()
         .validator(validatorPublicKey)
         .from(delegatorPublicKey)
         .amount(amountMotes)
@@ -138,7 +138,7 @@ export class CasperNetwork {
     auctionContractHash?: string
   ): Transaction {
     if (this.apiVersion === 2) {
-      new NativeRedelegateBuilder()
+      return new NativeRedelegateBuilder()
         .validator(validatorPublicKey)
         .newValidator(newValidatorPublicKey)
         .from(delegatorPublicKey)
@@ -178,7 +178,7 @@ export class CasperNetwork {
 
   public createTransferTransaction(
     senderPublicKey: PublicKey,
-    recepientPublicKey: PublicKey,
+    recipientPublicKey: PublicKey,
     networkName: string,
     amountMotes: string,
     deployCost: number,
@@ -186,7 +186,7 @@ export class CasperNetwork {
   ): Transaction {
     const transferBuilder = new NativeTransferBuilder()
       .from(senderPublicKey)
-      .target(recepientPublicKey)
+      .target(recipientPublicKey)
       .amount(amountMotes)
       .chainName(networkName)
       .payment(deployCost)
