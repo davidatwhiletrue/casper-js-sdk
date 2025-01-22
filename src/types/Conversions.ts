@@ -83,7 +83,7 @@ export class Conversions {
   /**
    * Converts a CSPR amount to its mote equivalent.
    *
-   * @param cspr - A `BigNumberish` amount of CSPR to convert to motes.
+   * @param cspr - A `string` amount of CSPR to convert to motes.
    * @returns A `BigNumber` containing the equivalent amount in motes.
    *
    * @remarks
@@ -94,8 +94,22 @@ export class Conversions {
    * const motes = Conversions.csprToMotes(cspr);
    * console.log(motes.toString()); // Outputs: "1000000000"
    */
-  static csprToMotes(cspr: BigNumberish): BigNumber {
-    return BigNumber.from(cspr).mul('1000000000');
+  static csprToMotes(cspr: string | number): BigNumber {
+    if (typeof cspr === 'string' && !/^\d+(\.\d+)?$/.test(cspr)) {
+      throw new Error('Invalid input: cspr must be a string representing a valid positive number.');
+    }
+
+    // eslint-disable-next-line prefer-const
+    let [integerPart, decimalPart = ""] = cspr.toString().split('.');
+    let result = BigNumber.from(integerPart).mul(10 ** 9);
+
+    if (decimalPart.length > 0) {
+      decimalPart = (decimalPart + '000000000').slice(0, 9);
+
+      result = result.add(decimalPart);
+    }
+
+    return result;
   }
 
   /**
@@ -120,8 +134,7 @@ export class Conversions {
       throw new Error('Motes cannot be negative number');
     }
 
-    const result = motesBigNumber.toBigInt() * BigInt(10 ** 9) / BigInt(10 ** 9);
-    const resultStr = result.toString();
+    const resultStr = motesBigNumber.toBigInt().toString();
 
     const integerPart = resultStr.slice(0, -9) || "0";
     const decimalPart = resultStr.slice(-9).padStart(9, '0');
