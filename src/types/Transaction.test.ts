@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { assert, expect } from 'chai';
 
 import { Duration, Timestamp } from './Time';
-import { TransactionV1 } from './Transaction';
+import { Transaction, TransactionV1 } from './Transaction';
 import { InitiatorAddr } from './InitiatorAddr';
 import { FixedMode, PricingMode } from './PricingMode';
 import { KeyAlgorithm, PrivateKey, PublicKey } from './keypair';
@@ -118,5 +118,75 @@ describe('Test Transaction', () => {
     assert.deepEqual(transaction.approvals[0].signer, sender.publicKey);
     assert.deepEqual(parseInt(transactionPaymentAmount, 10), 25000000000);
     expect(transactionV1.payload.chainName).to.deep.equal('casper-net-1');
+  });
+
+  it('should parse deploy json', async () => {
+    const json = {
+      "deploy": {
+        "approvals": [],
+        "hash": "076E77DE17De7F262c5531017c214afd664D9702D4b5b771996aE4dcAf9C01f9",
+        "header": {
+          "account": "02024570ae3c361650d5b1Bcd1724a1aF09ffe067d7F69ebd75B567c10c8379a7719",
+          "timestamp": "2025-01-21T18:07:52.214Z",
+          "ttl": "30m",
+          "dependencies": [],
+          "gas_price": 1,
+          "body_hash": "D52E4B46542D9C83BA6EF894dBA82e475011166A4C5F434b0d99248cfDC9Abc5",
+          "chain_name": "casper-test"
+        },
+        "payment": {
+          "ModuleBytes": {
+            "module_bytes": "",
+            "args": [
+              [
+                "amount",
+                {
+                  "cl_type": "U512",
+                  "bytes": "0400943577",
+                  "parsed": "2000000000"
+                }
+              ]
+            ]
+          }
+        },
+        "session": {
+          "StoredVersionedContractByHash": {
+            "hash": "6497c59f1bcfBBBC468Dc889dd73dCd542827fb966a24Eb33e4140Ab5BB4aE28",
+            "version": null,
+            "entry_point": "mint",
+            "args": [
+              [
+                "recipient",
+                {
+                  "cl_type": "Key",
+                  "bytes": "00ABbc44715BA77Ea117f9379A3f5b62879Be71D105b7508b610a676AEf4c3C26a",
+                  "parsed": {
+                    "Account": "account-hash-ABBC44715ba77ea117f9379a3f5b62879Be71D105B7508B610a676AeF4C3C26A"
+                  }
+                }
+              ],
+              [
+                "token_metas",
+                {
+                  "cl_type": {
+                    "List": {
+                      "Map": {
+                        "key": "String",
+                        "value": "String"
+                      }
+                    }
+                  },
+                  "bytes": "0100000003000000040000006e616d65080000004e6f6f6f6f6f6f6f0b0000006465736372697074696f6e04000000747275650500000061737365745400000068747470733a2f2f697066732d676174657761792e637370722e73747564696f2f697066732f516d5a62714d767a5036706a45415554753135376d5470736e38526b4d637a585a48767a56784454647854436572",
+                  "parsed": ""
+                }
+              ]
+            ]
+          }
+        }
+      }
+    };
+
+    const tx = Transaction.fromJSON(json);
+    expect(tx.hash.toHex()).to.equal('076e77de17de7f262c5531017c214afd664d9702d4b5b771996ae4dcaf9c01f9')
   });
 });
