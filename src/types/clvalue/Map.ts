@@ -195,28 +195,26 @@ export class CLValueMap {
 
     const { result: u32, bytes: u32Bytes } = CLValueUInt32.fromBytes(bytes);
     const size = u32.toNumber();
-    const remainder = u32Bytes;
+    let remainder = u32Bytes;
 
     if (size === 0) {
       return { result: mapResult, bytes: remainder };
     }
 
     for (let i = 0; i < size; i++) {
-      if (remainder.length) {
-        const keyVal = CLValueParser.fromBytesByType(remainder, mapType.key);
+      if (!remainder.length) {
+        continue;
+      }
 
-        if (!keyVal.bytes || !keyVal.result) {
-          continue;
-        }
+      try {
+        const keyVal = CLValueParser.fromBytesByType(remainder, mapType.key);
+        remainder = keyVal?.bytes ?? [];
 
         const valVal = CLValueParser.fromBytesByType(keyVal.bytes, mapType.val);
-
-        if (!valVal.bytes || !valVal.result) {
-          continue;
-        }
+        remainder = valVal?.bytes ?? [];
 
         mapResult.append(keyVal?.result, valVal?.result);
-      }
+      } catch {}
     }
 
     return { result: mapResult, bytes: remainder };
