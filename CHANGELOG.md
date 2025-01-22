@@ -13,6 +13,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.5-beta2] - 2025-01-22
+
+### Added
+
+- `CasperNetwork` abstraction that helps to easily handle Casper 1.5 and 2.0 versions
+
+### Fixed
+
+- Issue with `Conversions.motesToCSPR` and `Conversions.csprToMotes` Update `makeCep18TransferDeploy`
+- Issue with `CLValueMap.fromBytes`
+
 ### [5.0.4-beta2] - 2025-01-16
 
 ### Added
