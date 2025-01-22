@@ -222,7 +222,7 @@ export class CasperNetwork {
     return contractCall.buildFor1_5();
   }
 
-  public createContractPackageTransaction(
+  public createContractPackageCallTransaction(
     senderPublicKey: PublicKey,
     contractPackageHash: string,
     entryPoint: string,
