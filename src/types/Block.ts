@@ -1,4 +1,4 @@
-import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
+import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
 import { Hash } from './key';
 import { Timestamp } from './Time';
 import { Proposer } from './BlockProposer';
@@ -180,8 +180,8 @@ export class Block {
   /**
    * A list of signature IDs that were rewarded in this block.
    */
-  @jsonArrayMember(Number, { name: 'rewarded_signatures' })
-  public rewardedSignatures: number[];
+  @jsonArrayMember(Number, { dimensions: 2 })
+  public rewardedSignatures: number[][];
 
   /**
    * A list of proofs associated with this block.
@@ -235,7 +235,7 @@ export class Block {
     protocolVersion: string | undefined,
     eraEnd: EraEnd | undefined,
     transactions: BlockTransaction[],
-    rewardedSignatures: number[],
+    rewardedSignatures: number[][],
     proofs: Proof[],
     originBlockV1?: BlockV1,
     originBlockV2?: BlockV2
@@ -427,13 +427,14 @@ export class BlockTransaction {
    * console.log(transactions); // Outputs an array of BlockTransaction instances.
    */
   public static fromJSON(data: any): BlockTransaction[] {
+    const serializer = new TypedJSON(TransactionHash)
     const source = {
-      Mint: data['0'] || [],
-      Auction: data['1'] || [],
-      InstallUpgrade: data['2'] || [],
-      Large: data['3'] || [],
-      Medium: data['4'] || [],
-      Small: data['5'] || []
+      Mint: (data['0'] || []).map((json: any) => serializer.parse(json)),
+      Auction: (data['1'] || []).map((json: any) => serializer.parse(json)),
+      InstallUpgrade: (data['2'] || []).map((json: any) => serializer.parse(json)),
+      Large: (data['3'] || []).map((json: any) => serializer.parse(json)),
+      Medium: (data['4'] || []).map((json: any) => serializer.parse(json)),
+      Small: (data['5'] || []).map((json: any) => serializer.parse(json))
     };
 
     const transactions: BlockTransaction[] = [];
@@ -490,15 +491,24 @@ function getBlockTransactionsFromTransactionHashes(
 
   return hashes.map(hash => {
     const transactionHash = hash.transactionV1;
+    const deployHash = hash.deploy;
 
-    if (!transactionHash) {
-      throw new Error('Invalid TransactionHash: transactionV1 is undefined');
+    if (transactionHash) {
+      return new BlockTransaction(
+        category,
+        TransactionVersion.V1,
+        transactionHash
+      );
+    } else if (deployHash) {
+      return new BlockTransaction(
+        category,
+        TransactionVersion.Deploy,
+        deployHash
+      );
     }
 
-    return new BlockTransaction(
-      category,
-      TransactionVersion.V1,
-      transactionHash
+    throw new Error(
+      'Invalid TransactionHash: transactionV1 and deploy is undefined'
     );
   });
 }
@@ -895,18 +905,17 @@ export class BlockBodyV2 {
   /**
    * The list of transactions included in the block.
    */
-  @jsonArrayMember(BlockTransaction, {
+  @jsonMember(BlockTransaction, {
     name: 'transactions',
-    deserializer: (json: any) =>
-      json.map((it: string) => BlockTransaction.fromJSON(it))
+    deserializer: (json: any) => BlockTransaction.fromJSON(json)
   })
   public transactions: BlockTransaction[];
 
   /**
    * The list of signature IDs that were rewarded in this block.
    */
-  @jsonArrayMember(Number, { name: 'rewarded_signatures' })
-  public rewardedSignatures: number[];
+  @jsonArrayMember(Number, { dimensions: 2 })
+  public rewardedSignatures: number[][];
 }
 
 /**
