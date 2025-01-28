@@ -178,6 +178,7 @@ export class BidAddr {
     const rem = bytes.subarray(1);
     const bidAddrTag = BidAddr.bidAddrTag(tag);
     const bidAddr = new BidAddr();
+    bidAddr.tag = bidAddrTag;
 
     const parseHashPair = (
       input: Uint8Array
