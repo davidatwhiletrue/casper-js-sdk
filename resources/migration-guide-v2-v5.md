@@ -17,7 +17,7 @@ This guide will walk you through the key changes and provide detailed examples t
 
 ## Changes and Migration Steps
 
-### 1. **`CasperServiceByJsonRPC` and `CasperClient` Replaced with `RpcClient`**
+### 1. **`CasperServiceByJsonRPC` and `CasperClient` replaced with `RpcClient`**
 
 #### Overview
 
@@ -55,7 +55,7 @@ For details on `RpcClient` methods, refer to the [documentation](https://github.
 
 ---
 
-### 2. **`CLValueBuilder` Replaced by `CLValue` Constructors**
+### 2. **`CLValueBuilder` replaced by `CLValue` Constructors**
 
 #### Overview
 
@@ -163,7 +163,7 @@ Refer to the [keypair folder](https://github.com/casper-ecosystem/casper-js-sdk/
 
 ---
 
-### 5. **`PurseIdentifier` Enum Replaced with a Class**
+### 5. **`PurseIdentifier` Enum replaced with a Class**
 
 ### Changes
 
@@ -310,12 +310,15 @@ const deployFromJson = Deploy.fromJSON(deployJson);
 
 ### 7. **`Contracts` Abstraction Removed**
 
-With the release of version 5.0 of the `casper-js-sdk`, we removed the old abstraction for creating and interacting with deploys, including the functions `install` and `callEntrypoint`. This guide provides detailed steps for migrating from the old abstraction to the new approach using the SDK's updated API.
+With the release of version 5.0 of the `casper-js-sdk`, we removed the old abstraction for creating and interacting with deploys, including the functions `install` and `callEntrypoint`.  
+This guide provides detailed steps for migrating from the old abstraction to the new approach using the SDK's updated API.
 
 #### Key Changes:
 
-- Removed Custom Abstractions: Functions like `install` and `callEntrypoint` are no longer provided as utilities. Instead, the updated SDK expects developers to directly work with the core primitives of the SDK, offering more flexibility and transparency.
-- Direct Use of Deploy Utilities: Developers now work directly with the SDK's deploy and contract management primitives, such as `DeployHeader`, `ExecutableDeployItem`, and `Deploy`.
+- **Removed Custom Abstractions**: Functions like `install` and `callEntrypoint` are no longer provided as utilities. Instead, the updated SDK expects developers to directly work with the core primitives of the SDK, offering more flexibility and transparency.
+- **Direct Use of Deploy Utilities**: Developers now work directly with the SDK's deploy and contract management primitives, such as `DeployHeader`, `ExecutableDeployItem`, and `Deploy`.
+- **Deploy Builders for Common Contracts**: For frequently used contracts such as **auction, CEP-18 (fungible tokens), and CEP-78 (NFTs)**, the SDK provides specific **deploy builders** to streamline the deployment and interaction process. These utilities simplify common contract interactions while maintaining flexibility.  
+  You can find these deploy builders in the [utils directory](../src/utils).
 
 Below are examples to help you transition smoothly:
 
