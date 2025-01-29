@@ -23,7 +23,7 @@ npm install casper-js-sdk --save
 
 ## Migration guides
 
-### [v2 to v5](./migration-guide-v2-v5.md)
+### [v2 to v5](resources/migration-guide-v2-v5.md)
 
 ## Usage examples
 
