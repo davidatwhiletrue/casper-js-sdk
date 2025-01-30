@@ -5,6 +5,7 @@ import {
   Duration,
   ExecutableDeployItem,
   PublicKey,
+  Timestamp,
   TransferDeployItem
 } from '../types';
 import { CasperNetworkName } from '../@types';
@@ -16,6 +17,7 @@ export interface IMakeCsprTransferDeployParams {
   chainName?: string;
   memo?: string;
   ttl?: number;
+  timestamp?: string;
 }
 
 /**
@@ -37,6 +39,7 @@ export interface IMakeCsprTransferDeployParams {
  * @param params.ttl - (Optional) The time-to-live (TTL) for the `Deploy` in milliseconds.
  *                      Specifies how long the `Deploy` is valid before it expires.
  *                      Defaults 1800000 (30 minutes)
+ * @param params.timestamp - (Optional) The timestamp in ISO 8601 format
  *
  * @returns A promise that resolves to the created Deploy instance, ready to be sent to the Casper network.
  *
@@ -59,7 +62,8 @@ export const makeCsprTransferDeploy = ({
   transferAmount,
   chainName = CasperNetworkName.Mainnet,
   memo,
-  ttl = DEFAULT_DEPLOY_TTL
+  ttl = DEFAULT_DEPLOY_TTL,
+  timestamp
 }: IMakeCsprTransferDeployParams) => {
   const recipientKey = PublicKey.newPublicKey(recipientPublicKeyHex);
   const senderKey = PublicKey.newPublicKey(senderPublicKeyHex);
@@ -78,6 +82,10 @@ export const makeCsprTransferDeploy = ({
   deployHeader.account = senderKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+
+  if (timestamp) {
+    deployHeader.timestamp = Timestamp.fromJSON(timestamp);
+  }
 
   return Deploy.makeDeploy(deployHeader, payment, session);
 };
