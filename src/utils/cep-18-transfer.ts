@@ -1,7 +1,6 @@
 import {
   Args,
   CLValue,
-  CLValueUInt256,
   ContractHash,
   DEFAULT_DEPLOY_TTL,
   Deploy,
@@ -90,7 +89,7 @@ export const makeCep18TransferDeploy = ({
           KeyTypeID.Account
         )
       ),
-      amount: CLValueUInt256.newCLUInt256(transferAmount)
+      amount: CLValue.newCLUInt256(transferAmount)
     })
   );
 

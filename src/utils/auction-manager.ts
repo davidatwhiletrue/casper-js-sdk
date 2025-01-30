@@ -1,7 +1,6 @@
 import {
   Args,
   CLValue,
-  CLValueUInt512,
   ContractHash,
   DEFAULT_DEPLOY_TTL,
   Deploy,
@@ -27,6 +26,7 @@ export interface IMakeAuctionManagerDeployParams {
   paymentAmount?: string;
   chainName?: CasperNetworkName;
   ttl?: number;
+  contractHash?: string;
   timestamp?: string;
 }
 
@@ -55,6 +55,7 @@ export interface IMakeAuctionManagerDeployParams {
  *                      Specifies how long the `Deploy` is valid before it expires.
  *                      Defaults 1800000 (30 minutes)
  * @param params.timestamp - (Optional) The timestamp in ISO 8601 format
+ * @param params.contractHash - (Optional) The custom contract hash
  *
  * @returns A deploy object that can be signed and sent to the network.
  *
@@ -81,6 +82,7 @@ export const makeAuctionManagerDeploy = ({
   chainName = CasperNetworkName.Mainnet,
   newValidatorPublicKeyHex,
   ttl = DEFAULT_DEPLOY_TTL,
+  contractHash,
   timestamp
 }: IMakeAuctionManagerDeployParams) => {
   const delegatorPublicKey = PublicKey.newPublicKey(delegatorPublicKeyHex);
@@ -88,15 +90,23 @@ export const makeAuctionManagerDeploy = ({
   const newValidatorValidatorPublicKey = newValidatorPublicKeyHex
     ? PublicKey.newPublicKey(newValidatorPublicKeyHex)
     : null;
+  const auctionContractHash =
+    contractHash ?? AuctionManagerContractHashMap[chainName];
+
+  if (!auctionContractHash) {
+    throw new Error(
+      `Auction contract hash is undefined for chain: ${chainName}`
+    );
+  }
 
   const session = new ExecutableDeployItem();
   session.storedContractByHash = new StoredContractByHash(
-    ContractHash.newContract(AuctionManagerContractHashMap[chainName]),
+    ContractHash.newContract(auctionContractHash),
     contractEntryPoint,
     Args.fromMap({
       validator: CLValue.newCLPublicKey(validatorPublicKey),
       delegator: CLValue.newCLPublicKey(delegatorPublicKey),
-      amount: CLValueUInt512.newCLUInt512(amount),
+      amount: CLValue.newCLUInt512(amount),
       ...(newValidatorValidatorPublicKey
         ? {
             new_validator: CLValue.newCLPublicKey(
