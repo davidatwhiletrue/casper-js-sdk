@@ -13,6 +13,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.6-beta2] - 2025-01-30
+
+### Added
+
+- Extended `BidAddr`.
+
+### Fixed
+
+- Issue with `BlockTransaction` serialization.
+- Corrected the `rewardedSignatures` type to ensure accuracy.
+
+### Changed
+
+- Moved `newCL` methods into the `CLValue` class for a more streamlined `CLValue` creation process.
+- Added the ability to set a contract hash for the transaction builder, enhancing flexibility.
+- Updated migration guide from v2 to v5 for a smoother transition.
+
 ### [5.0.5-beta2] - 2025-01-22
 
 ### Added
