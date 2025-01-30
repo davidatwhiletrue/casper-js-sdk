@@ -9,13 +9,17 @@ import {
   Duration,
   ExecutableDeployItem,
   PublicKey,
-  StoredContractByHash
+  StoredContractByHash,
+  Timestamp
 } from '../types';
 import { AuctionManagerEntryPoint, CasperNetworkName } from '../@types';
 import { AuctionManagerContractHashMap } from './constants';
 
 export interface IMakeAuctionManagerDeployParams {
-  contractEntryPoint: AuctionManagerEntryPoint.delegate | AuctionManagerEntryPoint.undelegate | AuctionManagerEntryPoint.redelegate;
+  contractEntryPoint:
+    | AuctionManagerEntryPoint.delegate
+    | AuctionManagerEntryPoint.undelegate
+    | AuctionManagerEntryPoint.redelegate;
   delegatorPublicKeyHex: string;
   validatorPublicKeyHex: string;
   newValidatorPublicKeyHex?: string;
@@ -23,6 +27,7 @@ export interface IMakeAuctionManagerDeployParams {
   paymentAmount?: string;
   chainName?: CasperNetworkName;
   ttl?: number;
+  timestamp?: string;
 }
 
 /**
@@ -49,6 +54,7 @@ export interface IMakeAuctionManagerDeployParams {
  * @param params.ttl - (Optional) The time-to-live (TTL) for the `Deploy` in milliseconds.
  *                      Specifies how long the `Deploy` is valid before it expires.
  *                      Defaults 1800000 (30 minutes)
+ * @param params.timestamp - (Optional) The timestamp in ISO 8601 format
  *
  * @returns A deploy object that can be signed and sent to the network.
  *
@@ -74,7 +80,8 @@ export const makeAuctionManagerDeploy = ({
   paymentAmount = '2500000000',
   chainName = CasperNetworkName.Mainnet,
   newValidatorPublicKeyHex,
-  ttl = DEFAULT_DEPLOY_TTL
+  ttl = DEFAULT_DEPLOY_TTL,
+  timestamp
 }: IMakeAuctionManagerDeployParams) => {
   const delegatorPublicKey = PublicKey.newPublicKey(delegatorPublicKeyHex);
   const validatorPublicKey = PublicKey.newPublicKey(validatorPublicKeyHex);
@@ -106,6 +113,10 @@ export const makeAuctionManagerDeploy = ({
   deployHeader.account = delegatorPublicKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+
+  if (timestamp) {
+    deployHeader.timestamp = Timestamp.fromJSON(timestamp);
+  }
 
   return Deploy.makeDeploy(deployHeader, payment, session);
 };

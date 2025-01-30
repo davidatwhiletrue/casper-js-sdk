@@ -15,7 +15,8 @@ import {
   Key,
   KeyTypeID,
   PublicKey,
-  StoredVersionedContractByHash
+  StoredVersionedContractByHash,
+  Timestamp
 } from '../types';
 import { CasperNetworkName, NFTTokenStandard } from '../@types';
 
@@ -29,6 +30,7 @@ export interface IMakeNftTransferDeployParams {
   ttl?: number;
   tokenId?: string;
   tokenHash?: string;
+  timestamp?: string;
 }
 
 /**
@@ -45,6 +47,7 @@ export interface IMakeNftTransferDeployParams {
  * @param params.ttl - The time-to-live (TTL) for the deploy in milliseconds. Defaults to the constant `DEFAULT_DEPLOY_TTL`.
  * @param params.tokenId - The ID of the token to transfer. Optional and used if the standard requires it.
  * @param params.tokenHash - The hash of the token to transfer. Optional and used if the standard requires it.
+ * @param params.timestamp - (Optional) The timestamp in ISO 8601 format
  *
  * @returns A deploy object representing the NFT transfer operation.
  *
@@ -73,7 +76,8 @@ export const makeNftTransferDeploy = ({
   chainName = CasperNetworkName.Mainnet,
   ttl = DEFAULT_DEPLOY_TTL,
   tokenId,
-  tokenHash
+  tokenHash,
+  timestamp
 }: IMakeNftTransferDeployParams): Deploy => {
   const senderPublicKey = PublicKey.newPublicKey(senderPublicKeyHex);
 
@@ -118,6 +122,10 @@ export const makeNftTransferDeploy = ({
   deployHeader.account = senderPublicKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+
+  if (timestamp) {
+    deployHeader.timestamp = Timestamp.fromJSON(timestamp);
+  }
 
   return Deploy.makeDeploy(deployHeader, payment, session);
 };
