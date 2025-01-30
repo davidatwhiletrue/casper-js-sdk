@@ -67,6 +67,7 @@ export class CasperNetwork {
         .from(delegatorPublicKey)
         .byHash(auctionContractHash)
         .entryPoint('delegate')
+        .payment(deployCost)
         .chainName(networkName)
         .runtimeArgs(
           Args.fromMap({
@@ -110,6 +111,7 @@ export class CasperNetwork {
         .byHash(auctionContractHash)
         .entryPoint('undelegate')
         .chainName(networkName)
+        .payment(deployCost)
         .ttl(ttl)
         .runtimeArgs(
           Args.fromMap({
@@ -154,6 +156,7 @@ export class CasperNetwork {
         .byHash(auctionContractHash)
         .entryPoint('redelegate')
         .chainName(networkName)
+        .payment(deployCost)
         .runtimeArgs(
           Args.fromMap({
             validator: CLValue.newCLPublicKey(validatorPublicKey),
