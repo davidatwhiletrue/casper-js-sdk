@@ -10,6 +10,7 @@ import {
 } from './Transaction';
 import { PublicKey } from './keypair';
 import { HexBytes } from './HexBytes';
+import { getEnumKeyByValue } from "../utils";
 
 /**
  * Represents a proof containing a public key and a signature, used for validating the authenticity of data.
@@ -180,7 +181,7 @@ export class Block {
   /**
    * A list of signature IDs that were rewarded in this block.
    */
-  @jsonArrayMember(Number, { dimensions: 2 })
+  @jsonArrayMember(Number, { dimensions: 2, name: 'rewarded_signatures' })
   public rewardedSignatures: number[][];
 
   /**
@@ -466,6 +467,12 @@ export class BlockTransaction {
     );
 
     return transactions;
+  }
+
+  public toJSON(): string {
+    return JSON.stringify({
+      [this.category.toString()]: [{[getEnumKeyByValue(TransactionVersion, this.version) ?? '']: this.hash.toJSON()}]
+    });
   }
 }
 
@@ -907,14 +914,21 @@ export class BlockBodyV2 {
    */
   @jsonMember(BlockTransaction, {
     name: 'transactions',
-    deserializer: (json: any) => BlockTransaction.fromJSON(json)
+    deserializer: (json: any) => BlockTransaction.fromJSON(json),
+    serializer: (value: BlockTransaction[]) => {
+      return {
+        ...value.reduce((acc, tx) => {
+          return {...acc, ...JSON.parse(tx.toJSON())};
+        }, {})
+      };
+    }
   })
   public transactions: BlockTransaction[];
 
   /**
    * The list of signature IDs that were rewarded in this block.
    */
-  @jsonArrayMember(Number, { dimensions: 2 })
+  @jsonArrayMember(Number, { dimensions: 2, name: 'rewarded_signatures' })
   public rewardedSignatures: number[][];
 }
 

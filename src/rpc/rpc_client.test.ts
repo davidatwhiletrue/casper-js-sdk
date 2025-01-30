@@ -6,6 +6,7 @@ import {
   ChainGetBlockResultV1Compatible,
   InfoGetTransactionResultV1Compatible
 } from './response';
+import { BlockBodyV2 } from '../types';
 
 describe('RPC Client', () => {
   it('should be able to parse getTransactionByTransactionHash response', () => {
@@ -544,6 +545,11 @@ describe('RPC Client', () => {
     const result = serializer.parse(json.result)!;
     result.rawJSON = json.result;
 
+    const ser = new TypedJSON(BlockBodyV2);
+    const blockV2BodyJson = JSON.stringify(
+      ser.toPlainJson(result.blockWithSignatures!.block.blockV2!.body)
+    );
+
     const blockResult = ChainGetBlockResult.newChainGetBlockResultFromV1Compatible(
       result,
       result.rawJSON
@@ -558,5 +564,8 @@ describe('RPC Client', () => {
     expect(
       result.blockWithSignatures?.block.blockV2?.hash?.toHex()
     ).to.deep.equal(json.result.block_with_signatures.block.Version2.hash);
+    expect(blockV2BodyJson).to.equal(
+      JSON.stringify(json.result.block_with_signatures.block.Version2.body)
+    );
   });
 });
