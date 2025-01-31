@@ -601,12 +601,36 @@ export class NodeNextUpgrade {
 }
 
 @jsonObject
-export class BlockSync {
-  @jsonMember({ name: 'historical', constructor: String })
-  historical?: string;
+export class BlockSyncStatus {
+  @jsonMember({
+    name: 'block_hash',
+    constructor: Hash,
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    },
+    preserveNull: true
+  })
+  blockHash?: Hash;
 
-  @jsonMember({ name: 'forward', constructor: String })
-  forward?: string;
+  @jsonMember({ name: 'block_height', constructor: Number, preserveNull: true })
+  blockHeight?: number;
+
+  @jsonMember({ name: 'acquisition_state', constructor: String })
+  acquisitionState?: string;
+}
+
+@jsonObject
+export class BlockSynchronizerStatus {
+  @jsonMember({ name: 'historical', constructor: BlockSyncStatus })
+  historical?: BlockSyncStatus;
+
+  @jsonMember({ name: 'forward', constructor: BlockSyncStatus })
+  forward?: BlockSyncStatus;
 }
 
 @jsonObject
@@ -630,7 +654,7 @@ export class InfoGetStatusResult {
   nextUpgrade?: NodeNextUpgrade;
 
   @jsonMember({ name: 'our_public_signing_key', constructor: String })
-  outPublicSigningKey: string;
+  ourPublicSigningKey: string;
 
   @jsonArrayMember(NodePeer, { name: 'peers' })
   peers: NodePeer[];
@@ -686,9 +710,9 @@ export class InfoGetStatusResult {
 
   @jsonMember({
     name: 'block_sync',
-    constructor: BlockSync
+    constructor: BlockSynchronizerStatus
   })
-  blockSync: BlockSync;
+  blockSync: BlockSynchronizerStatus;
 
   rawJSON: any;
 }

@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
-import { MessageAddr } from './MessageAddr';
-import { Key, KeyTypeID } from './Key';
+import { MessageAddr, Key, KeyTypeID } from '../../../types';
 
 describe('Key', () => {
   const hashAddr =

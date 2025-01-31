@@ -2,10 +2,14 @@ import { expect } from 'chai';
 import { BigNumber } from '@ethersproject/bignumber';
 import { concat } from '@ethersproject/bytes';
 
-import { CLTypeBool, CLTypeList, CLTypeUInt32 } from './cltype';
-import { toBytesU32 } from '../ByteConverters';
-import { CLValueList } from './List';
-import { CLValue } from './CLValue';
+import {
+  CLTypeBool,
+  CLTypeList,
+  CLTypeUInt32,
+  CLValueList,
+  CLValue,
+  toBytesU32
+} from '../../../types';
 
 describe('CLValueList', () => {
   let typeList: CLTypeList;

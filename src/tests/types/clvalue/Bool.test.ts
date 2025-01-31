@@ -1,8 +1,10 @@
 import { expect } from 'chai';
-import { CLValueBool } from './Bool';
-import { CLValueParser } from './Parser';
-import { CLTypeBool } from './cltype';
-import { CLValue } from './CLValue';
+import {
+  CLValueBool,
+  CLValueParser,
+  CLTypeBool,
+  CLValue
+} from '../../../types';
 
 describe('CLBool', () => {
   it('Should be able to return proper value by calling .value()', () => {

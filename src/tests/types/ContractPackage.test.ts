@@ -1,7 +1,7 @@
 import { TypedJSON } from 'typedjson';
 import { expect } from 'chai';
 
-import { ContractPackage } from './ContractPackage';
+import { ContractPackage } from '../../types';
 
 describe('ContractPackage', () => {
   const createSerializerAndParse = (json: any) => {

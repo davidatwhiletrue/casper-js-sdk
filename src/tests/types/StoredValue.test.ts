@@ -1,8 +1,11 @@
 import { TypedJSON } from 'typedjson';
 import { expect } from 'chai';
 
-import { StoredValue } from './StoredValue';
-import { DelegatorAllocation, ValidatorAllocation } from './EraInfo';
+import {
+  StoredValue,
+  DelegatorAllocation,
+  ValidatorAllocation
+} from '../../types';
 
 describe('Test StoredValue', () => {
   const json = {

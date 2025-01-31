@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
-import { Key } from './Key';
-import { BidAddrTag } from './BidAddr';
+import { Key, BidAddrTag } from '../../../types';
 
 describe('BidAddr', () => {
   it('should correctly create a new key for validator BidAddr', () => {

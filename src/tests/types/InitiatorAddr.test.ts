@@ -1,7 +1,8 @@
 import { TypedJSON, jsonMember, jsonObject } from 'typedjson';
 import { expect } from 'chai';
 import { fail } from 'assert';
-import { InitiatorAddr } from './InitiatorAddr';
+
+import { InitiatorAddr } from '../../types';
 
 @jsonObject
 class UnderTest {

@@ -1,9 +1,14 @@
 import { expect } from 'chai';
 
-import { CLValueMap } from './Map';
-import { CLTypeBool, CLTypeInt32, CLTypeMap, CLTypeString } from './cltype';
-import { CLValueParser } from './Parser';
-import { CLValue } from './CLValue';
+import {
+  CLValueMap,
+  CLTypeBool,
+  CLTypeInt32,
+  CLTypeMap,
+  CLTypeString,
+  CLValueParser,
+  CLValue
+} from '../../../types';
 
 describe('CLValue CLMap implementation', () => {
   it('Maps should return proper clType', () => {

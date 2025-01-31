@@ -3,13 +3,17 @@ import { TypedJSON } from 'typedjson';
 
 import {
   ExecutableDeployItem,
-  TransferDeployItem
-} from './ExecutableDeployItem';
-import { Deploy, DeployHeader } from './Deploy';
-import { KeyAlgorithm, PrivateKey } from './keypair';
-import { Duration, Timestamp } from './Time';
-import { Hash } from './key';
-import { dehumanizerTTL, humanizerTTL } from './SerializationUtils';
+  TransferDeployItem,
+  Deploy,
+  DeployHeader,
+  KeyAlgorithm,
+  PrivateKey,
+  Duration,
+  Timestamp,
+  Hash,
+  dehumanizerTTL,
+  humanizerTTL
+} from '../../types';
 
 describe('Deploy', () => {
   it('should stringify/parse DeployHeader correctly', async function() {

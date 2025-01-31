@@ -1,8 +1,10 @@
 import { expect } from 'chai';
-import { CLValueByteArray } from './ByteArray';
-import { CLValueParser } from './Parser';
-import { CLTypeByteArray } from './cltype';
-import { CLValue } from './CLValue';
+import {
+  CLValueByteArray,
+  CLValue,
+  CLValueParser,
+  CLTypeByteArray
+} from '../../../types';
 
 describe('CLByteArray', () => {
   it('Should be able to return proper value by calling .value()', () => {
