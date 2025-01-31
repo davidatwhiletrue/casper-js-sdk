@@ -1,7 +1,5 @@
 import { expect } from 'chai';
-import { CLValueString } from './String';
-import { CLValueParser } from './Parser';
-import { CLValue } from './CLValue';
+import { CLValueString, CLValueParser, CLValue } from '../../../types';
 
 describe('CLString', () => {
   it('CLString value() should return proper value', () => {

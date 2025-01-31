@@ -1,15 +1,15 @@
 import { expect } from 'chai';
-import { CLValueTuple2 } from './Tuple2';
-import { CLValueParser } from './Parser';
 import {
+  CLValueTuple2,
+  CLValueParser,
   CLTypeBool,
   CLTypeInt32,
   CLTypeString,
   CLTypeTuple1,
   CLTypeTuple2,
-  CLTypeTuple3
-} from './cltype';
-import { CLValue } from './CLValue';
+  CLTypeTuple3,
+  CLValue
+} from '../../../types';
 
 describe('CLTuple', () => {
   it('Tuple2 should return proper clType', () => {

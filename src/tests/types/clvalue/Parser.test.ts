@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 
-import { CLValueParser } from './Parser';
-import { CLValue } from './CLValue';
-import { CLTypeMap } from './cltype';
+import { CLValueParser, CLValue, CLTypeMap } from '../../../types';
 
 describe('CLValue Parser', () => {
   it('should parse json to StoredValue', async () => {

@@ -1,20 +1,21 @@
 import { expect } from 'chai';
 
 import {
-  ContractCallBuilder,
-  NativeDelegateBuilder,
-  NativeTransferBuilder
-} from './TransactionBuilder';
-import { PublicKey } from './keypair';
-import {
   makeAuctionManagerDeploy,
   makeCep18TransferDeploy,
   makeCsprTransferDeploy
-} from '../utils';
-import { Args } from './Args';
-import { CLValue } from './clvalue';
-import { Key, KeyTypeID } from './key';
-import { AuctionManagerEntryPoint, CasperNetworkName } from '../@types';
+} from '../../utils';
+import {
+  Args,
+  CLValue,
+  Key,
+  KeyTypeID,
+  PublicKey,
+  ContractCallBuilder,
+  NativeDelegateBuilder,
+  NativeTransferBuilder
+} from '../../types';
+import { AuctionManagerEntryPoint, CasperNetworkName } from '../../@types';
 
 describe('Test TransactionBuilder', () => {
   it('should create native CSPR transfer Deploy', () => {

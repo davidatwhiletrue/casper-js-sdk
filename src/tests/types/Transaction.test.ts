@@ -1,25 +1,28 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { assert, expect } from 'chai';
 
-import { Duration, Timestamp } from './Time';
-import { Transaction, TransactionV1 } from './Transaction';
-import { InitiatorAddr } from './InitiatorAddr';
-import { FixedMode, PricingMode } from './PricingMode';
-import { KeyAlgorithm, PrivateKey, PublicKey } from './keypair';
 import {
+  Duration,
+  Timestamp,
+  Transaction,
+  TransactionV1,
+  InitiatorAddr,
+  FixedMode,
+  PricingMode,
+  KeyAlgorithm,
+  PrivateKey,
+  PublicKey,
   SessionTarget,
   TransactionRuntime,
-  TransactionTarget
-} from './TransactionTarget';
-import {
+  TransactionTarget,
   TransactionEntryPoint,
-  TransactionEntryPointEnum
-} from './TransactionEntryPoint';
-import { TransactionScheduling } from './TransactionScheduling';
-import { Args } from './Args';
-import { CLValue } from './clvalue';
-import { TransactionV1Payload } from './TransactionV1Payload';
-import { NativeTransferBuilder } from './TransactionBuilder';
+  TransactionEntryPointEnum,
+  TransactionScheduling,
+  Args,
+  CLValue,
+  TransactionV1Payload,
+  NativeTransferBuilder
+} from '../../types';
 
 describe('Test Transaction', () => {
   it('should create a TransactionV1 with correct payload instance', async () => {

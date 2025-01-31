@@ -1,8 +1,7 @@
 import { assert, expect } from 'chai';
 import { TypedJSON } from 'typedjson';
 
-import { Transform, TransformKey, TransformKind } from './Transform';
-import { CLValue } from './clvalue';
+import { Transform, TransformKey, TransformKind, CLValue } from '../../types';
 
 describe('TransformKind JSON Parsing and CLValue Transformation', () => {
   const transformJson = {

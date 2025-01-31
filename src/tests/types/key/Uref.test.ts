@@ -1,8 +1,12 @@
 import { expect } from 'chai';
 
-import { URef, UrefAccess } from './URef';
-import { Conversions } from '../Conversions';
-import { CLValue, CLValueParser } from '../clvalue';
+import {
+  URef,
+  UrefAccess,
+  Conversions,
+  CLValue,
+  CLValueParser
+} from '../../../types';
 
 const urefAddr =
   '2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a';

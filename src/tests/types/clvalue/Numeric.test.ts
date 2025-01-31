@@ -1,13 +1,14 @@
 import { expect } from 'chai';
-import { CLValueUInt32 } from './Uint32';
-import { CLValueParser } from '../Parser';
+
 import {
   CLTypeInt64,
   CLTypeUInt32,
   CLTypeUInt64,
-  CLTypeUInt8
-} from '../cltype';
-import { CLValue } from '../CLValue';
+  CLTypeUInt8,
+  CLValueParser,
+  CLValueUInt32,
+  CLValue
+} from '../../../types';
 
 const MAX_I64 = '9223372036854775807';
 const MAX_U8 = 255;

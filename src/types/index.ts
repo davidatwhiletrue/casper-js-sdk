@@ -41,3 +41,5 @@ export * from './clvalue';
 export * from './keypair';
 export * from './ContractWasm';
 export * from './TransactionBuilder';
+export * from './ByteConverters';
+export * from './SerializationUtils';
