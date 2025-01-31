@@ -13,6 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.7-beta2] - 2025-01-31
+
+### Fixed
+
+- Un/re-delegate flow with `payment` property
+
 ### [5.0.6-beta2] - 2025-01-30
 
 ### Added
