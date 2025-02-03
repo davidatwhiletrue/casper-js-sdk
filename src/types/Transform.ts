@@ -453,9 +453,7 @@ export class TransformKind {
       'account-hash-0000000000000000000000000000000000000000000000000000000000000000';
 
     const serializer2x = new TypedJSON(RawWriteAccount2XTransform);
-    const parsed2x = serializer2x.parse(
-      this.data
-    ) as RawWriteAccount2XTransform | null;
+    const parsed2x = serializer2x.parse(this.data);
 
     if (
       parsed2x?.Write?.Account?.accountHash &&
@@ -467,9 +465,7 @@ export class TransformKind {
 
     // Fallback: attempt to parse using the 1.x transformation format.
     const serializer1x = new TypedJSON(RawWriteAccount1XTransform);
-    const parsed1x = serializer1x.parse(
-      this.data
-    ) as RawWriteAccount1XTransform | null;
+    const parsed1x = serializer1x.parse(this.data);
 
     if (!parsed1x?.WriteAccount) {
       throw new Error('Error parsing as WriteAccount');
