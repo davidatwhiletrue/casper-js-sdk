@@ -13,3 +13,8 @@ export const AuctionManagerContractHashMap: Record<
   [CasperNetworkName.DevNet]:
     '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
 };
+
+export const DEFAULT_MINIMUM_DELEGATION_AMOUNT =
+  BigInt(500) * BigInt(1_000_000_000);
+export const DEFAULT_MAXIMUM_DELEGATION_AMOUNT =
+  BigInt(1_000_000_000) * BigInt(1_000_000_000);

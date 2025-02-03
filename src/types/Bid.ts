@@ -1,7 +1,8 @@
-import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
+import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from 'typedjson';
 import { PublicKey } from './keypair';
 import { CLValueUInt512 } from './clvalue';
 import { URef } from './key';
+import { HexBytes } from './HexBytes';
 
 /**
  * Represents the details of an era where an unbonding request was initiated.
@@ -14,7 +15,10 @@ export class UnbondEra {
   @jsonMember({
     name: 'amount',
     constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   amount: CLValueUInt512;
@@ -31,7 +35,10 @@ export class UnbondEra {
   @jsonMember({
     name: 'bonding_purse',
     constructor: URef,
-    deserializer: json => URef.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   bondingPurse: URef;
@@ -49,7 +56,10 @@ export class UnbondKind {
   @jsonMember({
     name: 'Validator',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   validator: PublicKey;
@@ -60,7 +70,10 @@ export class UnbondKind {
   @jsonMember({
     name: 'DelegatedPublicKey',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   delegatedPublicKey: PublicKey;
@@ -70,11 +83,9 @@ export class UnbondKind {
    */
   @jsonMember({
     name: 'DelegatedPurse',
-    constructor: URef,
-    deserializer: json => URef.fromJSON(json),
-    serializer: value => value.toJSON()
+    constructor: String
   })
-  delegatedPurse: URef;
+  delegatedPurse: string;
 }
 
 /**
@@ -88,7 +99,10 @@ export class Unbond {
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   validatorPublicKey: PublicKey;
@@ -119,10 +133,7 @@ export class DelegationKind {
    */
   @jsonMember({
     name: 'PublicKey',
-    constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
-    serializer: value => value.toJSON(),
-    preserveNull: true
+    constructor: PublicKey
   })
   publicKey?: PublicKey;
 
@@ -131,15 +142,76 @@ export class DelegationKind {
    */
   @jsonMember({
     name: 'Purse',
-    constructor: URef,
-    deserializer: json => {
-      if (!json) return;
-      return URef.fromJSON(json);
-    },
-    serializer: value => value.toJSON(),
-    preserveNull: true
+    constructor: URef
   })
   purse?: URef;
+
+  /**
+   * Converts the DelegationKind into a hexadecimal string.
+   *
+   * The method ensures that exactly one of the fields is set. If both or neither
+   * are provided, it throws an error.
+   *
+   *
+   * @returns The hexadecimal string representation of the delegation.
+   * @throws {Error} If neither or both delegation fields are set.
+   */
+  toHex(): string {
+    const hasPublicKey =
+      this.publicKey !== undefined && this.publicKey !== null;
+    const hasPurse = this.purse !== undefined && this.purse !== null;
+
+    if (!hasPublicKey && !hasPurse) {
+      throw new Error(
+        "Invalid DelegationKind: Neither 'publicKey' nor 'purse' is set. One must be provided."
+      );
+    }
+
+    if (hasPublicKey) {
+      return this.publicKey!.toHex();
+    } else {
+      return this.purse!.toPrefixedString();
+    }
+  }
+
+  /**
+   * Deserializes a JSON object into a DelegationKind instance.
+   *
+   * This method examines the input JSON. If it contains a `PublicKey` field,
+   * it will use that to populate the `publicKey` property. Otherwise, if it
+   * contains a `Purse` field, it will decode the hex string, append the default
+   * access byte (`7`), and create a URef instance.
+   *
+   * @param json - The JSON object to deserialize.
+   * @returns A new DelegationKind instance reflecting the given JSON.
+   * @throws {Error} If the input JSON is null or undefined, or if it does not
+   *                 conform to the expected format.
+   */
+  public static fromJSON(json: any): DelegationKind {
+    if (!json) {
+      throw new Error(`Invalid JSON for DelegationKind: ${json}`);
+    }
+
+    const delegatorKind = new DelegationKind();
+
+    if (json.PublicKey !== undefined && json.PublicKey !== null) {
+      delegatorKind.publicKey = PublicKey.fromJSON(json.PublicKey);
+    } else if (json.Purse !== undefined && json.Purse !== null) {
+      /**
+       * Purse is represented not in format at uref-{uref-bytes}-{access}
+       * but just a hex bytes
+       */
+      const urefBytes = HexBytes.fromHex(json.Purse);
+      const bytesWithAccess = new Uint8Array(urefBytes.bytes.length + 1);
+      bytesWithAccess.set(urefBytes.bytes, 0);
+      bytesWithAccess[urefBytes.bytes.length] = 7;
+      delegatorKind.purse = URef.fromBytes(bytesWithAccess).result;
+    } else {
+      throw new Error('unexpected DelegatorKind format');
+    }
+
+    return delegatorKind;
+  }
 }
 
 /**
@@ -171,12 +243,32 @@ export class VestingSchedule {
 @jsonObject
 export class ValidatorBid {
   /**
+   * The public key associated with the validator.
+   */
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  validatorPublicKey: PublicKey;
+
+  /**
    * The bonding purse associated with the validator.
    */
   @jsonMember({
     name: 'bonding_purse',
     constructor: URef,
-    deserializer: json => URef.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   bondingPurse: URef;
@@ -199,7 +291,10 @@ export class ValidatorBid {
   @jsonMember({
     name: 'staked_amount',
     constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   stakedAmount: CLValueUInt512;
@@ -207,11 +302,35 @@ export class ValidatorBid {
   /**
    * Minimum and maximum amounts that can be delegated to this validator.
    */
-  @jsonMember({ name: 'minimum_delegation_amount', constructor: Number })
-  minimumDelegationAmount: number;
+  @jsonMember({
+    name: 'minimum_delegation_amount',
+    constructor: BigInt,
+    deserializer: json => {
+      if (!json) return;
+      try {
+        return BigInt(json);
+      } catch (e) {
+        throw new Error(`Could not convert minimum_delegation_amount: ${json}`);
+      }
+    },
+    serializer: value => value?.toString()
+  })
+  minimumDelegationAmount: bigint;
 
-  @jsonMember({ name: 'maximum_delegation_amount', constructor: Number })
-  maximumDelegationAmount: number;
+  @jsonMember({
+    name: 'maximum_delegation_amount',
+    constructor: BigInt,
+    deserializer: json => {
+      if (!json) return;
+      try {
+        return BigInt(json);
+      } catch (e) {
+        throw new Error(`Could not convert maximum_delegation_amount: ${json}`);
+      }
+    },
+    serializer: value => value?.toString()
+  })
+  maximumDelegationAmount: bigint;
 
   /**
    * Number of slots reserved for specific delegators
@@ -231,16 +350,71 @@ export class ValidatorBid {
  */
 @jsonObject
 export class Delegator {
+  @jsonMember({
+    name: 'bonding_purse',
+    constructor: URef,
+    deserializer: json => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  bondingPurse: URef;
+
+  @jsonMember({
+    name: 'staked_amount',
+    constructor: CLValueUInt512,
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  stakedAmount: CLValueUInt512;
+
+  @jsonMember({
+    name: 'delegator_kind',
+    constructor: DelegationKind,
+    deserializer: json => {
+      if (!json) return;
+      return DelegationKind.fromJSON(json);
+    }
+  })
+  delegatorKind: DelegationKind;
+
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  validatorPublicKey: PublicKey;
+
+  @jsonMember({ name: 'vesting_schedule', constructor: VestingSchedule })
+  vestingSchedule?: VestingSchedule;
+
   constructor(
     bondingPurse: URef,
     stakedAmount: CLValueUInt512,
-    delegatorPublicKey: PublicKey,
+    delegatorKind: DelegationKind,
     validatorPublicKey: PublicKey,
     vestingSchedule?: VestingSchedule
   ) {
     this.bondingPurse = bondingPurse;
     this.stakedAmount = stakedAmount;
-    this.delegatorPublicKey = delegatorPublicKey;
+    this.delegatorKind = delegatorKind;
     this.validatorPublicKey = validatorPublicKey;
     this.vestingSchedule = vestingSchedule;
   }
@@ -251,49 +425,52 @@ export class Delegator {
    * @returns A new `Delegator` instance.
    */
   static newDelegatorFromDelegatorV1(v1: DelegatorV1): Delegator {
+    const delegationKind = new DelegationKind();
+    delegationKind.publicKey = v1.publicKey;
+
     return new Delegator(
       v1.bondingPurse,
       v1.stakedAmount,
-      v1.publicKey,
+      delegationKind,
       v1.delegatee,
       v1.vestingSchedule
     );
   }
 
-  @jsonMember({
-    name: 'bonding_purse',
-    constructor: URef,
-    deserializer: json => URef.fromJSON(json),
-    serializer: value => value.toJSON()
-  })
-  bondingPurse: URef;
+  /**
+   * Deserializes a `Delegator` instance from JSON.
+   * @param json
+   */
+  static fromJSON(json: any): Delegator[] {
+    if (!Array.isArray(json)) {
+      throw new Error('Delegators should be an array.');
+    }
 
-  @jsonMember({
-    name: 'staked_amount',
-    constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
-    serializer: value => value.toJSON()
-  })
-  stakedAmount: CLValueUInt512;
+    if (json.length > 0 && json[0].delegator_public_key != null) {
+      return json.map((item: any) => {
+        const delegatorJson = item.delegator;
+        const serializer = new TypedJSON(Delegator);
+        const delegator = serializer.parse(delegatorJson);
 
-  @jsonMember({
-    name: 'delegator_public_key',
-    constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
-    serializer: value => value.toJSON()
-  })
-  delegatorPublicKey: PublicKey;
+        if (!delegator) {
+          throw new Error(
+            'Failed to deserialize Delegator from wrapped format.'
+          );
+        }
 
-  @jsonMember({
-    name: 'validator_public_key',
-    constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
-    serializer: value => value.toJSON()
-  })
-  validatorPublicKey: PublicKey;
-
-  @jsonMember({ name: 'vesting_schedule', constructor: VestingSchedule })
-  vestingSchedule?: VestingSchedule;
+        return delegator;
+      });
+    } else {
+      return json.map((item: any) => {
+        const delegatorV1Serializer = new TypedJSON(DelegatorV1);
+        const delegatorV1 = delegatorV1Serializer.parse(item);
+        if (!delegatorV1) {
+          throw new Error('Failed to deserialize DelegatorV1.');
+        }
+        return this.newDelegatorFromDelegatorV1(delegatorV1);
+      });
+    }
+  }
 }
 
 /**
@@ -304,8 +481,14 @@ export class Bid {
   @jsonMember({
     name: 'bonding_purse',
     constructor: URef,
-    deserializer: json => URef.fromJSON(json),
-    serializer: value => value.toJSON()
+    deserializer: json => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   bondingPurse: URef;
 
@@ -318,20 +501,38 @@ export class Bid {
   @jsonMember({
     name: 'staked_amount',
     constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
-    serializer: value => value.toJSON()
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
+    serializer: (value: CLValueUInt512) => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   stakedAmount: CLValueUInt512;
 
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
-    serializer: value => value.toJSON()
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
   })
   validatorPublicKey: PublicKey;
 
-  @jsonArrayMember(Delegator, { name: 'delegators' })
+  @jsonArrayMember(Delegator, {
+    name: 'delegators',
+    deserializer: json => {
+      if (!json) return;
+      return Delegator.fromJSON(json);
+    }
+  })
   delegators: Delegator[];
 
   @jsonMember({ name: 'vesting_schedule', constructor: VestingSchedule })
@@ -346,7 +547,10 @@ export class DelegatorV1 {
   @jsonMember({
     name: 'bonding_purse',
     constructor: URef,
-    deserializer: json => URef.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return URef.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   bondingPurse: URef;
@@ -354,7 +558,10 @@ export class DelegatorV1 {
   @jsonMember({
     name: 'staked_amount',
     constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   stakedAmount: CLValueUInt512;
@@ -362,7 +569,10 @@ export class DelegatorV1 {
   @jsonMember({
     name: 'delegatee',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   delegatee: PublicKey;
@@ -370,7 +580,10 @@ export class DelegatorV1 {
   @jsonMember({
     name: 'public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   publicKey: PublicKey;
@@ -396,7 +609,10 @@ export class Credit {
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   validatorPublicKey: PublicKey;
@@ -407,7 +623,10 @@ export class Credit {
   @jsonMember({
     name: 'amount',
     constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   amount: CLValueUInt512;
@@ -430,7 +649,10 @@ export class Bridge {
   @jsonMember({
     name: 'old_validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   oldValidatorPublicKey: PublicKey;
@@ -441,7 +663,10 @@ export class Bridge {
   @jsonMember({
     name: 'new_validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   newValidatorPublicKey: PublicKey;
@@ -466,7 +691,10 @@ export class Reservation {
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   validatorPublicKey: PublicKey;
@@ -476,7 +704,11 @@ export class Reservation {
    */
   @jsonMember({
     name: 'delegator_kind',
-    constructor: DelegationKind
+    constructor: DelegationKind,
+    deserializer: json => {
+      if (!json) return;
+      return DelegationKind.fromJSON(json);
+    }
   })
   delegatorKind: DelegationKind;
 }

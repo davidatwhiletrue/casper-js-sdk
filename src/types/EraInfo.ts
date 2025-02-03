@@ -13,7 +13,11 @@ export class DelegatorAllocation {
    */
   @jsonMember({
     name: 'delegator_kind',
-    constructor: DelegationKind
+    constructor: DelegationKind,
+    deserializer: json => {
+      if (!json) return;
+      return DelegationKind.fromJSON(json);
+    }
   })
   delegatorKind: DelegationKind;
 
