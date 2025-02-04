@@ -68,7 +68,10 @@ export class ValidatorAllocation {
   @jsonMember({
     name: 'validator_public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   validatorPublicKey: PublicKey;
@@ -79,7 +82,10 @@ export class ValidatorAllocation {
   @jsonMember({
     name: 'amount',
     constructor: CLValueUInt512,
-    deserializer: json => CLValueUInt512.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return CLValueUInt512.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   amount: CLValueUInt512;
@@ -110,7 +116,7 @@ export class SeigniorageAllocation {
   /**
    * The allocation for a delegator.
    */
-  @jsonMember({ name: 'Delegator', constructor: DelegatorAllocation })
+  @jsonMember({ name: 'DelegatorKind', constructor: DelegatorAllocation })
   delegator?: DelegatorAllocation;
 
   /**
