@@ -7,9 +7,13 @@ import {
   DeployHeader,
   Duration,
   ExecutableDeployItem,
+  NativeDelegateBuilder,
+  NativeRedelegateBuilder,
+  NativeUndelegateBuilder,
   PublicKey,
   StoredContractByHash,
-  Timestamp
+  Timestamp,
+  Transaction
 } from '../types';
 import { AuctionManagerEntryPoint, CasperNetworkName } from '../@types';
 import { AuctionManagerContractHashMap } from './constants';
@@ -129,4 +133,93 @@ export const makeAuctionManagerDeploy = ({
   }
 
   return Deploy.makeDeploy(deployHeader, payment, session);
+};
+
+interface IMakeAuctionManagerTransactionParams
+  extends IMakeAuctionManagerDeployParams {
+  casperNetworkApiVersion: string;
+}
+
+export const makeAuctionManagerTransaction = ({
+  delegatorPublicKeyHex,
+  validatorPublicKeyHex,
+  contractEntryPoint,
+  amount,
+  paymentAmount = '2500000000',
+  chainName = CasperNetworkName.Mainnet,
+  newValidatorPublicKeyHex,
+  ttl = DEFAULT_DEPLOY_TTL,
+  contractHash,
+  timestamp,
+  casperNetworkApiVersion
+}: IMakeAuctionManagerTransactionParams): Transaction => {
+  if (casperNetworkApiVersion.startsWith('2.')) {
+    switch (contractEntryPoint) {
+      case AuctionManagerEntryPoint.delegate: {
+        let txBuilder = new NativeDelegateBuilder()
+          .validator(PublicKey.fromHex(validatorPublicKeyHex))
+          .from(PublicKey.fromHex(delegatorPublicKeyHex))
+          .amount(amount)
+          .chainName(chainName)
+          .payment(Number(paymentAmount))
+          .ttl(ttl);
+
+        if (timestamp) {
+          txBuilder = txBuilder.timestamp(Timestamp.fromJSON(timestamp));
+        }
+
+        return txBuilder.build();
+      }
+      case AuctionManagerEntryPoint.undelegate: {
+        let txBuilder = new NativeUndelegateBuilder()
+          .validator(PublicKey.fromHex(validatorPublicKeyHex))
+          .from(PublicKey.fromHex(delegatorPublicKeyHex))
+          .amount(amount)
+          .chainName(chainName)
+          .payment(Number(paymentAmount))
+          .ttl(ttl);
+
+        if (timestamp) {
+          txBuilder = txBuilder.timestamp(Timestamp.fromJSON(timestamp));
+        }
+
+        return txBuilder.build();
+      }
+      case AuctionManagerEntryPoint.redelegate: {
+        if (!newValidatorPublicKeyHex) {
+          throw new Error('Missing newValidatorPublicKeyHex param');
+        }
+
+        let txBuilder = new NativeRedelegateBuilder()
+          .validator(PublicKey.fromHex(validatorPublicKeyHex))
+          .newValidator(PublicKey.fromHex(newValidatorPublicKeyHex))
+          .from(PublicKey.fromHex(delegatorPublicKeyHex))
+          .amount(amount)
+          .chainName(chainName)
+          .payment(Number(paymentAmount))
+          .ttl(ttl);
+
+        if (timestamp) {
+          txBuilder = txBuilder.timestamp(Timestamp.fromJSON(timestamp));
+        }
+
+        return txBuilder.build();
+      }
+    }
+  } else {
+    return Transaction.fromDeploy(
+      makeAuctionManagerDeploy({
+        delegatorPublicKeyHex,
+        validatorPublicKeyHex,
+        contractEntryPoint,
+        amount,
+        paymentAmount,
+        chainName,
+        newValidatorPublicKeyHex,
+        ttl,
+        contractHash,
+        timestamp
+      })
+    );
+  }
 };

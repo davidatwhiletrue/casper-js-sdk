@@ -2,6 +2,7 @@ import {
   Args,
   CLTypeUInt256,
   CLValue,
+  ContractCallBuilder,
   ContractHash,
   DEFAULT_DEPLOY_TTL,
   Deploy,
@@ -12,7 +13,8 @@ import {
   KeyTypeID,
   PublicKey,
   StoredVersionedContractByHash,
-  Timestamp
+  Timestamp,
+  Transaction
 } from '../types';
 import { CasperNetworkName, NFTTokenStandard } from '../@types';
 
@@ -77,6 +79,108 @@ export const makeNftTransferDeploy = ({
 }: IMakeNftTransferDeployParams): Deploy => {
   const senderPublicKey = PublicKey.newPublicKey(senderPublicKeyHex);
 
+  const args = getRuntimeArgsForNftTransfer({
+    nftStandard,
+    recipientPublicKeyHex,
+    senderPublicKeyHex,
+    tokenHash,
+    tokenId
+  });
+
+  const session = new ExecutableDeployItem();
+
+  session.storedVersionedContractByHash = new StoredVersionedContractByHash(
+    ContractHash.newContract(contractPackageHash),
+    'transfer',
+    args
+  );
+
+  const payment = ExecutableDeployItem.standardPayment(paymentAmount);
+
+  const deployHeader = DeployHeader.default();
+  deployHeader.account = senderPublicKey;
+  deployHeader.chainName = chainName;
+  deployHeader.ttl = new Duration(ttl);
+
+  if (timestamp) {
+    deployHeader.timestamp = Timestamp.fromJSON(timestamp);
+  }
+
+  return Deploy.makeDeploy(deployHeader, payment, session);
+};
+
+interface IMakeNftTransferTransactionParams
+  extends IMakeNftTransferDeployParams {
+  casperNetworkApiVersion: string;
+}
+
+export const makeNftTransferTransaction = ({
+  nftStandard,
+  contractPackageHash,
+  senderPublicKeyHex,
+  recipientPublicKeyHex,
+  paymentAmount,
+  chainName = CasperNetworkName.Mainnet,
+  ttl = DEFAULT_DEPLOY_TTL,
+  tokenId,
+  tokenHash,
+  timestamp,
+  casperNetworkApiVersion
+}: IMakeNftTransferTransactionParams): Transaction => {
+  if (casperNetworkApiVersion.startsWith('2.')) {
+    let txBuilder = new ContractCallBuilder()
+      .byPackageHash(contractPackageHash)
+      .from(PublicKey.fromHex(senderPublicKeyHex))
+      .chainName(chainName)
+      .ttl(ttl)
+      .payment(Number(paymentAmount))
+      .runtimeArgs(
+        getRuntimeArgsForNftTransfer({
+          nftStandard,
+          recipientPublicKeyHex,
+          senderPublicKeyHex,
+          tokenHash,
+          tokenId
+        })
+      );
+
+    if (timestamp) {
+      txBuilder = txBuilder.timestamp(Timestamp.fromJSON(timestamp));
+    }
+
+    return txBuilder.build();
+  } else {
+    return Transaction.fromDeploy(
+      makeNftTransferDeploy({
+        nftStandard,
+        contractPackageHash,
+        senderPublicKeyHex,
+        recipientPublicKeyHex,
+        paymentAmount,
+        chainName,
+        ttl,
+        tokenId,
+        tokenHash,
+        timestamp
+      })
+    );
+  }
+};
+
+export const getRuntimeArgsForNftTransfer = ({
+  nftStandard,
+  senderPublicKeyHex,
+  recipientPublicKeyHex,
+  tokenId,
+  tokenHash
+}: Pick<
+  IMakeNftTransferDeployParams,
+  | 'nftStandard'
+  | 'senderPublicKeyHex'
+  | 'recipientPublicKeyHex'
+  | 'tokenId'
+  | 'tokenHash'
+>): Args => {
   if (!(tokenId || tokenHash)) {
     throw new Error('Specify either tokenId or tokenHash to make a transfer');
   }
@@ -101,29 +205,10 @@ export const makeNftTransferDeploy = ({
   }
 
   if (!args) {
-    throw new Error('Deploy arguments error. Check provided token data');
+    throw new Error('Arguments error. Check provided token data');
   }
 
-  const session = new ExecutableDeployItem();
-
-  session.storedVersionedContractByHash = new StoredVersionedContractByHash(
-    ContractHash.newContract(contractPackageHash),
-    'transfer',
-    args
-  );
-
-  const payment = ExecutableDeployItem.standardPayment(paymentAmount);
-
-  const deployHeader = DeployHeader.default();
-  deployHeader.account = senderPublicKey;
-  deployHeader.chainName = chainName;
-  deployHeader.ttl = new Duration(ttl);
-
-  if (timestamp) {
-    deployHeader.timestamp = Timestamp.fromJSON(timestamp);
-  }
-
-  return Deploy.makeDeploy(deployHeader, payment, session);
+  return args;
 };
 
 export const getRuntimeArgsForCep78Transfer = ({
