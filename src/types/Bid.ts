@@ -120,7 +120,10 @@ export class DelegationKind {
   @jsonMember({
     name: 'PublicKey',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON(),
     preserveNull: true
   })
