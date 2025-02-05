@@ -4,219 +4,119 @@ import { expect } from 'chai';
 import {
   StoredValue,
   DelegatorAllocation,
-  ValidatorAllocation
+  ValidatorAllocation,
+  NamedEntryPoint
 } from '../../types';
+import {
+  stateItemResultV1Json,
+  stateItemResultV2Json,
+  eraInfoResultJson
+} from '../data';
 
 describe('Test StoredValue', () => {
-  const json = {
-    EraInfo: {
-      seigniorage_allocations: [
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '018b46617b2b97e633b36530f2964b3f4c15916235910a2737e83d4fa2c7fad542'
-            },
-            validator_public_key:
-              '01509254f22690fbe7fb6134be574c4fbdb060dfa699964653b99753485e518ea6',
-            amount: '2515330120214391'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01509254f22690fbe7fb6134be574c4fbdb060dfa699964653b99753485e518ea6',
-            amount: '2728720430156545'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '018b46617b2b97e633b36530f2964b3f4c15916235910a2737e83d4fa2c7fad542'
-            },
-            validator_public_key:
-              '01509254f22690fbe7fb6134be574c4fbdb060dfa699964653b99753485e518ea6',
-            amount: '109303520813010'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01509254f22690fbe7fb6134be574c4fbdb060dfa699964653b99753485e518ea6',
-            amount: '118554941151112'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '0197b79d1a1351f8fb922b9f7f556d2bbfdba5105df9eaa6caa07804c703a641ed'
-            },
-            validator_public_key:
-              '0190664e16a17594ed2d0e3c279c4cf5894e8db0da15e3b91c938562a1caae32ab',
-            amount: '8599696498056110'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '0190664e16a17594ed2d0e3c279c4cf5894e8db0da15e3b91c938562a1caae32ab',
-            amount: '9377950843219784'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '0197b79d1a1351f8fb922b9f7f556d2bbfdba5105df9eaa6caa07804c703a641ed'
-            },
-            validator_public_key:
-              '0190664e16a17594ed2d0e3c279c4cf5894e8db0da15e3b91c938562a1caae32ab',
-            amount: '285067736921916'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '0190664e16a17594ed2d0e3c279c4cf5894e8db0da15e3b91c938562a1caae32ab',
-            amount: '310701366981535'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '01a5a5b7328118681638be3e06c8749609280dba4c9daf9aeb3d3464b8839b018a'
-            },
-            validator_public_key:
-              '01c867ff3cf1d4e4e68fc00922fdcb740304def196e223091dee62012f444b9eba',
-            amount: '5976757455713484'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01c867ff3cf1d4e4e68fc00922fdcb740304def196e223091dee62012f444b9eba',
-            amount: '6492754998004464'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '01a5a5b7328118681638be3e06c8749609280dba4c9daf9aeb3d3464b8839b018a'
-            },
-            validator_public_key:
-              '01c867ff3cf1d4e4e68fc00922fdcb740304def196e223091dee62012f444b9eba',
-            amount: '162277940193805'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01c867ff3cf1d4e4e68fc00922fdcb740304def196e223091dee62012f444b9eba',
-            amount: '176125500882714'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '0106ed45915392c02b37136618372ac8dde8e0e3b8ee6190b2ca6db539b354ede4'
-            },
-            validator_public_key:
-              '01f58b94526d280881f79744effebc555426190950d5dfdd2f8aaf10ceaec010c6',
-            amount: '6111063397723576'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01f58b94526d280881f79744effebc555426190950d5dfdd2f8aaf10ceaec010c6',
-            amount: '6660504858490961'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '0106ed45915392c02b37136618372ac8dde8e0e3b8ee6190b2ca6db539b354ede4'
-            },
-            validator_public_key:
-              '01f58b94526d280881f79744effebc555426190950d5dfdd2f8aaf10ceaec010c6',
-            amount: '183204228041446'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01f58b94526d280881f79744effebc555426190950d5dfdd2f8aaf10ceaec010c6',
-            amount: '199637730476608'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '0184f6d260f4ee6869ddb36affe15456de6ae045278fa2f467bb677561ce0dad55'
-            },
-            validator_public_key:
-              '01fed662dc7f1f7af43ad785ba07a8cc05b7a96f9ee69613cfde43bc56bec1140b',
-            amount: '2170319328593039'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01fed662dc7f1f7af43ad785ba07a8cc05b7a96f9ee69613cfde43bc56bec1140b',
-            amount: '2366902069827651'
-          }
-        },
-        {
-          Delegator: {
-            delegator_kind: {
-              PublicKey:
-                '0184f6d260f4ee6869ddb36affe15456de6ae045278fa2f467bb677561ce0dad55'
-            },
-            validator_public_key:
-              '01fed662dc7f1f7af43ad785ba07a8cc05b7a96f9ee69613cfde43bc56bec1140b',
-            amount: '217749920954248'
-          }
-        },
-        {
-          Validator: {
-            validator_public_key:
-              '01fed662dc7f1f7af43ad785ba07a8cc05b7a96f9ee69613cfde43bc56bec1140b',
-            amount: '237377113583604'
-          }
+  describe('era_info', () => {
+    let storedValue: StoredValue | undefined;
+
+    beforeEach(() => {
+      storedValue = new TypedJSON(StoredValue).parse(eraInfoResultJson);
+    });
+
+    it('should parse the EraInfo JSON into a StoredValue instance', () => {
+      expect(storedValue).to.be.an.instanceOf(StoredValue);
+      expect(storedValue?.eraInfo).to.exist;
+    });
+
+    it('should contain valid seigniorage allocations', () => {
+      const allocations = storedValue?.eraInfo?.seigniorageAllocations;
+      expect(allocations, 'Seigniorage allocations should exist').to.exist;
+      expect(allocations).to.have.lengthOf(20);
+    });
+
+    it('should ensure each allocation is an instance of the correct class', () => {
+      const allocations = storedValue?.eraInfo?.seigniorageAllocations || [];
+      allocations.forEach((allocation, index) => {
+        if (allocation.delegator) {
+          expect(allocation.delegator).to.be.an.instanceOf(DelegatorAllocation);
+        } else if (allocation.validator) {
+          expect(allocation.validator).to.be.an.instanceOf(ValidatorAllocation);
+        } else {
+          expect.fail(
+            `Allocation at index ${index} does not have a delegator or validator property`
+          );
         }
-      ]
-    }
-  };
-
-  it('should parse the EraInfo JSON into a StoredValue instance', () => {
-    const parsedValue = new TypedJSON(StoredValue).parse(json);
-    expect(parsedValue).to.be.an.instanceOf(StoredValue);
-    expect(parsedValue?.eraInfo).to.exist;
+      });
+    });
   });
 
-  it('should contain valid seigniorage allocations', () => {
-    const parsedValue = new TypedJSON(StoredValue).parse(json);
-    const allocations = parsedValue?.eraInfo?.seigniorageAllocations;
-    expect(allocations).to.exist;
-    expect(allocations).to.have.lengthOf(20);
-  });
+  describe('entry_points', () => {
+    describe('error handling', () => {
+      it('should throw an error when provided with null JSON', () => {
+        expect(() => NamedEntryPoint.fromJSON(null)).to.throw(
+          'Invalid JSON provided for NamedEntryPoint'
+        );
+      });
+    });
 
-  it('should ensure each allocation is an instance of the correct class', () => {
-    const parsedValue = new TypedJSON(StoredValue).parse(json);
-    const allocations = parsedValue?.eraInfo?.seigniorageAllocations || [];
-    allocations.forEach(allocation => {
-      if (allocation.delegator) {
-        expect(allocation.delegator).to.be.an.instanceOf(DelegatorAllocation);
-      } else if (allocation.validator) {
-        expect(allocation.validator).to.be.an.instanceOf(ValidatorAllocation);
-      }
+    describe('old structure (1.x format)', () => {
+      let storedValue: StoredValue;
+      let jsonEntryPoint: any;
+
+      before(() => {
+        storedValue = new TypedJSON(StoredValue).parse(
+          stateItemResultV1Json.stored_value
+        ) as StoredValue;
+        jsonEntryPoint =
+          stateItemResultV1Json.stored_value.Contract.entry_points[0];
+      });
+
+      it('should parse and map the entry point correctly for old structure', () => {
+        const entryPoint = storedValue!.contract!.entryPoints[0]!;
+        expect(entryPoint).to.exist;
+        expect(entryPoint).to.be.instanceOf(NamedEntryPoint);
+
+        expect(entryPoint.entryPoint.ret.toJSON()).to.deep.equal(
+          jsonEntryPoint.ret
+        );
+        expect(entryPoint.entryPoint.name).to.deep.equal(jsonEntryPoint.name);
+        expect(entryPoint.entryPoint.access).to.deep.equal(
+          jsonEntryPoint.access
+        );
+        expect(entryPoint.entryPoint.entryPointType).to.deep.equal(
+          jsonEntryPoint.entry_point_type
+        );
+      });
+    });
+
+    describe('new structure (2.x format)', () => {
+      let storedValue: StoredValue;
+      let jsonEntryPoint: any;
+
+      before(() => {
+        storedValue = new TypedJSON(StoredValue).parse(
+          stateItemResultV2Json.stored_value
+        ) as StoredValue;
+        jsonEntryPoint =
+          stateItemResultV2Json.stored_value.Contract.entry_points[0];
+      });
+
+      it('should parse and map the entry point correctly for new structure', () => {
+        const entryPoint = storedValue!.contract!.entryPoints[0]!;
+        expect(entryPoint).to.exist;
+        expect(entryPoint).to.be.instanceOf(NamedEntryPoint);
+
+        expect(entryPoint.entryPoint.ret.toJSON()).to.deep.equal(
+          jsonEntryPoint.entry_point.ret
+        );
+        expect(entryPoint.entryPoint.name).to.deep.equal(
+          jsonEntryPoint.entry_point.name
+        );
+        expect(entryPoint.entryPoint.access).to.deep.equal(
+          jsonEntryPoint.entry_point.access
+        );
+        expect(entryPoint.entryPoint.entryPointType).to.deep.equal(
+          jsonEntryPoint.entry_point.entry_point_type
+        );
+      });
     });
   });
 });
