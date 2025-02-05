@@ -13,6 +13,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.8-beta2] - 2025-02-05
+
+### Added
+
+- Parsing of contract entry points between `Casper 1.5`.x and `Casper 2.0`
+- New get auction info v2 method support
+- [Transaction utils](src/utils)
+
+### Fixed
+
+- Seigniorage allocations structure from `Delegator` to `DelegatorKind`
+- Parsing write account for `Transform`
+- `info_get_status` response parsing
+
+### Changed
+
+- Renamed `RpcAddressableEntity` to `AddressableEntity` to improve naming clarity and consistency.
+
 ### [5.0.7-beta2] - 2025-01-31
 
 ### Fixed
