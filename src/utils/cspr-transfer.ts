@@ -4,8 +4,10 @@ import {
   DeployHeader,
   Duration,
   ExecutableDeployItem,
+  NativeTransferBuilder,
   PublicKey,
   Timestamp,
+  Transaction,
   TransferDeployItem
 } from '../types';
 import { CasperNetworkName } from '../@types';
@@ -88,4 +90,52 @@ export const makeCsprTransferDeploy = ({
   }
 
   return Deploy.makeDeploy(deployHeader, payment, session);
+};
+
+interface IMakeCsprTransferTransactionParams
+  extends IMakeCsprTransferDeployParams {
+  casperNetworkApiVersion: string;
+}
+
+export const makeCsprTransferTransaction = ({
+  senderPublicKeyHex,
+  recipientPublicKeyHex,
+  transferAmount,
+  chainName = CasperNetworkName.Mainnet,
+  memo,
+  ttl = DEFAULT_DEPLOY_TTL,
+  timestamp,
+  casperNetworkApiVersion
+}: IMakeCsprTransferTransactionParams): Transaction => {
+  if (casperNetworkApiVersion.startsWith('2')) {
+    let txBuilder = new NativeTransferBuilder()
+      .from(PublicKey.fromHex(senderPublicKeyHex))
+      .target(PublicKey.fromHex(recipientPublicKeyHex))
+      .amount(transferAmount)
+      .chainName(chainName)
+      .payment(100000000)
+      .ttl(ttl);
+
+    if (timestamp) {
+      txBuilder = txBuilder.timestamp(Timestamp.fromJSON(timestamp));
+    }
+
+    if (memo) {
+      txBuilder = txBuilder.id(Number(memo));
+    }
+
+    return txBuilder.build();
+  } else {
+    return Transaction.fromDeploy(
+      makeCsprTransferDeploy({
+        senderPublicKeyHex,
+        recipientPublicKeyHex,
+        transferAmount,
+        chainName,
+        memo,
+        ttl,
+        timestamp
+      })
+    );
+  }
 };
