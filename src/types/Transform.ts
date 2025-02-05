@@ -96,7 +96,10 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteAccount, otherwise `false`.
    */
   public isWriteAccount(): boolean {
-    return this.isTransformation('Write') && this.isTransformation('Account');
+    return (
+      this.isTransformation('WriteAccount') ||
+      (this.isTransformation('Write') && this.isTransformation('Account'))
+    );
   }
 
   /**
