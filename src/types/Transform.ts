@@ -17,7 +17,8 @@ import {
   RawDataMessageTopic,
   RawDataNamedKey,
   RawUInt512,
-  RawWriteAccount,
+  RawWriteAccount1XTransform,
+  RawWriteAccount2XTransform,
   RawWriteCLValue,
   RawWriteCLValueV2,
   RawWriteContract,
@@ -95,7 +96,10 @@ export class TransformKind {
    * @returns `true` if the transformation is a WriteAccount, otherwise `false`.
    */
   public isWriteAccount(): boolean {
-    return this.isTransformation('WriteAccount');
+    return (
+      this.isTransformation('WriteAccount') ||
+      (this.isTransformation('Write') && this.isTransformation('Account'))
+    );
   }
 
   /**
@@ -419,21 +423,59 @@ export class TransformKind {
   }
 
   /**
-   * Attempts to parse the transformation as a WriteDeployInfo.
+   * Attempts to parse the transformation data as a WriteAccount transformation.
    *
-   * @returns A `DeployInfo` object if the data matches, otherwise `throw an error`.
+   * This method supports two JSON formats:
+   *
+   * - **2.x Format:**
+   *   ```json
+   *   {
+   *     "Write": {
+   *       "Account": {
+   *         "account_hash": "..."
+   *       }
+   *     }
+   *   }
+   *   ```
+   *   If the parsed `accountHash` is not equal to the zero account hash, this value is returned.
+   *
+   * - **1.x Format:**
+   *   ```json
+   *   {
+   *     "WriteAccount": "..."
+   *   }
+   *   ```
+   *   If the 2.x format is not matched or the parsed account hash equals the zero hash,
+   *   the method falls back to this format.
+   *
+   * @returns The parsed `AccountHash`.
+   * @throws Error if the transformation data cannot be parsed as a valid WriteAccount.
    */
   public parseAsWriteAccount(): AccountHash {
-    const serializer = new TypedJSON(RawWriteAccount);
-    const jsonRes = serializer.parse(this.data);
+    const ZERO_ACCOUNT_HASH =
+      'account-hash-0000000000000000000000000000000000000000000000000000000000000000';
 
-    if (!jsonRes || !jsonRes.WriteAccount) {
-      throw new Error(`Error parsing as WriteAccount`);
+    const serializer2x = new TypedJSON(RawWriteAccount2XTransform);
+    const parsed2x = serializer2x.parse(this.data);
+
+    if (
+      parsed2x?.Write?.Account?.accountHash &&
+      parsed2x.Write.Account.accountHash.toPrefixedString() !==
+        ZERO_ACCOUNT_HASH
+    ) {
+      return parsed2x.Write.Account.accountHash;
     }
 
-    return jsonRes.WriteAccount;
-  }
+    // Fallback: attempt to parse using the 1.x transformation format.
+    const serializer1x = new TypedJSON(RawWriteAccount1XTransform);
+    const parsed1x = serializer1x.parse(this.data);
 
+    if (!parsed1x?.WriteAccount) {
+      throw new Error('Error parsing as WriteAccount');
+    }
+
+    return parsed1x.WriteAccount;
+  }
   /**
    * Attempts to parse the transformation as a WriteDeployInfo.
    *
@@ -506,6 +548,28 @@ export class TransformKind {
   }
 
   /**
+   * Recursively checks if any key in the provided object (including nested objects)
+   * contains the specified name.
+   *
+   * @param obj - The object to search through.
+   * @param name - The transformation name to search for within the keys.
+   * @returns true if a key containing the name is found; otherwise, false.
+   */
+  private containsKeyRecursive(obj: any, name: string): boolean {
+    for (const key in obj) {
+      if (key.includes(name)) {
+        return true;
+      }
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if (this.containsKeyRecursive(obj[key], name)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * Checks if `TransformKind` has the transformation specified by name.
    *
    * @param `name` - transformation name (aka WriteTransfer)
@@ -514,10 +578,9 @@ export class TransformKind {
   public isTransformation(name: string): boolean {
     if (typeof this.data === 'string') {
       return this.data.includes(name);
-    } else if (typeof this.data === 'object') {
-      return Object.keys(this.data).some(key => key.includes(name));
+    } else if (typeof this.data === 'object' && this.data !== null) {
+      return this.containsKeyRecursive(this.data, name);
     }
-
     return false;
   }
 }

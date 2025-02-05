@@ -1,6 +1,7 @@
 import {
   Args,
   CLValue,
+  ContractCallBuilder,
   ContractHash,
   DEFAULT_DEPLOY_TTL,
   Deploy,
@@ -11,7 +12,8 @@ import {
   KeyTypeID,
   PublicKey,
   StoredVersionedContractByHash,
-  Timestamp
+  Timestamp,
+  Transaction
 } from '../types';
 import { CasperNetworkName } from '../@types';
 
@@ -105,4 +107,63 @@ export const makeCep18TransferDeploy = ({
   }
 
   return Deploy.makeDeploy(deployHeader, payment, session);
+};
+
+interface IMakeCep18TransferTransactionParams
+  extends IMakeCep18TransferDeployParams {
+  casperNetworkApiVersion: string;
+}
+
+export const makeCep18TransferTransaction = ({
+  contractPackageHash,
+  senderPublicKeyHex,
+  recipientPublicKeyHex,
+  transferAmount,
+  paymentAmount,
+  chainName = CasperNetworkName.Mainnet,
+  ttl = DEFAULT_DEPLOY_TTL,
+  timestamp,
+  casperNetworkApiVersion
+}: IMakeCep18TransferTransactionParams): Transaction => {
+  if (casperNetworkApiVersion.startsWith('2.')) {
+    let txBuilder = new ContractCallBuilder()
+      .byPackageHash(contractPackageHash)
+      .entryPoint('transfer')
+      .from(PublicKey.fromHex(senderPublicKeyHex))
+      .chainName(chainName)
+      .payment(Number(paymentAmount))
+      .ttl(ttl)
+      .runtimeArgs(
+        Args.fromMap({
+          recipient: CLValue.newCLKey(
+            Key.createByType(
+              PublicKey.fromHex(recipientPublicKeyHex)
+                .accountHash()
+                .toPrefixedString(),
+              KeyTypeID.Account
+            )
+          ),
+          amount: CLValue.newCLUInt256(transferAmount)
+        })
+      );
+
+    if (timestamp) {
+      txBuilder = txBuilder.timestamp(Timestamp.fromJSON(timestamp));
+    }
+
+    return txBuilder.build();
+  } else {
+    return Transaction.fromDeploy(
+      makeCep18TransferDeploy({
+        contractPackageHash,
+        senderPublicKeyHex,
+        recipientPublicKeyHex,
+        transferAmount,
+        paymentAmount,
+        chainName,
+        ttl,
+        timestamp
+      })
+    );
+  }
 };

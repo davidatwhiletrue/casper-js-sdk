@@ -117,6 +117,7 @@ abstract class TransactionBuilder<T extends TransactionBuilder<T>> {
     const deployHeader = DeployHeader.default();
     deployHeader.account = this._initiatorAddr.publicKey;
     deployHeader.chainName = this._chainName;
+    deployHeader.timestamp = this._timestamp;
     deployHeader.ttl = this._ttl;
 
     return deployHeader;

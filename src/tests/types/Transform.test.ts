@@ -2,6 +2,11 @@ import { assert, expect } from 'chai';
 import { TypedJSON } from 'typedjson';
 
 import { Transform, TransformKey, TransformKind, CLValue } from '../../types';
+import {
+  writeAccountV1Json,
+  writeAccountV2Json,
+  writeContractV2Json
+} from '../data';
 
 describe('TransformKind JSON Parsing and CLValue Transformation', () => {
   const transformJson = {
@@ -230,478 +235,47 @@ describe('TransformKind JSON Parsing and CLValue Transformation', () => {
   });
 
   it('should correctly parse and match the Contract V2', () => {
-    const transformContractV2Json = {
-      key:
-        'hash-94b21891ae273b17eeb6a1899a52ab952bcc4da2e19626563f88d6cf7ab6a2bd',
-      kind: {
-        Write: {
-          Contract: {
-            contract_package_hash:
-              'contract-package-b71675d8cf701d9bc584cb5152706873110e5158b004fb966ed28be49c66b39a',
-            contract_wasm_hash:
-              'contract-wasm-a9fb7ec293465829432a8e543a2c2d5bba6d622c512af7e0cf204f6f536a1cbf',
-            named_keys: [
-              {
-                name: '__events',
-                key:
-                  'uref-821900c35dcc7bedfa01d4901621990552d80870228b4d9a37e47364ae7d12a6-007'
-              },
-              {
-                name: '__events_ces_version',
-                key:
-                  'uref-993d25549280a839ef18c81d1211e86766ff29e7b7685912bc0e4e4a4964d886-007'
-              },
-              {
-                name: '__events_length',
-                key:
-                  'uref-c640355c74023b0eb6025d376285235767ffe73d9be57d83576e647aa720eacc-007'
-              },
-              {
-                name: '__events_schema',
-                key:
-                  'uref-5bf9cb0884874cc7d80e5bcab54c5100bfc8773908b85099ab569b32bd6bd72d-007'
-              },
-              {
-                name: 'state',
-                key:
-                  'uref-c5ae802a50fb72194d3c543805bab1a612186bdf2cc5d62758595694a1928fff-007'
-              }
-            ],
-            entry_points: [
-              {
-                name: 'add_to_the_pool',
-                entry_point: {
-                  name: 'add_to_the_pool',
-                  args: [],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'allowance',
-                entry_point: {
-                  name: 'allowance',
-                  args: [
-                    {
-                      name: 'owner',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'spender',
-                      cl_type: 'Key'
-                    }
-                  ],
-                  ret: 'U256',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'approve',
-                entry_point: {
-                  name: 'approve',
-                  args: [
-                    {
-                      name: 'spender',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'amount',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'balance_of',
-                entry_point: {
-                  name: 'balance_of',
-                  args: [
-                    {
-                      name: 'account',
-                      cl_type: 'Key'
-                    }
-                  ],
-                  ret: 'U256',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'burn',
-                entry_point: {
-                  name: 'burn',
-                  args: [
-                    {
-                      name: 'owner',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'amount',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'change_security',
-                entry_point: {
-                  name: 'change_security',
-                  args: [
-                    {
-                      name: 'admin_list',
-                      cl_type: {
-                        List: 'Key'
-                      }
-                    },
-                    {
-                      name: 'minter_list',
-                      cl_type: {
-                        List: 'Key'
-                      }
-                    },
-                    {
-                      name: 'none_list',
-                      cl_type: {
-                        List: 'Key'
-                      }
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'claim',
-                entry_point: {
-                  name: 'claim',
-                  args: [
-                    {
-                      name: 'receipt_id',
-                      cl_type: 'U32'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'decimals',
-                entry_point: {
-                  name: 'decimals',
-                  args: [],
-                  ret: 'U8',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'decrease_allowance',
-                entry_point: {
-                  name: 'decrease_allowance',
-                  args: [
-                    {
-                      name: 'spender',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'decr_by',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'grant_role',
-                entry_point: {
-                  name: 'grant_role',
-                  args: [
-                    {
-                      name: 'role',
-                      cl_type: {
-                        ByteArray: 32
-                      }
-                    },
-                    {
-                      name: 'address',
-                      cl_type: 'Key'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'has_role',
-                entry_point: {
-                  name: 'has_role',
-                  args: [
-                    {
-                      name: 'role',
-                      cl_type: {
-                        ByteArray: 32
-                      }
-                    },
-                    {
-                      name: 'address',
-                      cl_type: 'Key'
-                    }
-                  ],
-                  ret: 'Bool',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'increase_allowance',
-                entry_point: {
-                  name: 'increase_allowance',
-                  args: [
-                    {
-                      name: 'spender',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'inc_by',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'init',
-                entry_point: {
-                  name: 'init',
-                  args: [
-                    {
-                      name: 'validator_address',
-                      cl_type: 'PublicKey'
-                    },
-                    {
-                      name: 'claim_time',
-                      cl_type: 'U64'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: {
-                    Groups: ['constructor_group']
-                  },
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'mint',
-                entry_point: {
-                  name: 'mint',
-                  args: [
-                    {
-                      name: 'owner',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'amount',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'name',
-                entry_point: {
-                  name: 'name',
-                  args: [],
-                  ret: 'String',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'remove_from_the_pool',
-                entry_point: {
-                  name: 'remove_from_the_pool',
-                  args: [
-                    {
-                      name: 'amount',
-                      cl_type: 'U512'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'revoke_role',
-                entry_point: {
-                  name: 'revoke_role',
-                  args: [
-                    {
-                      name: 'role',
-                      cl_type: {
-                        ByteArray: 32
-                      }
-                    },
-                    {
-                      name: 'address',
-                      cl_type: 'Key'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'stake',
-                entry_point: {
-                  name: 'stake',
-                  args: [],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'staked_cspr',
-                entry_point: {
-                  name: 'staked_cspr',
-                  args: [],
-                  ret: 'U512',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'symbol',
-                entry_point: {
-                  name: 'symbol',
-                  args: [],
-                  ret: 'String',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'total_supply',
-                entry_point: {
-                  name: 'total_supply',
-                  args: [],
-                  ret: 'U256',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'transfer',
-                entry_point: {
-                  name: 'transfer',
-                  args: [
-                    {
-                      name: 'recipient',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'amount',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'transfer_from',
-                entry_point: {
-                  name: 'transfer_from',
-                  args: [
-                    {
-                      name: 'owner',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'recipient',
-                      cl_type: 'Key'
-                    },
-                    {
-                      name: 'amount',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'unstake',
-                entry_point: {
-                  name: 'unstake',
-                  args: [
-                    {
-                      name: 'scspr_amount',
-                      cl_type: 'U256'
-                    }
-                  ],
-                  ret: 'U32',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              },
-              {
-                name: 'withdraw_from_the_pool',
-                entry_point: {
-                  name: 'withdraw_from_the_pool',
-                  args: [
-                    {
-                      name: 'amount',
-                      cl_type: 'U512'
-                    }
-                  ],
-                  ret: 'Unit',
-                  access: 'Public',
-                  entry_point_type: 'Called'
-                }
-              }
-            ],
-            protocol_version: '2.0.0'
-          }
-        }
-      }
-    };
-
     const serializer = new TypedJSON(Transform);
-    const jsonRes = serializer.parse(transformContractV2Json);
+    const jsonRes = serializer.parse(writeContractV2Json);
     const transformKind = jsonRes?.kind;
     const isWriteContract = transformKind?.isWriteContract();
     const contract = transformKind?.parseAsWriteContract();
 
     expect(isWriteContract).to.be.true;
     expect(contract?.contractPackageHash.toPrefixedString()).to.deep.equal(
-      transformContractV2Json.kind.Write.Contract.contract_package_hash
+      writeContractV2Json.kind.Write.Contract.contract_package_hash
     );
     expect(contract?.contractWasmHash.toPrefixedWasmString()).to.deep.equal(
-      transformContractV2Json.kind.Write.Contract.contract_wasm_hash
+      writeContractV2Json.kind.Write.Contract.contract_wasm_hash
     );
     expect(contract?.entryPoints[0].entryPoint).to.not.be.empty;
+  });
+
+  it('should correctly parse and match the Write account V1', () => {
+    const serializer = new TypedJSON(TransformKey);
+    const jsonRes = serializer.parse(writeAccountV1Json);
+
+    const isWriteAccount = jsonRes?.transform?.isWriteAccount();
+    const writeAccount = jsonRes?.transform?.parseAsWriteAccount();
+
+    expect(writeAccount).to.be.not.undefined;
+    expect(isWriteAccount).to.be.true;
+    expect(writeAccount?.toPrefixedString()).to.deep.equal(
+      writeAccountV1Json.transform.WriteAccount
+    );
+  });
+
+  it('should correctly parse and match the Write account V2', () => {
+    const serializer = new TypedJSON(Transform);
+    const jsonRes = serializer.parse(writeAccountV2Json);
+
+    const isWriteAccount = jsonRes?.kind?.isWriteAccount();
+    const writeAccount = jsonRes?.kind?.parseAsWriteAccount();
+
+    expect(isWriteAccount).to.be.not.undefined;
+    expect(isWriteAccount).to.be.true;
+    expect(writeAccount?.toPrefixedString()).to.deep.equal(
+      writeAccountV2Json.kind.Write.Account.account_hash
+    );
   });
 });

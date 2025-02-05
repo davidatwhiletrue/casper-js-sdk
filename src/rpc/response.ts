@@ -35,7 +35,8 @@ import {
   PublicKey,
   CLValueUInt512,
   AuctionStateV1,
-  AuctionStateV2
+  AuctionStateV2,
+  AddressableEntity
 } from '../types';
 
 @jsonObject
@@ -115,8 +116,8 @@ export class StateGetAccountInfo {
 
 @jsonObject
 export class RpcAddressableEntity {
-  @jsonMember({ name: 'entity', constructor: RpcAddressableEntity })
-  entity: RpcAddressableEntity;
+  @jsonMember({ name: 'entity', constructor: AddressableEntity })
+  entity: AddressableEntity;
 
   @jsonArrayMember(NamedKey, { name: 'named_keys' })
   namedKeys: NamedKey[];
