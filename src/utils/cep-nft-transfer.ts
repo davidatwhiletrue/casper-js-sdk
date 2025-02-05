@@ -130,6 +130,7 @@ export const makeNftTransferTransaction = ({
   if (casperNetworkApiVersion.startsWith('2.')) {
     let txBuilder = new ContractCallBuilder()
       .byPackageHash(contractPackageHash)
+      .entryPoint('transfer')
       .from(PublicKey.fromHex(senderPublicKeyHex))
       .chainName(chainName)
       .ttl(ttl)
