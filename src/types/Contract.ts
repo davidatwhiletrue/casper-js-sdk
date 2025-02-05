@@ -33,7 +33,13 @@ export class Contract {
   /**
    * The list of entry points (functions) that can be called on this contract.
    */
-  @jsonArrayMember(NamedEntryPoint, { name: 'entry_points' })
+  @jsonArrayMember(NamedEntryPoint, {
+    name: 'entry_points',
+    deserializer: json => {
+      if (!json) return;
+      return json.map((it: NamedEntryPoint) => NamedEntryPoint.fromJSON(it));
+    }
+  })
   entryPoints: NamedEntryPoint[];
 
   /**

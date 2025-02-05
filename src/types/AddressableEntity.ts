@@ -1,4 +1,4 @@
-import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
+import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
 import { AssociatedKey } from './Account';
 import { EntryPointV1 } from './EntryPoint';
 import { AccountHash, URef } from './key';
@@ -143,8 +143,29 @@ export class NamedEntryPoint {
   entryPoint: EntryPointV1;
 
   /**
-   * The name of the entry point, used for identifying and invoking it.
+   * Creates a new NamedEntryPoint instance from JSON.
+   *
+   * This method supports both JSON variants:
+   *  - 1.x: { name, args, ret, access, entry_point_type, ... }
+   *  - 2.x: { entry_point: { name, args, ret, access, entry_point_type, ... } }
+   *
+   * @param json The raw JSON to parse.
+   * @returns A new instance of NamedEntryPoint.
    */
-  @jsonMember({ name: 'name', constructor: String })
-  name: string;
+  public static fromJSON(json: any): NamedEntryPoint {
+    if (!json) {
+      throw new Error('Invalid JSON provided for NamedEntryPoint');
+    }
+
+    const normalizedJSON = json.entry_point ? json : { entry_point: json };
+    const typedJSON = new TypedJSON(NamedEntryPoint);
+
+    const parsed = typedJSON.parse(normalizedJSON);
+
+    if (!parsed) {
+      throw new Error('Failed to parse NamedEntryPoint JSON');
+    }
+
+    return parsed;
+  }
 }
