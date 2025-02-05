@@ -331,26 +331,6 @@ export class RawWriteDeployInfo {
 }
 
 /**
- * Represents raw write data for account hash.
- */
-@jsonObject
-export class RawWriteAccount {
-  /**
-   * The account information in the write operation.
-   */
-  @jsonMember({
-    constructor: AccountHash,
-    name: 'WriteAccount',
-    deserializer: json => {
-      if (!json) return;
-      return AccountHash.fromJSON(json);
-    },
-    serializer: (value: AccountHash) => value.toJSON()
-  })
-  WriteAccount?: AccountHash;
-}
-
-/**
  * Represents raw write data for a CLValue.
  * Used for serializing and deserializing the arguments of a CLValue write operation.
  */
@@ -444,4 +424,77 @@ export class RawWriteContractPackage {
     constructor: WriteContractPackage
   })
   Write?: WriteContractPackage;
+}
+
+/**
+ * Represents the inner Account object in a 2.x Write transformation.
+ */
+@jsonObject
+export class RawWriteAccount2XTransformAccount {
+  @jsonMember({
+    name: 'account_hash',
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      return value.toJSON();
+    }
+  })
+  accountHash: AccountHash;
+}
+
+/**
+ * Represents the nested Write.Account object in a 2.x Write transformation.
+ */
+@jsonObject
+export class RawWriteAccount2XTransformWrite {
+  @jsonMember({
+    name: 'Account',
+    constructor: RawWriteAccount2XTransformAccount
+  })
+  Account: RawWriteAccount2XTransformAccount;
+}
+
+/**
+ * Represents a 2.x Write transformation.
+ *
+ * Expected JSON shape:
+ * {
+ *   "Write": {
+ *     "Account": {
+ *       "account_hash": "..."
+ *     }
+ *   }
+ * }
+ */
+@jsonObject
+export class RawWriteAccount2XTransform {
+  @jsonMember({ name: 'Write', constructor: RawWriteAccount2XTransformWrite })
+  Write: RawWriteAccount2XTransformWrite;
+}
+
+/**
+ * Represents a 1.x Write transformation.
+ *
+ * Expected JSON shape:
+ * {
+ *   "WriteAccount": "..."
+ * }
+ */
+@jsonObject
+export class RawWriteAccount1XTransform {
+  @jsonMember({
+    name: 'WriteAccount',
+    constructor: AccountHash,
+    deserializer: json => {
+      if (!json) return;
+      return AccountHash.fromJSON(json);
+    },
+    serializer: (value: AccountHash) => {
+      return value.toJSON();
+    }
+  })
+  WriteAccount: AccountHash;
 }
