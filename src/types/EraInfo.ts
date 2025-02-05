@@ -1,4 +1,4 @@
-import { jsonArrayMember, jsonMember, jsonObject } from 'typedjson';
+import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from 'typedjson';
 import { PublicKey } from './keypair';
 import { CLValueUInt512 } from './clvalue';
 import { DelegationKind } from './Bid';
@@ -101,6 +101,64 @@ export class ValidatorAllocation {
 }
 
 /**
+ * Represents the JSON structure when the key "Delegator" is present.
+ */
+@jsonObject
+export class DelegatorData {
+  @jsonMember({
+    name: 'delegator_public_key',
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => value.toJSON()
+  })
+  delegatorPublicKey?: PublicKey;
+
+  @jsonMember({
+    name: 'validator_public_key',
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => {
+      if (!value) return;
+      return value.toJSON();
+    }
+  })
+  validatorPublicKey: PublicKey;
+
+  @jsonMember({
+    name: 'amount',
+    constructor: CLValueUInt512,
+    deserializer: json => CLValueUInt512.fromJSON(json),
+    serializer: value => value.toJSON()
+  })
+  amount: CLValueUInt512;
+}
+
+/**
+ * Temporary helper class to match the overall JSON structure.
+ * The JSON may contain one of the following keys:
+ * - "Validator" (a ValidatorAllocation)
+ * - "DelegatorKind" (a DelegatorAllocation)
+ * - "Delegator" (a DelegatorData, which will be converted to a DelegatorAllocation)
+ */
+@jsonObject
+class TempSeigniorageAllocation {
+  @jsonMember({ name: 'Validator', constructor: ValidatorAllocation })
+  validator?: ValidatorAllocation;
+
+  @jsonMember({ name: 'DelegatorKind', constructor: DelegatorAllocation })
+  delegatorKind?: DelegatorAllocation;
+
+  @jsonMember({ name: 'Delegator', constructor: DelegatorData })
+  delegator?: DelegatorData;
+}
+
+/**
  * Class representing the seigniorage allocation for a validator and delegator.
  */
 @jsonObject
@@ -130,6 +188,49 @@ export class SeigniorageAllocation {
     this.validator = validator;
     this.delegator = delegator;
   }
+
+  /**
+   * Custom deserialization from a JSON.
+   *
+   * The JSON is expected to have one of the following structures:
+   * - A "Delegator" key with an object containing "delegator_public_key", "validator_public_key", and "amount".
+   * - A "Validator" key with an object matching ValidatorAllocation.
+   * - A "DelegatorKind" key with an object matching DelegatorAllocation.
+   *
+   * @param json A JSON.
+   * @returns A new SeigniorageAllocation instance.
+   * @throws Error if the JSON is empty, invalid, or does not match any expected structure.
+   */
+  public static fromJSON(json: any): SeigniorageAllocation {
+    if (!json) {
+      throw new Error(`Invalid JSON for SeigniorageAllocation: ${json}`);
+    }
+
+    const temp = new TypedJSON(TempSeigniorageAllocation).parse(json);
+    if (!temp) {
+      throw new Error('Failed to parse JSON');
+    }
+
+    const allocation = new SeigniorageAllocation();
+
+    if (temp?.delegator) {
+      const delegatorKind = new DelegationKind();
+      delegatorKind.publicKey = temp?.delegator?.delegatorPublicKey;
+      allocation.delegator = new DelegatorAllocation(
+        delegatorKind,
+        temp?.delegator?.validatorPublicKey,
+        temp?.delegator?.amount
+      );
+    } else if (temp.validator) {
+      allocation.validator = temp.validator;
+    } else if (temp.delegatorKind) {
+      allocation.delegator = temp.delegatorKind;
+    } else {
+      throw new Error('incorrect SeigniorageAllocation format structure');
+    }
+
+    return allocation;
+  }
 }
 
 /**
@@ -140,7 +241,15 @@ export class EraInfo {
   /**
    * A list of seigniorage allocations for validators and delegators in the era.
    */
-  @jsonArrayMember(SeigniorageAllocation, { name: 'seigniorage_allocations' })
+  @jsonArrayMember(SeigniorageAllocation, {
+    name: 'seigniorage_allocations',
+    deserializer: json => {
+      if (!json) return;
+      return json.map((it: SeigniorageAllocation) =>
+        SeigniorageAllocation.fromJSON(it)
+      );
+    }
+  })
   seigniorageAllocations: SeigniorageAllocation[];
 
   /**
