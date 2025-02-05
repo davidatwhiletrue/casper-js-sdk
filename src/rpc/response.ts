@@ -34,6 +34,8 @@ import {
   Hash,
   PublicKey,
   CLValueUInt512,
+  AuctionStateV1,
+  AuctionStateV2,
   AddressableEntity
 } from '../types';
 
@@ -59,6 +61,28 @@ export class StateGetAuctionInfoResult {
 
   @jsonMember({ name: 'auction_state', constructor: AuctionState })
   auctionState: AuctionState;
+
+  rawJSON?: any;
+}
+
+@jsonObject
+export class StateGetAuctionInfoV1Result {
+  @jsonMember({ name: 'api_version', constructor: String })
+  version: string;
+
+  @jsonMember({ name: 'auction_state', constructor: AuctionStateV1 })
+  auctionState: AuctionStateV1;
+
+  rawJSON?: any;
+}
+
+@jsonObject
+export class StateGetAuctionInfoV2Result {
+  @jsonMember({ name: 'api_version', constructor: String })
+  version: string;
+
+  @jsonMember({ name: 'auction_state', constructor: AuctionStateV2 })
+  auctionState: AuctionStateV2;
 
   rawJSON?: any;
 }

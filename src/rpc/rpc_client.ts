@@ -24,6 +24,8 @@ import {
   RpcResponse,
   StateGetAccountInfo,
   StateGetAuctionInfoResult,
+  StateGetAuctionInfoV1Result,
+  StateGetAuctionInfoV2Result,
   StateGetBalanceResult,
   StateGetDictionaryResult,
   StateGetEntityResult,
@@ -61,7 +63,8 @@ import {
   Deploy,
   PublicKey,
   Hash,
-  Transaction
+  Transaction,
+  AuctionState
 } from '../types';
 import { HttpError } from './error';
 
@@ -773,9 +776,45 @@ export class RpcClient implements IClient {
   }
 
   async getLatestAuctionInfo(): Promise<StateGetAuctionInfoResult> {
+    try {
+      const auctionInfoV2 = await this.getLatestAuctionInfoV2();
+      const auctionInfoResult = new StateGetAuctionInfoResult();
+      auctionInfoResult.auctionState = AuctionState.fromV2(
+        auctionInfoV2.auctionState
+      );
+      auctionInfoResult.version = auctionInfoV2.version;
+      auctionInfoResult.rawJSON = auctionInfoV2.rawJSON;
+      return auctionInfoResult;
+    } catch (err) {
+      const errorMessage = err?.message || '';
+      if (!errorMessage.includes('Method not found')) {
+        throw err;
+      }
+
+      const auctionInfoV1 = await this.getLatestAuctionInfoV1();
+      const auctionInfoResult = new StateGetAuctionInfoResult();
+      auctionInfoResult.auctionState = AuctionState.fromV1(
+        auctionInfoV1.auctionState
+      );
+      auctionInfoResult.version = auctionInfoV1.version;
+      auctionInfoResult.rawJSON = auctionInfoV1.rawJSON;
+      return auctionInfoResult;
+    }
+  }
+
+  async getLatestAuctionInfoV1(): Promise<StateGetAuctionInfoV1Result> {
     const resp = await this.processRequest(Method.GetAuctionInfo, null);
 
-    const result = this.parseResponse(StateGetAuctionInfoResult, resp.result);
+    const result = this.parseResponse(StateGetAuctionInfoV1Result, resp.result);
+    result.rawJSON = resp.result;
+
+    return result;
+  }
+
+  async getLatestAuctionInfoV2(): Promise<StateGetAuctionInfoV2Result> {
+    const resp = await this.processRequest(Method.GetAuctionInfoV2, null);
+
+    const result = this.parseResponse(StateGetAuctionInfoV2Result, resp.result);
     result.rawJSON = resp.result;
 
     return result;
@@ -784,6 +823,31 @@ export class RpcClient implements IClient {
   async getAuctionInfoByHash(
     blockHash: string
   ): Promise<StateGetAuctionInfoResult> {
+    try {
+      const resV2 = await this.getAuctionInfoV2ByHash(blockHash);
+      const result = new StateGetAuctionInfoResult();
+      result.auctionState = AuctionState.fromV2(resV2.auctionState);
+      result.version = resV2.version;
+      result.rawJSON = resV2.rawJSON;
+      return result;
+    } catch (err) {
+      const errorMessage = err?.message || '';
+      if (!errorMessage.includes('Method not found')) {
+        throw err;
+      }
+
+      const resV1 = await this.getAuctionInfoV1ByHash(blockHash);
+      const result = new StateGetAuctionInfoResult();
+      result.auctionState = AuctionState.fromV1(resV1.auctionState);
+      result.version = resV1.version;
+      result.rawJSON = resV1.rawJSON;
+      return result;
+    }
+  }
+
+  async getAuctionInfoV1ByHash(
+    blockHash: string
+  ): Promise<StateGetAuctionInfoV1Result> {
     const serializer = new TypedJSON(ParamBlockIdentifier);
     const blockIdentifierParam = ParamBlockIdentifier.byHash(blockHash);
 
@@ -792,7 +856,24 @@ export class RpcClient implements IClient {
       serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
-    const result = this.parseResponse(StateGetAuctionInfoResult, resp.result);
+    const result = this.parseResponse(StateGetAuctionInfoV1Result, resp.result);
+    result.rawJSON = resp.result;
+
+    return result;
+  }
+
+  async getAuctionInfoV2ByHash(
+    blockHash: string
+  ): Promise<StateGetAuctionInfoV2Result> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHash(blockHash);
+
+    const resp = await this.processRequest(
+      Method.GetAuctionInfoV2,
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
+    );
+
+    const result = this.parseResponse(StateGetAuctionInfoV2Result, resp.result);
     result.rawJSON = resp.result;
 
     return result;
@@ -801,6 +882,31 @@ export class RpcClient implements IClient {
   async getAuctionInfoByHeight(
     height: number
   ): Promise<StateGetAuctionInfoResult> {
+    try {
+      const resV2 = await this.getAuctionInfoV2ByHeight(height);
+      const result = new StateGetAuctionInfoResult();
+      result.auctionState = AuctionState.fromV2(resV2.auctionState);
+      result.version = resV2.version;
+      result.rawJSON = resV2.rawJSON;
+      return result;
+    } catch (err) {
+      const errorMessage = err?.message || '';
+      if (!errorMessage.includes('Method not found')) {
+        throw err;
+      }
+
+      const resV1 = await this.getAuctionInfoV1ByHeight(height);
+      const result = new StateGetAuctionInfoResult();
+      result.auctionState = AuctionState.fromV1(resV1.auctionState);
+      result.version = resV1.version;
+      result.rawJSON = resV1.rawJSON;
+      return result;
+    }
+  }
+
+  async getAuctionInfoV1ByHeight(
+    height: number
+  ): Promise<StateGetAuctionInfoV1Result> {
     const serializer = new TypedJSON(ParamBlockIdentifier);
     const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
 
@@ -809,7 +915,24 @@ export class RpcClient implements IClient {
       serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
     );
 
-    const result = this.parseResponse(StateGetAuctionInfoResult, resp.result);
+    const result = this.parseResponse(StateGetAuctionInfoV1Result, resp.result);
+    result.rawJSON = resp.result;
+
+    return result;
+  }
+
+  async getAuctionInfoV2ByHeight(
+    height: number
+  ): Promise<StateGetAuctionInfoV2Result> {
+    const serializer = new TypedJSON(ParamBlockIdentifier);
+    const blockIdentifierParam = ParamBlockIdentifier.byHeight(height);
+
+    const resp = await this.processRequest(
+      Method.GetAuctionInfoV2,
+      serializer.toPlainJson(blockIdentifierParam) as ParamBlockIdentifier
+    );
+
+    const result = this.parseResponse(StateGetAuctionInfoV2Result, resp.result);
     result.rawJSON = resp.result;
 
     return result;

@@ -26,6 +26,7 @@ export enum Method {
   GetBlockTransfers = 'chain_get_block_transfers',
   GetEraSummary = 'chain_get_era_summary',
   GetAuctionInfo = 'state_get_auction_info',
+  GetAuctionInfoV2 = 'state_get_auction_info_v2',
   GetValidatorChanges = 'info_get_validator_changes',
   GetStateRootHash = 'chain_get_state_root_hash',
   GetStatus = 'info_get_status',

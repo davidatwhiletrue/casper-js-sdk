@@ -72,4 +72,33 @@ export class BidKind {
    */
   @jsonMember({ name: 'Unbond', constructor: Unbond })
   unbond?: Unbond;
+
+  /**
+   * Constructs a new instance of BidKind.
+   *
+   * @param unified - (Optional) A unified bid.
+   * @param validator - (Optional) A validator-specific bid.
+   * @param delegator - (Optional) A delegator bid.
+   * @param bridge - (Optional) A bridge transition bid.
+   * @param credit - (Optional) A credit bid.
+   * @param reservation - (Optional) A reservation bid.
+   * @param unbond - (Optional) An unbonding request bid.
+   */
+  constructor(
+    unified?: Bid,
+    validator?: ValidatorBid,
+    delegator?: Delegator,
+    bridge?: Bridge,
+    credit?: Credit,
+    reservation?: Reservation,
+    unbond?: Unbond
+  ) {
+    this.unified = unified;
+    this.validator = validator;
+    this.delegator = delegator;
+    this.bridge = bridge;
+    this.credit = credit;
+    this.reservation = reservation;
+    this.unbond = unbond;
+  }
 }

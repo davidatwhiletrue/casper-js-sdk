@@ -22,6 +22,7 @@ import {
   RpcResponse,
   StateGetAccountInfo,
   StateGetAuctionInfoResult,
+  StateGetAuctionInfoV1Result,
   StateGetBalanceResult,
   StateGetDictionaryResult,
   StateGetEntityResult,
@@ -38,14 +39,86 @@ import {
 import { Deploy, PublicKey, Transaction } from '../types';
 
 export interface ClientPOS {
+  /**
+   * Retrieves the latest auction information, including Validator Bids and Era Validators.
+   * @returns A Promise resolving to the latest auction info.
+   * @rpc state_get_auction_info_v2 (fallback: state_get_auction_info)
+   */
   getLatestAuctionInfo(): Promise<StateGetAuctionInfoResult>;
+
+  /**
+   * Retrieves auction information by block hash, including Validator Bids and Era Validators.
+   * @param blockHash - The hash of the block to retrieve auction info for.
+   * @returns A Promise resolving to the auction info.
+   * @rpc state_get_auction_info_v2 (fallback: state_get_auction_info)
+   */
   getAuctionInfoByHash(blockHash: string): Promise<StateGetAuctionInfoResult>;
+
+  /**
+   * Retrieves auction information by block height, including Validator Bids and Era Validators.
+   * @param height - The height of the block to retrieve auction info for.
+   * @returns A Promise resolving to the auction info.
+   * @rpc state_get_auction_info_v2 (fallback: state_get_auction_info)
+   */
   getAuctionInfoByHeight(height: number): Promise<StateGetAuctionInfoResult>;
 
+  /**
+   * Retrieves the latest auction information (version 1), including Validator Bids and Era Validators.
+   * @returns A Promise resolving to the latest auction info (V1).
+   * @rpc state_get_auction_info
+   */
+  getLatestAuctionInfoV1(): Promise<StateGetAuctionInfoV1Result>;
+
+  /**
+   * Retrieves auction information by block hash (version 1), including Validator Bids and Era Validators.
+   * @param blockHash - The hash of the block to retrieve auction info for.
+   * @returns A Promise resolving to the auction info (V1).
+   * @rpc state_get_auction_info
+   */
+  getAuctionInfoV1ByHash(
+    blockHash: string
+  ): Promise<StateGetAuctionInfoV1Result>;
+
+  /**
+   * Retrieves auction information by block height (version 1), including Validator Bids and Era Validators.
+   * @param height - The height of the block to retrieve auction info for.
+   * @returns A Promise resolving to the auction info (V1).
+   * @rpc state_get_auction_info
+   */
+  getAuctionInfoV1ByHeight(
+    height: number
+  ): Promise<StateGetAuctionInfoV1Result>;
+
+  /**
+   * Retrieves the latest EraInfo from the network.
+   * Only the last block in an era (switch block) contains an era summary.
+   * This method returns information about the latest block, which may not be the last block in the era.
+   * @returns A Promise resolving to the latest EraInfo.
+   */
   getEraInfoLatest(): Promise<ChainGetEraInfoResult>;
+
+  /**
+   * Retrieves EraInfo by block height.
+   * Only the last block in an era (switch block) contains an era summary.
+   * @param height - The height of the block to retrieve EraInfo for.
+   * @returns A Promise resolving to the EraInfo.
+   */
   getEraInfoByBlockHeight(height: number): Promise<ChainGetEraInfoResult>;
+
+  /**
+   * Retrieves EraInfo by block hash.
+   * Only the last block in an era (switch block) contains an era summary.
+   * @param hash - The hash of the block to retrieve EraInfo for.
+   * @returns A Promise resolving to the EraInfo.
+   */
   getEraInfoByBlockHash(hash: string): Promise<ChainGetEraInfoResult>;
 
+  /**
+   * Retrieves status changes of active validators.
+   * The changes occurred during the EraId contained within the response itself.
+   * A validator may show more than one change in a single era.
+   * @returns A Promise resolving to validator status changes.
+   */
   getValidatorChangesInfo(): Promise<InfoGetValidatorChangesResult>;
 }
 
