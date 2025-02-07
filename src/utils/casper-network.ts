@@ -184,7 +184,8 @@ export class CasperNetwork {
     networkName: string,
     amountMotes: string,
     deployCost: number,
-    ttl: number
+    ttl: number,
+    id: number
   ): Transaction {
     const transferBuilder = new NativeTransferBuilder()
       .from(senderPublicKey)
@@ -192,7 +193,8 @@ export class CasperNetwork {
       .amount(amountMotes)
       .chainName(networkName)
       .payment(deployCost)
-      .ttl(ttl);
+      .ttl(ttl)
+      .id(id);
     if (this.apiVersion === 2) {
       return transferBuilder.build();
     }
