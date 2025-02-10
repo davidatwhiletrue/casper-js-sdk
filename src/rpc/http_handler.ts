@@ -89,3 +89,73 @@ export class HttpHandler implements IHandler {
     }
   }
 }
+
+export class HttpFetchHandler implements IHandler {
+  private endpoint: string;
+  private referrer: string;
+  private customHeaders: Record<string, string>;
+
+  constructor(endpoint: string) {
+    this.endpoint = endpoint;
+    this.customHeaders = {};
+  }
+
+  setCustomHeaders(headers: Record<string, string>) {
+    this.customHeaders = headers;
+  }
+
+  setReferrer(url: string) {
+    this.referrer = url;
+  }
+
+  /** @throws {HttpError, Error} */
+  async processCall(params: RpcRequest): Promise<RpcResponse> {
+    const serializer = new TypedJSON(RpcRequest);
+    let body: string;
+
+    try {
+      body = serializer.stringify(params);
+    } catch (err) {
+      throw new Error(
+        `${ErrParamsJsonStringifyHandler.message}, details: ${err.message}`
+      );
+    }
+
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        ...(this.referrer
+          ? { referrer: this.referrer }
+          : {}),
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.customHeaders
+        },
+        body
+      });
+
+      if (response.status < 200 || response.status >= 300) {
+        throw new HttpError(response.status, new Error(response.statusText));
+      }
+
+      try {
+        return response.json();
+      } catch (err) {
+        throw new Error(
+          `${ErrRpcResponseUnmarshal.message}, details: ${err.message}`
+        );
+      }
+    } catch (err) {
+      const status = err?.response?.status;
+      const statusText = err?.response?.statusText;
+
+      if (status && statusText) {
+        throw new HttpError(status, new Error(statusText));
+      } else {
+        throw new Error(
+          `${ErrProcessHttpRequest.message}, details: ${err.message}`
+        );
+      }
+    }
+  }
+}
