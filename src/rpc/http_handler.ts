@@ -18,18 +18,26 @@ export const ErrRpcResponseUnmarshal = new Error(
 );
 
 export class HttpHandler implements IHandler {
-  private httpClient: AxiosInstance;
   private endpoint: string;
-  private customHeaders: Record<string, string>;
+  private client: 'axios' | 'fetch';
+  private httpClient?: AxiosInstance;
+  private referrer?: string;
+  private customHeaders: Record<string, string> = {};
 
-  constructor(endpoint: string, client?: AxiosInstance) {
-    this.httpClient = client ?? axios.create();
+  constructor(endpoint: string, client: 'axios' | 'fetch' = 'axios') {
     this.endpoint = endpoint;
-    this.customHeaders = {};
+    this.client = client;
+    if (client === 'axios') {
+      this.httpClient = axios.create();
+    }
   }
 
   setCustomHeaders(headers: Record<string, string>) {
     this.customHeaders = headers;
+  }
+
+  setReferrer(url: string) {
+    this.referrer = url;
   }
 
   /** @throws {HttpError, Error} */
@@ -45,6 +53,14 @@ export class HttpHandler implements IHandler {
       );
     }
 
+    if (this.client === 'axios') {
+      return this.processAxiosRequest(body);
+    } else {
+      return this.processFetchRequest(body);
+    }
+  }
+
+  private async processAxiosRequest(body: string): Promise<RpcResponse> {
     const config: AxiosRequestConfig = {
       method: 'POST',
       url: this.endpoint,
@@ -56,36 +72,45 @@ export class HttpHandler implements IHandler {
     };
 
     try {
-      const response = await this.httpClient.request<RpcResponse>(config);
+      const response = await this.httpClient!.request<RpcResponse>(config);
+      if (response.status < 200 || response.status >= 300) {
+        throw new HttpError(response.status, new Error(response.statusText));
+      }
+      return response.data;
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        throw new HttpError(
+          err.response.status,
+          new Error(err.response.statusText)
+        );
+      }
+      throw new Error(
+        `${ErrProcessHttpRequest.message}, details: ${err.message}`
+      );
+    }
+  }
+
+  private async processFetchRequest(body: string): Promise<RpcResponse> {
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        ...(this.referrer ? { referrer: this.referrer } : {}),
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.customHeaders
+        },
+        body
+      });
 
       if (response.status < 200 || response.status >= 300) {
         throw new HttpError(response.status, new Error(response.statusText));
       }
 
-      try {
-        return response.data;
-      } catch (err) {
-        throw new Error(
-          `${ErrRpcResponseUnmarshal.message}, details: ${err.message}`
-        );
-      }
+      return response.json();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          throw new HttpError(
-            err.response.status,
-            new Error(err.response.statusText)
-          );
-        } else {
-          throw new Error(
-            `${ErrProcessHttpRequest.message}, details: ${err.message}`
-          );
-        }
-      } else {
-        throw new Error(
-          `${ErrReadHttpResponseBody.message}, details: ${err.message}`
-        );
-      }
+      throw new Error(
+        `${ErrProcessHttpRequest.message}, details: ${err.message}`
+      );
     }
   }
 }
