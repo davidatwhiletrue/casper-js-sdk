@@ -13,6 +13,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.9-beta2] - 2025-02-12
+
+### Added
+
+- `transferId` to `transaction / deploy` builders
+
+### Changed
+
+- For `HttpHandler` added a possibility to set referer header and choose between axios / fetch
+
 ### [5.0.8-beta2] - 2025-02-05
 
 ### Added
