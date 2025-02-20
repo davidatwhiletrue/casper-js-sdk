@@ -52,7 +52,7 @@ export enum PrefixName {
 /**
  * Enum representing different types of blockchain key types used in the system.
  */
-export const enum KeyTypeID {
+export enum KeyTypeID {
   Account = 0,
   Hash,
   URef,
