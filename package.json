@@ -50,6 +50,9 @@
       "pre-commit": "lint-staged"
     }
   },
+  "overrides": {
+    "elliptic": "6.6.1"
+  },
   "devDependencies": {
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "@types/chai": "^4.1.7",
