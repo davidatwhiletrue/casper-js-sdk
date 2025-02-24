@@ -338,7 +338,7 @@ export class Key {
       case KeyTypeID.EraId:
         return Key.concatBytes(this.era?.toBytes(), typeBytes);
       case KeyTypeID.URef:
-        return Key.concatBytes(this.uRef?.data, typeBytes);
+        return Key.concatBytes(this.uRef?.bytes(), typeBytes);
       case KeyTypeID.Transfer:
         return Key.concatBytes(this.transfer?.toBytes(), typeBytes);
       case KeyTypeID.DeployInfo:
@@ -408,7 +408,7 @@ export class Key {
       case KeyTypeID.Hash:
         return `${PrefixName.Hash}${this.hash?.toHex()}`;
       case KeyTypeID.EraId:
-        return `${PrefixName.EraId}${this.era?.toString()}`;
+        return `${PrefixName.EraId}${this.era?.toJSON()}`;
       case KeyTypeID.URef:
         return this.uRef!.toPrefixedString();
       case KeyTypeID.Transfer:
