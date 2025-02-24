@@ -1,4 +1,5 @@
 import { jsonMember, jsonObject } from 'typedjson';
+import { toBytesNumber } from '../ByteConverters';
 
 /**
  * Represents an Era in the system.
@@ -57,8 +58,6 @@ export class Era {
    * @returns A Uint8Array representation of the Era value as a 32-bit unsigned integer.
    */
   toBytes(): Uint8Array {
-    const buffer = new ArrayBuffer(4);
-    new DataView(buffer).setUint32(0, this.value, true);
-    return new Uint8Array(buffer);
+    return toBytesNumber(64, false)(this.value);
   }
 }
