@@ -252,28 +252,39 @@ export class InfoGetDeployResult {
   @jsonMember({ name: 'deploy', constructor: Deploy })
   deploy: Deploy;
 
-  @jsonMember({
-    name: 'execution_info',
-    constructor: DeployExecutionInfo
-  })
-  executionResults: DeployExecutionInfo;
+  @jsonMember({ name: 'execution_info', constructor: DeployExecutionInfo })
+  executionInfo?: DeployExecutionInfo;
 
-  @jsonArrayMember(DeployExecutionResult, {
-    name: 'execution_results'
-  })
+  // Legacy execution results V1
+  @jsonArrayMember(DeployExecutionResult, { name: 'execution_results' })
   executionResultsV1?: DeployExecutionResult[];
 
   rawJSON: any;
 
+  /**
+   * Converts the deployment result into a transaction result.
+   * It prefers the newer executionInfo format if available,
+   * otherwise falls back to legacy execution results.
+   */
   toInfoGetTransactionResult(): InfoGetTransactionResult {
+    let executionInfo: ExecutionInfo;
+
+    if (this.executionInfo) {
+      executionInfo = new ExecutionInfo(
+        this.executionInfo.blockHash,
+        this.executionInfo.blockHeight,
+        this.executionInfo.executionResult
+      );
+    } else if (this.executionResultsV1 && this.executionResultsV1.length > 0) {
+      executionInfo = ExecutionInfo.fromV1(this.executionResultsV1);
+    } else {
+      throw new Error('Invalid Execution Info');
+    }
+
     return new InfoGetTransactionResult(
       this.apiVersion,
       Deploy.newTransactionFromDeploy(this.deploy),
-      new ExecutionInfo(
-        this.executionResults.blockHash,
-        this.executionResults.blockHeight,
-        this.executionResults.executionResult
-      ),
+      executionInfo,
       this.rawJSON
     );
   }
