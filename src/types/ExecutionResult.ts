@@ -422,9 +422,18 @@ export class ExecutionResult {
         transfers.push(transfer);
       }
 
-      result.limit = 0;
+      result.limit = 0; // limit is unknown field for V1 Deploy
+
+      // In ExecutionResultV1, the 'v1.Success.Cost' field actually represents the amount of consumed gas.
+      // However, in version 1.X, there is no distinction between 'cost' and 'consumed_gas'.
+      //
+      // For example, for failed deploys without execution results, 'cost' is reported as 0,
+      // but the penalty charge (which is a cost) is reflected in the execution effects.
+      //
+      // In version V2, 'Consumed' and 'Cost' are explicitly separated.
+      // So to maintain backward compatibility for V1, 'v1.Success.Cost' is used for both 'Consumed' and 'Cost'.
       result.consumed = v1.success.cost;
-      result.cost = 0;
+      result.cost = v1.success.cost;
       result.payment = null;
       result.transfers = transfers;
       result.effects = transforms;
