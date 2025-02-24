@@ -432,7 +432,7 @@ export class ExecutionResult {
       //
       // In version V2, 'Consumed' and 'Cost' are explicitly separated.
       // So to maintain backward compatibility for V1, 'v1.Success.Cost' is used for both 'Consumed' and 'Cost'.
-      result.consumed = v1.success.cost; // Consumed is unknown field for V1 Deploy
+      result.consumed = v1.success.cost;
       result.cost = v1.success.cost;
       result.payment = null;
       result.transfers = transfers;
