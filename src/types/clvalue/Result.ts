@@ -21,6 +21,19 @@ export class CLValueResult {
    * @param inner - The CLValue contained within the Result.
    */
   constructor(type: CLTypeResult, isSuccess: boolean, inner: CLValue) {
+    const expectedTypeName = isSuccess
+      ? type.innerOk.getName()
+      : type.innerErr.getName();
+    const actualTypeName = inner.getType().getName();
+
+    if (expectedTypeName !== actualTypeName) {
+      throw new Error(
+        `Inner value's type (${actualTypeName}) does not match the expected type (${expectedTypeName}) for ${
+          isSuccess ? 'Ok' : 'Error'
+        }.`
+      );
+    }
+
     this.type = type;
     this.isSuccess = isSuccess;
     this.inner = inner;
