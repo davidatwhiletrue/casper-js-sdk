@@ -27,6 +27,7 @@ import { CLTypeTuple1 } from './Tuple1';
 import { CLTypeTuple2 } from './Tuple2';
 import { CLTypeTuple3 } from './Tuple3';
 import { IResultWithBytes } from '../CLValue';
+import { CLValueUInt32 } from '../Numeric';
 
 /**
  * A utility class for parsing various CLTypes from different formats, such as JSON, strings, and bytes.
@@ -174,11 +175,11 @@ export class CLTypeParser {
         return { result: new CLTypeList(listInner), bytes: listBytes };
       case TypeID.ByteArray:
         const {
-          result: byteArrayInner,
+          result: byteArraySize,
           bytes: byteArrayBytes
-        } = CLTypeParser.matchBytesToCLType(remainder);
+        } = CLValueUInt32.fromBytes(remainder);
         return {
-          result: new CLTypeList(byteArrayInner),
+          result: new CLTypeByteArray(byteArraySize.toNumber()),
           bytes: byteArrayBytes
         };
       case TypeID.Result:

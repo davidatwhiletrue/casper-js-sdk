@@ -6,6 +6,7 @@ import { PublicKey } from '../keypair';
 import {
   CLType,
   CLTypeByteArray,
+  CLTypeDynamic,
   CLTypeList,
   CLTypeMap,
   CLTypeOption,
@@ -107,6 +108,13 @@ export class CLValueParser {
     sourceType: CLType
   ): IResultWithBytes<CLValue> {
     const result = new CLValue(sourceType);
+
+    if (sourceType instanceof CLTypeDynamic) {
+      const clType = CLTypeParser.matchBytesToCLType(bytes);
+      result.type = new CLTypeDynamic(clType.result.getTypeID(), clType.result);
+      return { result, bytes: clType.bytes };
+    }
+
     const typeID = sourceType.getTypeID();
 
     switch (typeID) {
@@ -254,6 +262,9 @@ export class CLValueParser {
     const valueBytes = u32.bytes.subarray(0, length);
     const typeBytes = u32.bytes.subarray(length);
     const clType = CLTypeParser.matchBytesToCLType(typeBytes);
-    return this.fromBytesByType(valueBytes, clType.result);
+    const clValue = this.fromBytesByType(valueBytes, clType.result);
+
+    // return clType bytes here, since clType bytes are after clValue bytes: [clvalue.bytes, cltype.bytes, remainder...]
+    return { result: clValue.result, bytes: clType.bytes };
   }
 }
