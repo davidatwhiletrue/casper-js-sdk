@@ -13,6 +13,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.11-beta2] - 2025-02-24
+
+### Changed
+
+- Updated `cost` / `consumed` for executions result V1 by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/517
+
+### Fixed
+
+- Fixed `toInfoGetTransactionResult` method to parse V1 deploy result by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/518
+- Fixed construction of Uref and EraID for Transaction Session builder by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/516
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.10-beta2...5.0.11-beta2
+
+### [5.0.10-beta2] - 2025-02-20
+
+### Fixed
+
+- Fixed issue with importing of `KeyTypeID`
+- Fixed vulnerability in the elliptic package by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/514
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.9-beta2...5.0.10-beta2
+
 ### [5.0.9-beta2] - 2025-02-12
 
 ### Added
