@@ -7,9 +7,7 @@ Provide basic functionality to work with Casper events that streamed by SSE serv
 ```ts
 import { SseClient, EventName } from 'casper-js-sdk';
 
-const sseClient = new SseClient(
-  'http://<Node Address>:9999/events/main'
-);
+const sseClient = new SseClient('http://<Node Address>:9999/events');
 
 sseClient.subscribe(EventName.BlockAddedEventType, rawEvent => {
   try {
