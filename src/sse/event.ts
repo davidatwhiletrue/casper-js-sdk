@@ -20,55 +20,37 @@ import {
   Transform
 } from '../types';
 
-export enum EventType {
-  APIVersionEventType = 1,
-  BlockAddedEventType,
-  DeployProcessedEventType,
-  DeployAcceptedEventType,
-  DeployExpiredEventType,
-  TransactionProcessedEventType,
-  TransactionAcceptedEventType,
-  TransactionExpiredEventType,
-  EventIDEventType,
-  FinalitySignatureType,
-  StepEventType,
-  FaultEventType,
-  ShutdownType
+export enum EventName {
+  APIVersionEventType = 'ApiVersion',
+  BlockAddedEventType = 'BlockAdded',
+  DeployProcessedEventType = 'DeployProcessed',
+  DeployAcceptedEventType = 'DeployAccepted',
+  DeployExpiredEventType = 'DeployExpired',
+  TransactionProcessedEventType = 'TransactionProcessed',
+  TransactionAcceptedEventType = 'TransactionAccepted',
+  TransactionExpiredEventType = 'TransactionExpired',
+  EventIDEventType = 'EventID',
+  FinalitySignatureType = 'FinalitySignature',
+  StepEventType = 'Step',
+  FaultEventType = 'Fault',
+  ShutdownType = 'Shutdown'
 }
-
-export const AllEventsNames: { [key in EventType]: string } = {
-  [EventType.APIVersionEventType]: 'ApiVersion',
-  [EventType.BlockAddedEventType]: 'BlockAdded',
-  [EventType.DeployProcessedEventType]: 'DeployProcessed',
-  [EventType.DeployAcceptedEventType]: 'DeployAccepted',
-  [EventType.DeployExpiredEventType]: 'DeployExpired',
-  [EventType.TransactionProcessedEventType]: 'TransactionProcessed',
-  [EventType.TransactionAcceptedEventType]: 'TransactionAccepted',
-  [EventType.TransactionExpiredEventType]: 'TransactionExpired',
-  [EventType.EventIDEventType]: 'EventID',
-  [EventType.FinalitySignatureType]: 'FinalitySignature',
-  [EventType.StepEventType]: 'Step',
-  [EventType.FaultEventType]: 'Fault',
-  [EventType.ShutdownType]: 'Shutdown'
-};
-
-export type EventData = string;
 
 @jsonObject
 export class RawEvent {
-  @jsonMember({ name: 'EventType', constructor: Number })
-  eventType: EventType;
+  @jsonMember({ name: 'type', constructor: String })
+  eventType: string;
 
-  @jsonMember({ name: 'Data', constructor: String })
-  data: EventData;
+  @jsonMember({ name: 'data', constructor: String })
+  data: string;
 
-  @jsonMember({ name: 'EventID', constructor: Number })
-  eventID: number;
+  @jsonMember({ name: 'lastEventId', constructor: String })
+  lastEventId: string;
 
-  constructor(eventType: EventType, data: EventData, eventID: number) {
+  constructor(eventType: string, data: string, lastEventId: string) {
     this.eventType = eventType;
     this.data = data;
-    this.eventID = eventID;
+    this.lastEventId = lastEventId;
   }
 
   private parseEvent<T>(
@@ -100,14 +82,14 @@ export class RawEvent {
   parseAsFinalitySignatureEvent(): FinalitySignatureEvent {
     return this.parseEvent(
       FinalitySignatureEvent,
-      FinalitySignatureEvent.deserialize
+      FinalitySignatureEvent.fromJSON
     );
   }
 
   parseAsTransactionExpiredEvent(): TransactionExpiredEvent {
     return this.parseEvent(
       TransactionExpiredEvent,
-      TransactionExpiredEvent.deserialize
+      TransactionExpiredEvent.fromJSON
     );
   }
 
@@ -168,30 +150,31 @@ export class BlockAddedEvent {
   }
 
   static fromJSON(data: any): BlockAddedEvent {
-    const parsedData = JSON.parse(data);
-
-    if (!parsedData) {
+    if (!data) {
       throw new Error('Parse JSON on null or undefined data');
     }
 
-    if (parsedData.BlockAdded && parsedData.BlockAdded.block) {
-      const { blockHash } = parsedData.BlockAdded;
-      const blockWrapper = parsedData.BlockAdded.block;
+    const parsedData = JSON.parse(data);
 
-      if (blockWrapper.BlockV1 || blockWrapper.BlockV2) {
+    if (parsedData.BlockAdded && parsedData.BlockAdded.block) {
+      const serializer = new TypedJSON(BlockAddedWrapper);
+      const blockWrapper = serializer.parse(parsedData.BlockAdded);
+
+      if (blockWrapper?.block.blockV1 || blockWrapper?.block.blockV2) {
         return new BlockAddedEvent({
-          blockHash: blockHash,
-          block: Block.newBlockFromBlockWrapper(blockWrapper, [])
+          blockHash: blockWrapper.blockHash,
+          block: Block.newBlockFromBlockWrapper(blockWrapper.block, [])
         });
       }
     }
 
-    if (parsedData.BlockAdded) {
-      const v1Event = parsedData;
+    const v1EventSerializer = new TypedJSON(BlockAddedV1);
+    const parsedV1Event = v1EventSerializer.parse(parsedData.BlockAdded);
 
+    if (parsedV1Event) {
       return new BlockAddedEvent({
-        blockHash: v1Event.BlockAdded.blockHash,
-        block: Block.newBlockFromBlockV1(v1Event.BlockAdded.block)
+        blockHash: parsedV1Event.blockHash,
+        block: Block.newBlockFromBlockV1(parsedV1Event.block)
       });
     }
 
@@ -252,7 +235,10 @@ export class DeployProcessedPayload {
   @jsonMember({
     name: 'deploy_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   deployHash: Hash;
@@ -260,7 +246,10 @@ export class DeployProcessedPayload {
   @jsonMember({
     name: 'account',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   account: PublicKey;
@@ -282,7 +271,10 @@ export class DeployProcessedPayload {
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   blockHash: Hash;
@@ -311,7 +303,10 @@ export class DeployExpiredPayload {
   @jsonMember({
     name: 'deploy_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   deployHash: Hash;
@@ -328,7 +323,14 @@ export class DeployExpiredEvent {
 
 @jsonObject
 export class TransactionAcceptedPayload {
-  @jsonMember({ name: 'transaction', constructor: Transaction })
+  @jsonMember({
+    name: 'transaction',
+    constructor: Transaction,
+    deserializer: json => {
+      if (!json) return;
+      return Transaction.fromJSON(json);
+    }
+  })
   transaction: Transaction;
 }
 
@@ -340,12 +342,21 @@ export class TransactionAcceptedEvent {
   })
   transactionAcceptedPayload: TransactionAcceptedPayload;
 
-  public static fromJSON(data: unknown): TransactionAcceptedEvent | Error {
-    try {
-      const transactionEvent = TypedJSON.parse(data, TransactionAcceptedEvent);
-      if (!transactionEvent) throw new Error('TransactionAcceptedEvent is nil');
+  public static fromJSON(data: any): TransactionAcceptedEvent | Error {
+    if (!data || data.TransactionAccepted) {
+      throw new Error(
+        'Parse JSON on null or undefined data for TransactionAcceptedEvent'
+      );
+    }
 
-      const wrapper = TypedJSON.parse(data, TransactionWrapper);
+    try {
+      const parsed = JSON.parse(data);
+      const transactionEvent = new TransactionAcceptedEvent();
+
+      const wrapper = TypedJSON.parse(
+        parsed.TransactionAccepted,
+        TransactionWrapper
+      );
 
       if (wrapper?.deploy) {
         transactionEvent.transactionAcceptedPayload = {
@@ -361,7 +372,10 @@ export class TransactionAcceptedEvent {
         return transactionEvent;
       }
 
-      const deployEvent = TypedJSON.parse(data, DeployAcceptedEvent);
+      const deployEvent = TypedJSON.parse(
+        parsed.TransactionAccepted,
+        DeployAcceptedEvent
+      );
       if (deployEvent?.deployAccepted) {
         transactionEvent.transactionAcceptedPayload = {
           transaction: Deploy.newTransactionFromDeploy(
@@ -394,21 +408,41 @@ export class TransactionExpiredEvent {
   })
   transactionExpiredPayload: TransactionExpiredPayload;
 
-  public static deserialize(data: any): TransactionExpiredEvent | Error {
-    try {
-      const transactionEvent = TypedJSON.parse(data, TransactionExpiredEvent);
-      if (!transactionEvent) throw new Error('TransactionExpiredEvent is nil');
+  public static fromJSON(data: any): TransactionExpiredEvent | Error {
+    if (!data) {
+      throw new Error(
+        'Parse JSON on null or undefined data for TransactionExpiredEvent'
+      );
+    }
 
-      const payload = transactionEvent.transactionExpiredPayload;
+    try {
+      const parsedData = JSON.parse(data);
+
+      const transactionEvent = new TransactionExpiredEvent();
+      const transactionExpiredPayload = TypedJSON.parse(
+        parsedData.TransactionExpired,
+        TransactionExpiredPayload
+      );
+      if (!transactionExpiredPayload)
+        throw new Error('transactionExpiredPayload is nil');
+
+      if (transactionExpiredPayload) {
+        transactionEvent.transactionExpiredPayload = transactionExpiredPayload;
+      }
+
+      const payload = transactionEvent?.transactionExpiredPayload;
 
       if (
-        payload.transactionHash?.transactionV1 ||
-        payload.transactionHash?.deploy
+        payload?.transactionHash?.transactionV1 ||
+        payload?.transactionHash?.deploy
       ) {
         return transactionEvent;
       }
 
-      const deployEvent = TypedJSON.parse(data, DeployExpiredEvent);
+      const deployEvent = TypedJSON.parse(
+        parsedData.TransactionExpired,
+        DeployExpiredEvent
+      );
       if (deployEvent?.deployExpired) {
         transactionEvent.transactionExpiredPayload = {
           transactionHash: new TransactionHash(
@@ -430,7 +464,10 @@ export class TransactionProcessedPayload {
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   blockHash: Hash;
@@ -441,7 +478,10 @@ export class TransactionProcessedPayload {
   @jsonMember({
     name: 'initiator_addr',
     constructor: InitiatorAddr,
-    deserializer: json => InitiatorAddr.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return InitiatorAddr.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   initiatorAddr: InitiatorAddr;
@@ -460,7 +500,14 @@ export class TransactionProcessedPayload {
   @jsonMember({ name: 'ttl', constructor: String })
   ttl: string;
 
-  @jsonMember({ name: 'execution_result', constructor: ExecutionResult })
+  @jsonMember({
+    name: 'execution_result',
+    constructor: ExecutionResult,
+    deserializer: json => {
+      if (!json) return;
+      return ExecutionResult.fromJSON(json);
+    }
+  })
   executionResult: ExecutionResult;
 
   @jsonArrayMember(Message, { name: 'messages' })
@@ -476,10 +523,24 @@ export class TransactionProcessedEvent {
   transactionProcessedPayload: TransactionProcessedPayload;
 
   public static fromJSON(data: any): TransactionProcessedEvent | Error {
+    console.log(data);
+    if (!data || data.TransactionProcessed) {
+      throw new Error(
+        'Parse JSON on null or undefined data for TransactionExpiredEvent'
+      );
+    }
+
     try {
-      const transactionEvent = TypedJSON.parse(data, TransactionProcessedEvent);
-      if (!transactionEvent)
-        throw new Error('TransactionProcessedEvent is nil');
+      const parsedData = JSON.parse(data);
+      const transactionEvent = new TransactionProcessedEvent();
+      const parsedTransactionPayload = TypedJSON.parse(
+        parsedData.TransactionProcessed,
+        TransactionProcessedPayload
+      );
+
+      if (parsedTransactionPayload) {
+        transactionEvent.transactionProcessedPayload = parsedTransactionPayload;
+      }
 
       const payload = transactionEvent.transactionProcessedPayload;
 
@@ -490,7 +551,10 @@ export class TransactionProcessedEvent {
         return transactionEvent;
       }
 
-      const deployEvent = TypedJSON.parse(data, DeployProcessedEvent);
+      const deployEvent = TypedJSON.parse(
+        parsedData.TransactionProcessed,
+        DeployProcessedEvent
+      );
       if (deployEvent?.deployProcessed) {
         transactionEvent.transactionProcessedPayload = {
           blockHash: deployEvent.deployProcessed.blockHash,
@@ -522,7 +586,10 @@ export class FinalitySignatureV1 {
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   blockHash: Hash;
@@ -533,7 +600,10 @@ export class FinalitySignatureV1 {
   @jsonMember({
     name: 'signature',
     constructor: HexBytes,
-    deserializer: json => HexBytes.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return HexBytes.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   signature: HexBytes;
@@ -541,7 +611,10 @@ export class FinalitySignatureV1 {
   @jsonMember({
     name: 'public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   publicKey: PublicKey;
@@ -552,7 +625,10 @@ export class FinalitySignatureV2 {
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   blockHash: Hash;
@@ -581,7 +657,10 @@ export class FinalitySignatureV2 {
   @jsonMember({
     name: 'signature',
     constructor: HexBytes,
-    deserializer: json => HexBytes.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return HexBytes.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   signature: HexBytes;
@@ -589,7 +668,10 @@ export class FinalitySignatureV2 {
   @jsonMember({
     name: 'public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   publicKey: PublicKey;
@@ -617,7 +699,10 @@ export class FinalitySignature {
   @jsonMember({
     name: 'block_hash',
     constructor: Hash,
-    deserializer: json => Hash.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Hash.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   blockHash: Hash;
@@ -650,7 +735,10 @@ export class FinalitySignature {
   @jsonMember({
     name: 'signature',
     constructor: HexBytes,
-    deserializer: json => HexBytes.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return HexBytes.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   signature: HexBytes;
@@ -658,7 +746,10 @@ export class FinalitySignature {
   @jsonMember({
     name: 'public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   publicKey: PublicKey;
@@ -670,30 +761,23 @@ export class FinalitySignature {
 }
 
 @jsonObject
-export class FinalitySignatureWrapperEvent {
-  @jsonMember({
-    isRequired: false,
-    name: 'FinalitySignature',
-    constructor: FinalitySignatureV1
-  })
-  finalitySignatureV1?: FinalitySignatureV1;
-
-  @jsonMember({
-    isRequired: false,
-    name: 'FinalitySignature',
-    constructor: FinalitySignatureV2
-  })
-  finalitySignatureV2?: FinalitySignatureV2;
-}
-
-@jsonObject
 export class FinalitySignatureEvent {
   @jsonMember({ name: 'FinalitySignature', constructor: FinalitySignature })
   finalitySignature: FinalitySignature;
 
-  public static deserialize(data: any): FinalitySignatureEvent | Error {
+  public static fromJSON(data: any): FinalitySignatureEvent | Error {
+    if (!data || data.FinalitySignature) {
+      throw new Error(
+        'Parse JSON on null or undefined data for FinalitySignatureEvent'
+      );
+    }
+
     try {
-      const wrapped = TypedJSON.parse(data, FinalitySignatureWrapper);
+      const parsed = JSON.parse(data);
+      const wrapped = TypedJSON.parse(
+        parsed.FinalitySignature,
+        FinalitySignatureWrapper
+      );
       if (!wrapped) throw new Error('FinalitySignatureWrapper is nil');
 
       let finalitySignature: FinalitySignature;
@@ -715,7 +799,10 @@ export class FinalitySignatureEvent {
           publicKey: wrapped.v2.publicKey
         };
       } else {
-        const v1Event = TypedJSON.parse(data, FinalitySignatureV1);
+        const v1Event = TypedJSON.parse(
+          parsed.FinalitySignature,
+          FinalitySignatureV1
+        );
         if (!v1Event) throw new Error('Failed to parse FinalitySignatureV1');
 
         finalitySignature = {
@@ -746,7 +833,10 @@ export class FaultPayload {
   @jsonMember({
     name: 'public_key',
     constructor: PublicKey,
-    deserializer: json => PublicKey.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   publicKey: PublicKey;
@@ -754,7 +844,10 @@ export class FaultPayload {
   @jsonMember({
     name: 'timestamp',
     constructor: Timestamp,
-    deserializer: json => Timestamp.fromJSON(json),
+    deserializer: json => {
+      if (!json) return;
+      return Timestamp.fromJSON(json);
+    },
     serializer: value => value.toJSON()
   })
   timestamp: Timestamp;
