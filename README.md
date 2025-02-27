@@ -81,31 +81,23 @@ Provides basic functionality to work with Casper events that streamed by SSE ser
 Example:
 
 ```ts
-import { SseClient, EventType } from 'casper-js-sdk';
+import { SseClient, EventName } from 'casper-js-sdk';
 
-const sseClient = new SseClient(
-  'http://<Node Address>:9999/events/main'
-);
-sseClient.registerHandler(
-  EventType.DeployProcessedEventType,
-  async rawEvent => {
-    try {
-      const deployEvent = rawEvent.parseAsDeployProcessedEvent();
-      console.log(
-        `Deploy hash: ${deployEvent.deployProcessed.deployHash}`
-      );
-    } catch (error) {
-      console.error('Error processing event:', error);
-    }
+const sseClient = new SseClient('http://<Node Address>:9999/events');
+
+sseClient.subscribe(EventName.BlockAddedEventType, rawEvent => {
+  try {
+    const parsedEvent = rawEvent.parseAsBlockAddedEvent();
+    console.log(`Block hash: ${parsedEvent.BlockAdded.blockHash}`);
+  } catch (error) {
+    console.error('Error processing event:', error);
   }
-);
+});
 
-// Start the client with the last known event ID
+// Start the client with the last known event ID ( Optional )
 const lastEventID = 1234;
 
-sseClient.start(lastEventID).catch(error => {
-  console.error('Error starting SSE client:', error);
-});
+sseClient.start(lastEventID);
 ```
 
 ### Creating a transaction
