@@ -523,7 +523,6 @@ export class TransactionProcessedEvent {
   transactionProcessedPayload: TransactionProcessedPayload;
 
   public static fromJSON(data: any): TransactionProcessedEvent | Error {
-    console.log(data);
     if (!data || data.TransactionProcessed) {
       throw new Error(
         'Parse JSON on null or undefined data for TransactionExpiredEvent'
