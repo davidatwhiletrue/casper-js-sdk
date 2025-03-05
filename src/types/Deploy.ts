@@ -392,7 +392,8 @@ export class Deploy {
       }
     }
 
-    const standardPayment = paymentAmount === 0 && !deploy.payment.moduleBytes;
+    const standardPayment =
+      deploy.payment.moduleBytes?.moduleBytes.length === 0;
 
     const pricingMode = new PricingMode();
     const paymentLimitedMode = new PaymentLimitedMode();
