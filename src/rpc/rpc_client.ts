@@ -418,7 +418,6 @@ export class RpcClient implements IClient {
     blockHash: string,
     pub: PublicKey
   ): Promise<StateGetAccountInfo> {
-    const serializer = new TypedJSON(ParamGetAccountInfoBalance);
     const accountInfoBalance = new ParamGetAccountInfoBalance(
       pub.toHex(),
       ParamBlockIdentifier.byHash(blockHash)
@@ -426,7 +425,7 @@ export class RpcClient implements IClient {
 
     const resp = await this.processRequest<ParamGetAccountInfoBalance>(
       Method.GetStateAccount,
-      serializer.toPlainJson(accountInfoBalance) as ParamGetAccountInfoBalance
+      accountInfoBalance.toJSON() as ParamGetAccountInfoBalance
     );
 
     const result = this.parseResponse(StateGetAccountInfo, resp.result);
@@ -439,7 +438,6 @@ export class RpcClient implements IClient {
     blockHeight: number,
     pub: PublicKey
   ): Promise<StateGetAccountInfo> {
-    const serializer = new TypedJSON(ParamGetAccountInfoBalance);
     const accountInfoBalance = new ParamGetAccountInfoBalance(
       pub.toHex(),
       ParamBlockIdentifier.byHeight(blockHeight)
@@ -447,7 +445,7 @@ export class RpcClient implements IClient {
 
     const resp = await this.processRequest<ParamGetAccountInfoBalance>(
       Method.GetStateAccount,
-      serializer.toPlainJson(accountInfoBalance) as ParamGetAccountInfoBalance
+      accountInfoBalance.toJSON() as ParamGetAccountInfoBalance
     );
 
     const result = this.parseResponse(StateGetAccountInfo, resp.result);
@@ -460,7 +458,6 @@ export class RpcClient implements IClient {
     blockIdentifier: ParamBlockIdentifier | null,
     accountIdentifier: AccountIdentifier
   ): Promise<StateGetAccountInfo> {
-    const serializer = new TypedJSON(ParamGetAccountInfoBalance);
     let identifier = blockIdentifier;
 
     if (!identifier) {
@@ -484,7 +481,7 @@ export class RpcClient implements IClient {
 
     const resp = await this.processRequest<ParamGetAccountInfoBalance>(
       Method.GetStateAccount,
-      serializer.toPlainJson(accountInfoBalance) as ParamGetAccountInfoBalance
+      accountInfoBalance.toJSON() as ParamGetAccountInfoBalance
     );
 
     const result = this.parseResponse(StateGetAccountInfo, resp.result);

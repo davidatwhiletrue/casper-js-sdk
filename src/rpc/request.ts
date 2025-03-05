@@ -1,4 +1,10 @@
-import { jsonObject, jsonMember, jsonArrayMember, AnyT } from 'typedjson';
+import {
+  jsonObject,
+  jsonMember,
+  jsonArrayMember,
+  AnyT,
+  TypedJSON
+} from 'typedjson';
 import { IDValue } from './id_value';
 import {
   TransactionHash,
@@ -240,6 +246,17 @@ export class ParamGetAccountInfoBalance {
   ) {
     this.accountIdentifier = accountIdentifier;
     this.paramBlockIdentifier = paramBlockIdentifier;
+  }
+
+  toJSON(): any {
+    return Object.assign(
+      { account_identifier: this.accountIdentifier },
+      this.paramBlockIdentifier
+        ? new TypedJSON(ParamBlockIdentifier).toPlainJson(
+            this.paramBlockIdentifier
+          )
+        : {}
+    );
   }
 }
 
