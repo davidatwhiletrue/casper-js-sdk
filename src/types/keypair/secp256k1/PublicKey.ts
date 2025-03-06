@@ -1,5 +1,8 @@
 import * as secp256k1 from '@noble/secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
+import { keyEncoder } from './PrivateKey';
+import { Conversions } from '../../Conversions';
+import { readBase64WithPEM } from '../utils';
 
 /** The expected size of a secp256k1 public key in bytes. */
 const PublicKeySize = 33;
@@ -29,6 +32,18 @@ export class PublicKey {
   }
 
   /**
+   * Convert this instance's public key to PEM format
+   * @returns A PEM compliant string containing this instance's public key
+   */
+  public toPem(): string {
+    return keyEncoder.encodePublic(
+      Conversions.encodeBase16(this.key),
+      'raw',
+      'pem'
+    );
+  }
+
+  /**
    * Verifies a signature for a given message.
    * Uses the secp256k1 algorithm to validate if the provided signature matches
    * the public key for the given message.
@@ -36,10 +51,7 @@ export class PublicKey {
    * @param signature - The signature to verify. Supports both raw (64-byte R || S) and DER formats.
    * @returns A promise that resolves to `true` if the signature is valid, or `false` otherwise.
    */
-  verifySignature(
-    message: Uint8Array,
-    signature: Uint8Array
-  ): boolean {
+  verifySignature(message: Uint8Array, signature: Uint8Array): boolean {
     let compactSignature: Uint8Array;
 
     if (signature.length === 64) {
@@ -58,6 +70,24 @@ export class PublicKey {
     const hash = sha256(message);
 
     return secp256k1.verify(compactSignature, hash, this.key);
+  }
+
+  /**
+   * Creates a PrivateKey instance from a PEM-encoded string.
+   * @param content - The PEM string representing the private key.
+   * @returns A new PrivateKey instance.
+   * @throws Error if the content cannot be properly parsed.
+   */
+  static fromPem(content: string): PublicKey {
+    const publicKeyBytes = readBase64WithPEM(content);
+
+    const rawKeyHex = keyEncoder.encodePublic(
+      Buffer.from(publicKeyBytes),
+      'der',
+      'raw'
+    );
+
+    return new PublicKey(new Uint8Array(Buffer.from(rawKeyHex, 'hex')));
   }
 
   /**

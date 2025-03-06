@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { PublicKey, PrivateKey, KeyAlgorithm } from '../../../types';
+import { KeyAlgorithm, PrivateKey, PublicKey } from '../../../types';
 
 describe('PublicKey', () => {
   it('should work PublicKey fromHex and toHex', async function() {

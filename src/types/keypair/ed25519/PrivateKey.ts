@@ -2,7 +2,7 @@ import * as ed25519 from '@noble/ed25519';
 import { PrivateKeyInternal } from '../PrivateKey';
 import { sha512 } from '@noble/hashes/sha512';
 import { Conversions } from '../../Conversions';
-import { readBase64WithPEM } from '../utils';
+import { parseKey, readBase64WithPEM } from '../utils';
 
 ed25519.utils.sha512Sync = (...m) => sha512(ed25519.utils.concatBytes(...m));
 
@@ -133,24 +133,7 @@ export class PrivateKey implements PrivateKeyInternal {
     const privateKeyBytes = readBase64WithPEM(content);
 
     return new PrivateKey(
-      new Uint8Array(Buffer.from(PrivateKey.parsePrivateKey(privateKeyBytes)))
+      new Uint8Array(Buffer.from(parseKey(privateKeyBytes, 0, 32)))
     );
-  }
-
-  private static parsePrivateKey(bytes: Uint8Array) {
-    const len = bytes.length;
-
-    // prettier-ignore
-    const key =
-      (len === 32) ? bytes :
-        (len === 64) ? Buffer.from(bytes).slice(0, 32) :
-          (len > 32 && len < 64) ? Buffer.from(bytes).slice(len % 32) :
-            null;
-
-    if (key == null || key.length !== 32) {
-      throw Error(`Unexpected key length: ${len}`);
-    }
-
-    return key;
   }
 }

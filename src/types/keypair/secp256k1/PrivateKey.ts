@@ -9,7 +9,7 @@ import { readBase64WithPEM } from '../utils';
 secp256k1.utils.hmacSha256Sync = (k, ...m) =>
   hmac(sha256, k, secp256k1.utils.concatBytes(...m));
 
-const keyEncoder = new KeyEncoder('secp256k1');
+export const keyEncoder = new KeyEncoder('secp256k1');
 
 /**
  * Represents a secp256k1 private key, supporting key generation, signing, and PEM encoding.

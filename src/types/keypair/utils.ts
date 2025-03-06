@@ -29,3 +29,28 @@ export function readBase64WithPEM(content: string): Uint8Array {
     .trim();
   return Conversions.decodeBase64(base64);
 }
+
+/**
+ * Parses and validates a key in a certain range "from" to "to"
+ * @param {Uint8Array} bytes The key to be parsed and validated
+ * @param {number} from The starting index from which to parse the key
+ * @param {number} to The ending index from which to parse the key
+ * @returns The parsed key
+ * @throws `Error` if the key is of an unexpected length
+ */
+export const parseKey = (bytes: Uint8Array, from: number, to: number) => {
+  const len = bytes.length;
+
+  const key =
+    len === 32
+      ? bytes
+      : len === 64
+      ? Buffer.from(bytes).slice(from, to)
+      : len > 32 && len < 64
+      ? Buffer.from(bytes).slice(len % 32)
+      : null;
+  if (key == null || key.length !== 32) {
+    throw Error(`Unexpected key length: ${len}`);
+  }
+  return key;
+};

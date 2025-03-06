@@ -51,6 +51,12 @@ interface PublicKeyInternal {
    * @returns A promise that resolves to a boolean indicating the validity of the signature.
    */
   verifySignature(message: Uint8Array, sig: Uint8Array): boolean;
+
+  /**
+   * Convert this instance's public key to PEM format
+   * @returns A PEM compliant string containing this instance's public key
+   */
+  toPem(): string;
 }
 
 /**
@@ -233,22 +239,37 @@ export class PublicKey {
    * @returns A promise that resolves to a boolean indicating the validity of the signature.
    * @throws Error if the signature or public key is empty, or if the signature is invalid.
    */
-  verifySignature(
-    message: Uint8Array,
-    sig: Uint8Array
-  ): boolean {
+  verifySignature(message: Uint8Array, sig: Uint8Array): boolean {
     if (sig.length <= 1) throw ErrEmptySignature;
     if (!this.key) throw ErrEmptyPublicKey;
 
     const sigWithoutAlgByte = sig.slice(1);
-    const signature = this.key.verifySignature(
-      message,
-      sigWithoutAlgByte
-    );
+    const signature = this.key.verifySignature(message, sigWithoutAlgByte);
 
     if (!signature) throw ErrInvalidSignature;
 
     return signature;
+  }
+
+  public toPem(): string {
+    return this.key!.toPem();
+  }
+
+  public static fromPem(content: string, algorithm: KeyAlgorithm) {
+    let key: PublicKeyInternal | null = null;
+
+    switch (algorithm) {
+      case KeyAlgorithm.ED25519:
+        key = Ed25519PublicKey.fromPem(content);
+        break;
+      case KeyAlgorithm.SECP256K1:
+        key = Secp256k1PublicKey.fromPem(content);
+        break;
+      default:
+        throw ErrInvalidPublicKeyAlgo;
+    }
+
+    return new PublicKey(algorithm, key);
   }
 
   /**
