@@ -1,21 +1,21 @@
 import { expect } from 'chai';
 
-import { PublicKey, PrivateKey, KeyAlgorithm } from '../../../types';
+import { KeyAlgorithm, PrivateKey, PublicKey } from '../../../types';
 
 describe('PublicKey', () => {
-  it('should work PublicKey fromHex and toHex', async function() {
-    const newKeySecp = await PrivateKey.generate(KeyAlgorithm.SECP256K1);
+  it('should work PublicKey fromHex and toHex', () => {
+    const newKeySecp = PrivateKey.generate(KeyAlgorithm.SECP256K1);
     const hashSecp = newKeySecp.publicKey.toHex();
     const publicKeySecp = PublicKey.fromHex(hashSecp);
     expect(hashSecp).to.deep.equal(publicKeySecp.toHex());
 
-    const newKeyEd = await PrivateKey.generate(KeyAlgorithm.ED25519);
+    const newKeyEd = PrivateKey.generate(KeyAlgorithm.ED25519);
     const hashEd = newKeyEd.publicKey.toHex();
     const publicKeyEd = PublicKey.fromHex(hashEd);
     expect(hashEd).to.deep.equal(publicKeyEd.toHex());
   });
 
-  it('should work PublicKey fromHex and toHex with exact hash', async function() {
+  it('should work PublicKey fromHex and toHex with exact hash', () => {
     const hash =
       '0203b9b4cd6085590b68bfccaf7ea1744766e5225928beba99155a1bd79870f7a986';
 
@@ -23,7 +23,7 @@ describe('PublicKey', () => {
     expect(hash).to.deep.equal(publicKey.toHex());
   });
 
-  it('should produce checksummed public key hex', async function() {
+  it('should produce checksummed public key hex', () => {
     const hash =
       '0203E0fb0E4c25be97F2fE87b3067984D28ee7e32b400ce240e52DEd452c49a79567';
 
