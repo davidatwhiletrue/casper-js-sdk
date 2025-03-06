@@ -21,6 +21,7 @@ import {
   toBytesU32,
   toBytesU64
 } from './ByteConverters';
+import { CLValue } from './clvalue';
 
 /**
  * Represents the header of a deploy in the blockchain.
@@ -324,6 +325,29 @@ export class Deploy {
     approvals: Approval[] = []
   ): Deploy {
     return new Deploy(hash, header, payment, session, approvals);
+  }
+
+  /**
+   * Adds a runtime argument to a `Deploy` object
+   * @param deploy The `Deploy` object for which to add the runtime argument
+   * @param name The name of the runtime argument
+   * @param value The value of the runtime argument
+   * @returns The original `Deploy` with the additional runtime argument
+   * @remarks Will fail if the `Deploy` has already been signed
+   */
+  public static addArgToDeploy(
+    deploy: Deploy,
+    name: string,
+    value: CLValue
+  ): Deploy {
+    if (deploy.approvals.length !== 0) {
+      throw Error('Can not add argument to already signed deploy.');
+    }
+
+    const deploySession = deploy.session;
+    deploySession.setArg(name, value);
+
+    return Deploy.makeDeploy(deploy.header, deploy.payment, deploy.session);
   }
 
   /**
