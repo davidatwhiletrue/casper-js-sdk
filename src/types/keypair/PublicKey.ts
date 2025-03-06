@@ -255,6 +255,13 @@ export class PublicKey {
     return this.key!.toPem();
   }
 
+  /**
+   * Creates a PublicKey instance from a PEM-encoded string.
+   * @param content - The PEM string representing the private key.
+   * @param algorithm - The KeyAlgorithm of PEM
+   * @returns A new PublicKey instance.
+   * @throws Error if the content cannot be properly parsed.
+   */
   public static fromPem(content: string, algorithm: KeyAlgorithm) {
     let key: PublicKeyInternal | null = null;
 

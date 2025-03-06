@@ -73,9 +73,9 @@ export class PublicKey {
   }
 
   /**
-   * Creates a PrivateKey instance from a PEM-encoded string.
+   * Creates a PublicKey instance from a PEM-encoded string.
    * @param content - The PEM string representing the private key.
-   * @returns A new PrivateKey instance.
+   * @returns A new PublicKey instance.
    * @throws Error if the content cannot be properly parsed.
    */
   static fromPem(content: string): PublicKey {
