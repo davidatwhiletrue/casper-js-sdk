@@ -295,7 +295,13 @@ export class InfoGetTransactionResult {
   @jsonMember({ name: 'api_version', constructor: String })
   apiVersion: string;
 
-  @jsonMember({ constructor: Transaction })
+  @jsonMember({
+    constructor: Transaction,
+    deserializer: json => {
+      if (!json) return;
+      return Transaction.fromJSON(json);
+    }
+  })
   transaction: Transaction;
 
   @jsonMember({ name: 'execution_info', constructor: ExecutionInfo })

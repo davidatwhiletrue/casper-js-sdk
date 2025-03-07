@@ -592,7 +592,14 @@ export class TransactionWrapper {
    * The version 1 transaction object, if applicable.
    * This will contain the details of a TransactionV1, which represents the first version of a transaction.
    */
-  @jsonMember({ name: 'Version1', constructor: TransactionV1 })
+  @jsonMember({
+    name: 'Version1',
+    constructor: TransactionV1,
+    deserializer: json => {
+      if (!json) return;
+      return TransactionV1.fromJSON(json);
+    }
+  })
   transactionV1?: TransactionV1;
 
   /**

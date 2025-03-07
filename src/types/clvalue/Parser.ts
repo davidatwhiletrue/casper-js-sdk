@@ -61,7 +61,7 @@ export class CLValueParser {
   public static fromJSON(json: any): CLValue {
     const clType = CLTypeParser.fromInterface(json.cl_type);
 
-    const clEntity = this.fromBytesByType(
+    const clEntity = CLValueParser.fromBytesByType(
       Conversions.decodeBase16(json.bytes),
       clType
     );
@@ -171,8 +171,9 @@ export class CLValueParser {
         result.uref = uref?.result;
         return { result, bytes: uref?.bytes };
       case TypeID.Any:
-        result.any = new CLValueAny(bytes);
-        return { result, bytes };
+        const anyType = new CLValueAny(bytes);
+        result.any = anyType;
+        return { result, bytes: new Uint8Array([]) };
       case TypeID.PublicKey:
         const pubKey = PublicKey.fromBytes(bytes);
         result.publicKey = pubKey?.result;
