@@ -1,6 +1,6 @@
 import { concat } from '@ethersproject/bytes';
 
-import { CLTypeList } from './cltype';
+import { CLTypeList, TypeID } from './cltype';
 import { CLValue, IResultWithBytes } from './CLValue';
 import { CLValueUInt32 } from './Numeric';
 import { CLValueParser } from './Parser';
@@ -37,7 +37,8 @@ export class CLValueList {
    */
   public bytes(): Uint8Array {
     const valueByteList = this.elements.map(e => e.bytes());
-    valueByteList.splice(0, 0, toBytesU32(this.size()));
+    this?.type?.elementsType?.getTypeID() !== TypeID.Any &&
+      valueByteList.splice(0, 0, toBytesU32(this.size()));
     return concat(valueByteList);
   }
 
@@ -137,7 +138,8 @@ export class CLValueList {
   ): IResultWithBytes<CLValueList> {
     const { result: u32, bytes: u32Bytes } = CLValueUInt32.fromBytes(source);
     const size = u32.toNumber();
-    let remainder = u32Bytes;
+    let remainder =
+      clType?.elementsType?.getTypeID() === TypeID.Any ? source : u32Bytes;
     const elements: CLValue[] = [];
 
     for (let i = 0; i < size; i++) {

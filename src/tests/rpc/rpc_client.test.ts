@@ -5,13 +5,15 @@ import {
   ChainGetBlockResult,
   ChainGetBlockResultV1Compatible,
   InfoGetStatusResult,
+  InfoGetTransactionResult,
   InfoGetTransactionResultV1Compatible
 } from '../../rpc';
 import { BlockBodyV2 } from '../../types';
 import {
   getBlockByHashJson,
   getStatusJson,
-  infoGetTransactionResultV1Json
+  infoGetTransactionResultV1Json,
+  addReservationTransactionJson
 } from '../data';
 
 describe('RPC Client', () => {
@@ -128,6 +130,31 @@ describe('RPC Client', () => {
     );
     expect(result.blockSync.historical?.blockHash?.toHex()).to.deep.equal(
       getStatusJson.result.block_sync.historical.block_hash
+    );
+  });
+
+  it('should correctly parse AddReservation Transaction with Any type', () => {
+    const tx = InfoGetTransactionResult.fromJSON(
+      addReservationTransactionJson
+    )!;
+
+    expect(tx).to.be.not.undefined;
+    expect(tx).to.be.not.empty;
+    expect(tx?.rawJSON).to.deep.equal(addReservationTransactionJson);
+    expect(tx.transaction.hash.toHex()).to.deep.equal(
+      addReservationTransactionJson.transaction.Version1.hash
+    );
+    expect(tx.transaction.entryPoint.toJSON()).to.deep.equal(
+      addReservationTransactionJson.transaction.Version1.payload.fields
+        .entry_point
+    );
+    expect(tx.transaction.scheduling.toJSON()).to.deep.equal(
+      addReservationTransactionJson.transaction.Version1.payload.fields
+        .scheduling
+    );
+    expect(tx.transaction.initiatorAddr.publicKey?.toHex()).to.deep.equal(
+      addReservationTransactionJson.transaction.Version1.payload.initiator_addr
+        .PublicKey
     );
   });
 });
