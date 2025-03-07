@@ -149,9 +149,6 @@ export class TransactionV1 {
     const payloadBytes = this.payload!.toBytes();
     const calculatedHash = new Hash(byteHash(payloadBytes));
 
-    // console.log(calculatedHash.toBytes());
-    // console.log(this.hash.toBytes());
-
     if (!this.hash.equals(calculatedHash)) throw ErrInvalidTransactionHash;
 
     for (const approval of this.approvals) {
