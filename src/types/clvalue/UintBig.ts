@@ -92,7 +92,8 @@ const fromBytesBigIntBase = (
 
   return {
     result: BigNumber.from(bigIntBytes.slice().reverse()),
-    bytes: uintBytes
+    bytes: uintBytes,
+    originalBytes: rawBytes
   };
 };
 
@@ -105,7 +106,10 @@ export const fromBytesUInt128 = (
   rawBytes: Uint8Array
 ): IResultWithBytes<CLValueUInt128> => {
   const value = fromBytesBigIntBase(rawBytes, 128);
-  return { result: new CLValueUInt128(value?.result), bytes: value?.bytes };
+  return {
+    result: new CLValueUInt128(value?.result, value?.originalBytes),
+    bytes: value?.bytes
+  };
 };
 
 /**
@@ -117,7 +121,10 @@ export const fromBytesUInt256 = (
   rawBytes: Uint8Array
 ): IResultWithBytes<CLValueUInt256> => {
   const value = fromBytesBigIntBase(rawBytes, 256);
-  return { result: new CLValueUInt256(value?.result), bytes: value?.bytes };
+  return {
+    result: new CLValueUInt256(value?.result, value?.originalBytes),
+    bytes: value?.bytes
+  };
 };
 
 /**
@@ -129,5 +136,8 @@ export const fromBytesUInt512 = (
   rawBytes: Uint8Array
 ): IResultWithBytes<CLValueUInt512> => {
   const value = fromBytesBigIntBase(rawBytes, 512);
-  return { result: new CLValueUInt512(value?.result), bytes: value?.bytes };
+  return {
+    result: new CLValueUInt512(value?.result, value?.originalBytes),
+    bytes: value?.bytes
+  };
 };

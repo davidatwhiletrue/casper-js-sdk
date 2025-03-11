@@ -65,6 +65,7 @@ interface IValue {
 export interface IResultWithBytes<T> {
   result: T;
   bytes: Uint8Array;
+  originalBytes?: Uint8Array;
 }
 
 /**
