@@ -4,13 +4,14 @@ import { fromBytesUInt256 } from '../UintBig';
 import { IResultWithBytes } from '../CLValue';
 import { toBytesU256 } from '../../ByteConverters';
 import { CLValueNumeric } from './Abstract';
+import { arrayEquals } from '../../../utils';
 
 /**
  * Represents a 256-bit unsigned integer value in the Casper type system.
  */
 export class CLValueUInt256 extends CLValueNumeric {
-  constructor(value: BigNumberish) {
-    super(value);
+  constructor(value: BigNumberish, originalBytes?: Uint8Array) {
+    super(value, originalBytes);
   }
 
   /**
@@ -18,6 +19,13 @@ export class CLValueUInt256 extends CLValueNumeric {
    * @returns A Uint8Array representing the bytes of the UInt256 value.
    */
   public bytes(): Uint8Array {
+    if (
+      this.originalBytes &&
+      arrayEquals(this.originalBytes, Uint8Array.from([1, 0]))
+    ) {
+      return this.originalBytes;
+    }
+
     return toBytesU256(this.value);
   }
 

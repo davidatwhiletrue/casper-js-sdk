@@ -6,13 +6,15 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
  */
 export abstract class CLValueNumeric {
   protected value: BigNumber;
+  protected originalBytes?: Uint8Array;
 
   /**
    * The constructor is protected to ensure this class cannot be instantiated directly.
    * Subclasses can call this constructor using `super`.
    */
-  protected constructor(value: BigNumberish) {
+  protected constructor(value: BigNumberish, originalBytes?: Uint8Array) {
     this.value = BigNumber.from(value);
+    this.originalBytes = originalBytes;
   }
 
   /**

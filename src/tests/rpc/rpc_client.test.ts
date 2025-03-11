@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import {
   ChainGetBlockResult,
   ChainGetBlockResultV1Compatible,
+  InfoGetDeployResult,
   InfoGetStatusResult,
   InfoGetTransactionResult,
   InfoGetTransactionResultV1Compatible
@@ -13,7 +14,8 @@ import {
   getBlockByHashJson,
   getStatusJson,
   infoGetTransactionResultV1Json,
-  addReservationTransactionJson
+  addReservationTransactionJson,
+  infoGetDeployJson
 } from '../data';
 
 describe('RPC Client', () => {
@@ -155,6 +157,24 @@ describe('RPC Client', () => {
     expect(tx.transaction.initiatorAddr.publicKey?.toHex()).to.deep.equal(
       addReservationTransactionJson.transaction.Version1.payload.initiator_addr
         .PublicKey
+    );
+  });
+
+  it('should correctly parse deploy', () => {
+    const deployResult = new TypedJSON(InfoGetDeployResult).parse(
+      infoGetDeployJson
+    )!;
+    const tx = deployResult.toInfoGetTransactionResult();
+
+    expect(deployResult).to.be.not.undefined;
+    expect(deployResult).to.be.not.empty;
+    expect(tx).to.be.not.undefined;
+    expect(tx).to.be.not.empty;
+    expect(tx.transaction.hash.toHex()).to.deep.equal(
+      infoGetDeployJson.deploy.hash
+    );
+    expect(tx.transaction.entryPoint.customEntryPoint).to.deep.equal(
+      infoGetDeployJson.deploy.session.StoredContractByHash.entry_point
     );
   });
 });
