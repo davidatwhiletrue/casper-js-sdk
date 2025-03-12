@@ -15,7 +15,8 @@ import {
   getStatusJson,
   infoGetTransactionResultV1Json,
   addReservationTransactionJson,
-  infoGetDeployJson
+  infoGetDeployJson,
+  transactionWithEraJson
 } from '../data';
 
 describe('RPC Client', () => {
@@ -176,5 +177,23 @@ describe('RPC Client', () => {
     expect(tx.transaction.entryPoint.customEntryPoint).to.deep.equal(
       infoGetDeployJson.deploy.session.StoredContractByHash.entry_point
     );
+  });
+
+  it('should correctly parse Transaction with era-id Key', () => {
+    const tx = InfoGetTransactionResultV1Compatible.fromJSON(
+      transactionWithEraJson.data
+    )!;
+
+    expect(tx).to.be.not.undefined;
+    expect(tx).to.be.not.empty;
+
+    expect(tx.transaction?.transactionV1?.hash.toHex()).to.deep.equal(
+      transactionWithEraJson.data.transaction.Version1.hash
+    );
+    expect(
+      tx.transaction?.transactionV1?.payload.fields.args
+        .getByName('key_uref_name')
+        ?.key?.toPrefixedString()
+    ).to.deep.equal('era-42');
   });
 });

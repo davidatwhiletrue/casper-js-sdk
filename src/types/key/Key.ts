@@ -511,7 +511,7 @@ export class Key {
         result.deploy = Hash.fromBytes(deployBytes)?.result;
         return { result, bytes: deployRemainder };
       case KeyTypeID.EraId:
-        const [eraBytes, eraRemainder] = splitAt(64, contentBytes);
+        const [eraBytes, eraRemainder] = splitAt(1, contentBytes);
         result.era = Era.fromBytes(eraBytes);
         return { result, bytes: eraRemainder };
       case KeyTypeID.Balance:
