@@ -3,6 +3,7 @@ import { jsonMember, jsonObject } from 'typedjson';
 
 import { Hash } from './Hash';
 import { IResultWithBytes } from '../clvalue';
+import { EntityAddr } from './EntityAddr';
 
 /** Prefix for topics in MessageAddr. */
 const TopicPrefix = 'topic-';
@@ -17,29 +18,17 @@ const PrefixNameMessage = 'message-';
  */
 @jsonObject
 export class MessageAddr {
-  /**
-   * Creates an instance of MessageAddr.
-   * @param hashAddr - The address of the associated entity.
-   * @param topicNameHash - The hash of the topic name.
-   * @param messageIndex - Optional index of the message.
-   */
-  constructor(hashAddr: Hash, topicNameHash: Hash, messageIndex?: number) {
-    this.hashAddr = hashAddr;
-    this.topicNameHash = topicNameHash;
-    this.messageIndex = messageIndex;
-  }
-
   /** The address of the associated entity. */
   @jsonMember({
-    name: 'HashAddr',
-    constructor: Hash,
+    name: 'EntityAddr',
+    constructor: EntityAddr,
     deserializer: json => {
       if (!json) return;
-      return Hash.fromJSON(json);
+      return EntityAddr.fromJSON(json);
     },
     serializer: value => value.toJSON()
   })
-  public hashAddr: Hash;
+  public entityAddr: EntityAddr;
 
   /** The hash of the topic name associated with this message. */
   @jsonMember({ name: 'TopicNameHash', constructor: Hash })
@@ -50,7 +39,23 @@ export class MessageAddr {
   public messageIndex?: number;
 
   /**
-   * Instantiates a MessageAddr from its string representation.
+   * Creates an instance of MessageAddr.
+   * @param entityAddr - The address of the associated entity.
+   * @param topicNameHash - The hash of the topic name.
+   * @param messageIndex - Optional index of the message.
+   */
+  constructor(
+    entityAddr: EntityAddr,
+    topicNameHash: Hash,
+    messageIndex?: number
+  ) {
+    this.entityAddr = entityAddr;
+    this.topicNameHash = topicNameHash;
+    this.messageIndex = messageIndex;
+  }
+
+  /**
+   * Instantiates a `MessageAddr` from its string representation.
    * The string should follow the prefixed format used in the system.
    * @param source - The string representation of the MessageAddr.
    * @returns A new MessageAddr instance.
@@ -73,38 +78,35 @@ export class MessageAddr {
       source = source.substring(TopicPrefix.length);
       const parts = source.split('-');
 
-      if (parts.length === 2) {
-        hashAddr = parts[0];
-        topicHash = parts[1];
-      } else {
+      if (parts.length !== 4) {
         throw new Error(
           'Key not valid. It should have a hash address and a topic hash.'
         );
       }
+
+      hashAddr = `${parts[0]}-${parts[1]}-${parts[2]}`;
+      topicHash = parts[3];
     } else {
       const parts = source.split('-');
 
-      if (parts.length === 3) {
-        hashAddr = parts[0];
-        topicHash = parts[1];
-
-        if (parts[2].length === 0) {
-          throw new Error('Key not valid. Expected a non-empty message index.');
-        }
-        index = parseInt(parts[2], 16);
-
-        if (isNaN(index)) {
-          throw new Error('Key not valid. Index is not a valid number.');
-        }
-      } else {
+      if (parts.length !== 5) {
         throw new Error(
           'Key not valid. It should have a hash address, a topic hash, and a message index.'
         );
       }
+
+      hashAddr = `${parts[0]}-${parts[1]}-${parts[2]}`;
+      topicHash = parts[3];
+
+      if (parts[4].length === 0) {
+        throw new Error('Key not valid. Expected a non-empty message index.');
+      }
+
+      index = parseInt(parts[4], 16);
     }
 
     return new MessageAddr(
-      Hash.fromHex(hashAddr),
+      EntityAddr.fromPrefixedString(hashAddr),
       Hash.fromHex(topicHash),
       index
     );
@@ -120,7 +122,7 @@ export class MessageAddr {
     if (!this.messageIndex) {
       result += TopicPrefix;
     }
-    result += this.hashAddr.toHex();
+    result += this.entityAddr.toPrefixedString();
     result += '-' + this.topicNameHash.toHex();
 
     if (this.messageIndex !== undefined) {
@@ -147,7 +149,7 @@ export class MessageAddr {
    * @returns A new `MessageAddr` instance wrapped in an `IResultWithBytes`.
    */
   static fromBytes(bytes: Uint8Array): IResultWithBytes<MessageAddr> {
-    const entityAddr = Hash.fromBytes(bytes);
+    const entityAddr = EntityAddr.fromBytes(bytes);
     const topicNameHash = Hash.fromBytes(bytes);
 
     let messageIndex: number | undefined;
@@ -172,7 +174,7 @@ export class MessageAddr {
    * @returns A `Uint8Array` representing the `MessageAddr`.
    */
   toBytes(): Uint8Array {
-    const entityBytes = this.hashAddr.toBytes();
+    const entityBytes = this.entityAddr.toBytes();
     const topicBytes = this.topicNameHash.toBytes();
     const result = new Uint8Array(
       entityBytes.length +
