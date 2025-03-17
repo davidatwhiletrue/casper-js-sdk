@@ -139,8 +139,14 @@ export class ExecutionResultV2 {
   @jsonMember({
     name: 'limit',
     constructor: Number,
-    deserializer: json => BigNumber.from(json).toNumber(),
-    serializer: value => BigNumber.from(value).toString()
+    deserializer: json => {
+      if (!json) return;
+      return BigNumber.from(json).toNumber();
+    },
+    serializer: value => {
+      if (!value) return;
+      return BigNumber.from(value).toString();
+    }
   })
   public limit: number;
 
@@ -155,14 +161,42 @@ export class ExecutionResultV2 {
   })
   public consumed: number;
 
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => {
+      if (!json) return;
+      return BigNumber.from(json).toNumber();
+    },
+    serializer: value => {
+      if (!value) return;
+      return BigNumber.from(value).toString();
+    }
+  })
+  public refund: number;
+
+  /**
+   * The gas price of the era.
+   */
+  @jsonMember({
+    constructor: Number,
+    name: 'current_price'
+  })
+  public currentPrice: number;
+
   /**
    * The cost associated with the transaction execution.
    */
   @jsonMember({
     name: 'cost',
     constructor: Number,
-    deserializer: json => BigNumber.from(json).toNumber(),
-    serializer: value => BigNumber.from(value).toString()
+    deserializer: json => {
+      if (!json) return;
+      return BigNumber.from(json).toNumber();
+    },
+    serializer: value => {
+      if (!value) return;
+      return BigNumber.from(value).toString();
+    }
   })
   public cost: number;
 
@@ -286,10 +320,38 @@ export class ExecutionResult {
    */
   @jsonMember({
     constructor: Number,
-    deserializer: json => BigNumber.from(json).toNumber(),
-    serializer: value => BigNumber.from(value).toString()
+    deserializer: json => {
+      if (!json) return;
+      return BigNumber.from(json).toNumber();
+    },
+    serializer: value => {
+      if (!value) return;
+      return BigNumber.from(value).toString();
+    }
   })
   public consumed: number;
+
+  @jsonMember({
+    constructor: Number,
+    deserializer: json => {
+      if (!json) return;
+      return BigNumber.from(json).toNumber();
+    },
+    serializer: value => {
+      if (!value) return;
+      return BigNumber.from(value).toString();
+    }
+  })
+  public refund: number;
+
+  /**
+   * The gas price of the era.
+   */
+  @jsonMember({
+    constructor: Number,
+    name: 'current_price'
+  })
+  public currentPrice: number;
 
   /**
    * The cost associated with the transaction execution.
@@ -366,6 +428,8 @@ export class ExecutionResult {
         executionResult.transfers = executionResultV2.transfers;
         executionResult.sizeEstimate = executionResultV2.sizeEstimate;
         executionResult.effects = executionResultV2.effects;
+        executionResult.currentPrice = executionResultV2?.currentPrice;
+        executionResult.refund = executionResultV2?.refund;
         executionResult.originExecutionResultV2 = executionResultV2;
         return executionResult;
       }
@@ -437,6 +501,8 @@ export class ExecutionResult {
       result.payment = null;
       result.transfers = transfers;
       result.effects = transforms;
+      result.refund = 0;
+      result.currentPrice = 1;
       result.originExecutionResultV1 = v1;
 
       return result;
