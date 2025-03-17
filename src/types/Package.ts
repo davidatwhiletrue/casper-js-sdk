@@ -1,5 +1,5 @@
 import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';
-import { AddressableEntityHash, URef } from './key';
+import { EntityAddr, URef } from './key';
 
 /**
  * Represents a key that uniquely identifies the version of an entity, including both the entity version and the protocol version.
@@ -40,12 +40,12 @@ export class EntityVersionAndHash {
    * This is used to uniquely identify an entity in a decentralized environment.
    */
   @jsonMember({
-    name: 'addressable_entity_hash',
-    constructor: AddressableEntityHash,
-    deserializer: json => AddressableEntityHash.fromJSON(json),
-    serializer: (value: AddressableEntityHash) => value.toJSON()
+    name: 'entity_addr',
+    constructor: EntityAddr,
+    deserializer: json => EntityAddr.fromJSON(json),
+    serializer: (value: EntityAddr) => value.toJSON()
   })
-  addressableEntityHash: AddressableEntityHash;
+  addressableEntity: EntityAddr;
 
   /**
    * The key representing the version of the entity.
@@ -59,14 +59,14 @@ export class EntityVersionAndHash {
   /**
    * Creates a new instance of `EntityVersionAndHash` with an addressable entity hash and an entity version key.
    *
-   * @param addressableEntityHash The addressable entity hash for the entity.
+   * @param addressableEntity The addressable entity hash for the entity.
    * @param entityVersionKey The version key of the entity.
    */
   constructor(
-    addressableEntityHash: AddressableEntityHash,
+    addressableEntity: EntityAddr,
     entityVersionKey: EntityVersionKey
   ) {
-    this.addressableEntityHash = addressableEntityHash;
+    this.addressableEntity = addressableEntity;
     this.entityVersionKey = entityVersionKey;
   }
 }
