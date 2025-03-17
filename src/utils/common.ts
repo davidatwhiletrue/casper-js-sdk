@@ -14,3 +14,11 @@ export function getEnumKeyByValue<T extends object>(
 export const arrayEquals = (a: Uint8Array, b: Uint8Array): boolean => {
   return a.length === b.length && a.every((val, index) => val === b[index]);
 };
+
+/**
+ * Utility function to sleep for a given duration.
+ * @param ms - Duration in milliseconds.
+ * @returns A promise that resolves after the given duration.
+ */
+export const sleep = (ms: number): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, ms));

@@ -67,6 +67,7 @@ import {
   AuctionState
 } from '../types';
 import { HttpError } from './error';
+import { sleep } from '../utils';
 
 export class RpcClient implements IClient {
   private handler: IHandler;
@@ -1379,6 +1380,72 @@ export class RpcClient implements IClient {
     result.rawJSON = resp.result;
 
     return result;
+  }
+
+  private async waitForConfirmation<T>(
+    getInfo: (hash: string) => Promise<T>,
+    hash: string,
+    timeout: number
+  ): Promise<T> {
+    const timer = setTimeout(() => {
+      throw new Error('Timeout');
+    }, timeout);
+
+    while (true) {
+      const info = await getInfo(hash);
+      const executionResult = (info as any)?.executionInfo?.executionResult;
+
+      let successful = false;
+
+      if (!executionResult) {
+        successful = false;
+      } else {
+        return info;
+      }
+
+      if (successful) {
+        clearTimeout(timer);
+        return info;
+      } else {
+        await sleep(400);
+      }
+    }
+  }
+
+  /**
+   * Waits for a transaction to be confirmed on-chain.
+   * @param transaction - The transaction instance.
+   * @param timeout - Optional timeout in milliseconds (default: 6000ms).
+   * @returns A promise that resolves to `InfoGetTransactionResult` if successful.
+   * @throws An error if the transaction times out.
+   */
+  public async waitForTransaction(
+    transaction: Transaction,
+    timeout = 6000
+  ): Promise<InfoGetTransactionResult> {
+    return this.waitForConfirmation(
+      this.getTransactionByTransactionHash.bind(this),
+      transaction?.hash?.toHex(),
+      timeout
+    );
+  }
+
+  /**
+   * Waits for a deploy to be confirmed on-chain.
+   * @param deploy - The deploy instance.
+   * @param timeout - Optional timeout in milliseconds (default: 60000ms).
+   * @returns A promise that resolves to `InfoGetDeployResult` if successful.
+   * @throws An error if the deploy times out.
+   */
+  public async waitForDeploy(
+    deploy: Deploy,
+    timeout = 60000
+  ): Promise<InfoGetDeployResult> {
+    return this.waitForConfirmation(
+      this.getDeploy.bind(this),
+      deploy?.hash?.toHex(),
+      timeout
+    );
   }
 
   private parseResponse<T>(type: new (params: any) => T, response: any): T {
