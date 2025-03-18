@@ -1382,33 +1382,54 @@ export class RpcClient implements IClient {
     return result;
   }
 
+  /**
+   * Waits for a transaction to be confirmed within a given timeout period.
+   * Implements a retry mechanism to handle transient errors from the getInfo function.
+   *
+   * @template T - The expected return type of the transaction info.
+   * @param getInfo - A function that fetches transaction info based on its hash.
+   * @param hash - The transaction hash to monitor.
+   * @param timeout - The maximum time (in milliseconds) to wait for confirmation.
+   * @param maxRetries - The maximum number of retries for transient errors.
+   * @param retryDelay - The delay (in milliseconds) between retry attempts.
+   * @returns A promise that resolves with the transaction info if confirmed, otherwise rejects on timeout or persistent errors.
+   * @throws {Error} If the timeout is reached before confirmation or if getInfo fails consistently beyond the allowed retries.
+   */
   private async waitForConfirmation<T>(
     getInfo: (hash: string) => Promise<T>,
     hash: string,
-    timeout: number
+    timeout: number,
+    maxRetries = 3,
+    retryDelay = 500
   ): Promise<T> {
     const timer = setTimeout(() => {
       throw new Error('Timeout');
     }, timeout);
 
+    let attempts = 0;
+
     while (true) {
-      const info = await getInfo(hash);
-      const executionResult = (info as any)?.executionInfo?.executionResult;
-
-      let successful = false;
-
-      if (!executionResult) {
-        successful = false;
-      } else {
-        return info;
+      try {
+        const info = await getInfo(hash);
+        if ((info as any)?.executionInfo?.executionResult) {
+          clearTimeout(timer);
+          return info;
+        }
+      } catch (error) {
+        if (attempts >= maxRetries) {
+          clearTimeout(timer);
+          throw new Error(
+            `Failed after ${maxRetries} retries: ${error.message}`
+          );
+        }
+        attempts++;
+        console.warn(
+          `Attempt ${attempts} failed: ${error.message}. Retrying in ${retryDelay}ms...`
+        );
+        await sleep(retryDelay);
+        continue;
       }
-
-      if (successful) {
-        clearTimeout(timer);
-        return info;
-      } else {
-        await sleep(400);
-      }
+      await sleep(400);
     }
   }
 
