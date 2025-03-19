@@ -67,6 +67,7 @@ import {
   AuctionState
 } from '../types';
 import { HttpError } from './error';
+import { sleep } from '../utils';
 
 export class RpcClient implements IClient {
   private handler: IHandler;
@@ -1379,6 +1380,93 @@ export class RpcClient implements IClient {
     result.rawJSON = resp.result;
 
     return result;
+  }
+
+  /**
+   * Waits for a transaction to be confirmed within a given timeout period.
+   * Implements a retry mechanism to handle transient errors from the getInfo function.
+   *
+   * @template T - The expected return type of the transaction info.
+   * @param getInfo - A function that fetches transaction info based on its hash.
+   * @param hash - The transaction hash to monitor.
+   * @param timeout - The maximum time (in milliseconds) to wait for confirmation.
+   * @param maxRetries - The maximum number of retries for transient errors.
+   * @param retryDelay - The delay (in milliseconds) between retry attempts.
+   * @returns A promise that resolves with the transaction info if confirmed, otherwise rejects on timeout or persistent errors.
+   * @throws {Error} If the timeout is reached before confirmation or if getInfo fails consistently beyond the allowed retries.
+   */
+  private async waitForConfirmation<T>(
+    getInfo: (hash: string) => Promise<T>,
+    hash: string,
+    timeout: number,
+    maxRetries = 3,
+    retryDelay = 500
+  ): Promise<T> {
+    const timer = setTimeout(() => {
+      throw new Error('Timeout');
+    }, timeout);
+
+    let attempts = 0;
+
+    while (true) {
+      try {
+        const info = await getInfo(hash);
+        if ((info as any)?.executionInfo?.executionResult) {
+          clearTimeout(timer);
+          return info;
+        }
+      } catch (error) {
+        if (attempts >= maxRetries) {
+          clearTimeout(timer);
+          throw new Error(
+            `Failed after ${maxRetries} retries: ${error.message}`
+          );
+        }
+        attempts++;
+        console.warn(
+          `Attempt ${attempts} failed: ${error.message}. Retrying in ${retryDelay}ms...`
+        );
+        await sleep(retryDelay);
+        continue;
+      }
+      await sleep(400);
+    }
+  }
+
+  /**
+   * Waits for a transaction to be confirmed on-chain.
+   * @param transaction - The transaction instance.
+   * @param timeout - Optional timeout in milliseconds (default: 6000ms).
+   * @returns A promise that resolves to `InfoGetTransactionResult` if successful.
+   * @throws An error if the transaction times out.
+   */
+  public async waitForTransaction(
+    transaction: Transaction,
+    timeout = 6000
+  ): Promise<InfoGetTransactionResult> {
+    return this.waitForConfirmation(
+      this.getTransactionByTransactionHash.bind(this),
+      transaction?.hash?.toHex(),
+      timeout
+    );
+  }
+
+  /**
+   * Waits for a deploy to be confirmed on-chain.
+   * @param deploy - The deploy instance.
+   * @param timeout - Optional timeout in milliseconds (default: 60000ms).
+   * @returns A promise that resolves to `InfoGetDeployResult` if successful.
+   * @throws An error if the deploy times out.
+   */
+  public async waitForDeploy(
+    deploy: Deploy,
+    timeout = 60000
+  ): Promise<InfoGetDeployResult> {
+    return this.waitForConfirmation(
+      this.getDeploy.bind(this),
+      deploy?.hash?.toHex(),
+      timeout
+    );
   }
 
   private parseResponse<T>(type: new (params: any) => T, response: any): T {
