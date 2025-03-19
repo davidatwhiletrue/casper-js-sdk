@@ -29,6 +29,7 @@ export interface IMakeNftTransferDeployParams {
   tokenId?: string;
   tokenHash?: string;
   timestamp?: string;
+  gasPrice?: number;
 }
 
 /**
@@ -75,7 +76,8 @@ export const makeNftTransferDeploy = ({
   ttl = DEFAULT_DEPLOY_TTL,
   tokenId,
   tokenHash,
-  timestamp
+  timestamp,
+  gasPrice = 1
 }: IMakeNftTransferDeployParams): Deploy => {
   const senderPublicKey = PublicKey.newPublicKey(senderPublicKeyHex);
 
@@ -101,6 +103,7 @@ export const makeNftTransferDeploy = ({
   deployHeader.account = senderPublicKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+  deployHeader.gasPrice = gasPrice;
 
   if (timestamp) {
     deployHeader.timestamp = Timestamp.fromJSON(timestamp);
@@ -125,7 +128,8 @@ export const makeNftTransferTransaction = ({
   tokenId,
   tokenHash,
   timestamp,
-  casperNetworkApiVersion
+  casperNetworkApiVersion,
+  gasPrice = 1
 }: IMakeNftTransferTransactionParams): Transaction => {
   if (casperNetworkApiVersion.startsWith('2.')) {
     let txBuilder = new ContractCallBuilder()
@@ -134,7 +138,7 @@ export const makeNftTransferTransaction = ({
       .from(PublicKey.fromHex(senderPublicKeyHex))
       .chainName(chainName)
       .ttl(ttl)
-      .payment(Number(paymentAmount))
+      .payment(Number(paymentAmount), gasPrice)
       .runtimeArgs(
         getRuntimeArgsForNftTransfer({
           nftStandard,

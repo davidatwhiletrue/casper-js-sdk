@@ -32,6 +32,7 @@ export interface IMakeAuctionManagerDeployParams {
   ttl?: number;
   contractHash?: string;
   timestamp?: string;
+  gasPrice?: number;
 }
 
 /**
@@ -87,7 +88,8 @@ export const makeAuctionManagerDeploy = ({
   newValidatorPublicKeyHex,
   ttl = DEFAULT_DEPLOY_TTL,
   contractHash,
-  timestamp
+  timestamp,
+  gasPrice = 1
 }: IMakeAuctionManagerDeployParams) => {
   const delegatorPublicKey = PublicKey.newPublicKey(delegatorPublicKeyHex);
   const validatorPublicKey = PublicKey.newPublicKey(validatorPublicKeyHex);
@@ -127,6 +129,7 @@ export const makeAuctionManagerDeploy = ({
   deployHeader.account = delegatorPublicKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+  deployHeader.gasPrice = gasPrice;
 
   if (timestamp) {
     deployHeader.timestamp = Timestamp.fromJSON(timestamp);
@@ -151,7 +154,8 @@ export const makeAuctionManagerTransaction = ({
   ttl = DEFAULT_DEPLOY_TTL,
   contractHash,
   timestamp,
-  casperNetworkApiVersion
+  casperNetworkApiVersion,
+  gasPrice = 1
 }: IMakeAuctionManagerTransactionParams): Transaction => {
   if (casperNetworkApiVersion.startsWith('2.')) {
     switch (contractEntryPoint) {
@@ -161,7 +165,7 @@ export const makeAuctionManagerTransaction = ({
           .from(PublicKey.fromHex(delegatorPublicKeyHex))
           .amount(amount)
           .chainName(chainName)
-          .payment(Number(paymentAmount))
+          .payment(Number(paymentAmount), gasPrice)
           .ttl(ttl);
 
         if (timestamp) {
@@ -176,7 +180,7 @@ export const makeAuctionManagerTransaction = ({
           .from(PublicKey.fromHex(delegatorPublicKeyHex))
           .amount(amount)
           .chainName(chainName)
-          .payment(Number(paymentAmount))
+          .payment(Number(paymentAmount), gasPrice)
           .ttl(ttl);
 
         if (timestamp) {
@@ -196,7 +200,7 @@ export const makeAuctionManagerTransaction = ({
           .from(PublicKey.fromHex(delegatorPublicKeyHex))
           .amount(amount)
           .chainName(chainName)
-          .payment(Number(paymentAmount))
+          .payment(Number(paymentAmount), gasPrice)
           .ttl(ttl);
 
         if (timestamp) {
