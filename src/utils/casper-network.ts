@@ -49,7 +49,8 @@ export class CasperNetwork {
     amountMotes: string | BigNumber,
     deployCost: number,
     ttl: number,
-    auctionContractHash?: string
+    auctionContractHash?: string,
+    gasPriceTolerance?: number
   ): Transaction {
     if (this.apiVersion === 2) {
       return new NativeDelegateBuilder()
@@ -57,7 +58,7 @@ export class CasperNetwork {
         .from(delegatorPublicKey)
         .amount(amountMotes)
         .chainName(networkName)
-        .payment(deployCost)
+        .payment(deployCost, gasPriceTolerance)
         .ttl(ttl)
         .build();
     }
@@ -67,7 +68,7 @@ export class CasperNetwork {
         .from(delegatorPublicKey)
         .byHash(auctionContractHash)
         .entryPoint('delegate')
-        .payment(deployCost)
+        .payment(deployCost, gasPriceTolerance)
         .chainName(networkName)
         .runtimeArgs(
           Args.fromMap({
@@ -92,7 +93,8 @@ export class CasperNetwork {
     amountMotes: string | BigNumber,
     deployCost: number,
     ttl: number,
-    auctionContractHash?: string
+    auctionContractHash?: string,
+    gasPriceTolerance?: number
   ): Transaction {
     if (this.apiVersion === 2) {
       return new NativeUndelegateBuilder()
@@ -100,7 +102,7 @@ export class CasperNetwork {
         .from(delegatorPublicKey)
         .amount(amountMotes)
         .chainName(networkName)
-        .payment(deployCost)
+        .payment(deployCost, gasPriceTolerance)
         .ttl(ttl)
         .build();
     }
@@ -111,7 +113,7 @@ export class CasperNetwork {
         .byHash(auctionContractHash)
         .entryPoint('undelegate')
         .chainName(networkName)
-        .payment(deployCost)
+        .payment(deployCost, gasPriceTolerance)
         .ttl(ttl)
         .runtimeArgs(
           Args.fromMap({
@@ -136,7 +138,8 @@ export class CasperNetwork {
     amountMotes: string | BigNumber,
     deployCost: number,
     ttl: number,
-    auctionContractHash?: string
+    auctionContractHash?: string,
+    gasPriceTolerance?: number
   ): Transaction {
     if (this.apiVersion === 2) {
       return new NativeRedelegateBuilder()
@@ -145,7 +148,7 @@ export class CasperNetwork {
         .from(delegatorPublicKey)
         .amount(amountMotes)
         .chainName(networkName)
-        .payment(deployCost)
+        .payment(deployCost, gasPriceTolerance)
         .ttl(ttl)
         .build();
     }
@@ -156,7 +159,7 @@ export class CasperNetwork {
         .byHash(auctionContractHash)
         .entryPoint('redelegate')
         .chainName(networkName)
-        .payment(deployCost)
+        .payment(deployCost, gasPriceTolerance)
         .runtimeArgs(
           Args.fromMap({
             validator: CLValue.newCLPublicKey(validatorPublicKey),
@@ -185,14 +188,15 @@ export class CasperNetwork {
     amountMotes: string,
     deployCost: number,
     ttl: number,
-    id: number
+    id: number,
+    gasPriceTolerance?: number
   ): Transaction {
     const transferBuilder = new NativeTransferBuilder()
       .from(senderPublicKey)
       .target(recipientPublicKey)
       .amount(amountMotes)
       .chainName(networkName)
-      .payment(deployCost)
+      .payment(deployCost, gasPriceTolerance)
       .ttl(ttl)
       .id(id);
     if (this.apiVersion === 2) {
@@ -209,7 +213,8 @@ export class CasperNetwork {
     networkName: string,
     deployCost: number,
     ttl: number,
-    args: Args
+    args: Args,
+    gasPriceTolerance?: number
   ): Transaction {
     const contractCall = new ContractCallBuilder()
       .byHash(contractHash)
@@ -218,7 +223,7 @@ export class CasperNetwork {
       .chainName(networkName)
       .runtimeArgs(args)
       .ttl(ttl)
-      .payment(deployCost);
+      .payment(deployCost, gasPriceTolerance);
 
     if (this.apiVersion === 2) {
       return contractCall.build();
@@ -235,7 +240,8 @@ export class CasperNetwork {
     deployCost: number,
     args: Args,
     ttl: number,
-    contractVersion?: number
+    contractVersion?: number,
+    gasPriceTolerance?: number
   ): Transaction {
     const contractCall = new ContractCallBuilder()
       .byPackageHash(contractPackageHash, contractVersion)
@@ -244,7 +250,7 @@ export class CasperNetwork {
       .chainName(networkName)
       .runtimeArgs(args)
       .ttl(ttl)
-      .payment(deployCost);
+      .payment(deployCost, gasPriceTolerance);
 
     if (this.apiVersion === 2) {
       return contractCall.build();
@@ -259,12 +265,13 @@ export class CasperNetwork {
     deployCost: number,
     ttl: number,
     bytes: Uint8Array,
-    args: Args
+    args: Args,
+    gasPriceTolerance?: number
   ): Transaction {
     const sessionWasm = new SessionBuilder()
       .from(senderPublicKey)
       .chainName(networkName)
-      .payment(deployCost)
+      .payment(deployCost, gasPriceTolerance)
       .ttl(ttl)
       .wasm(bytes)
       .runtimeArgs(args);

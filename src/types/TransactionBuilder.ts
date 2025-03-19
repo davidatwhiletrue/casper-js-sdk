@@ -101,12 +101,12 @@ abstract class TransactionBuilder<T extends TransactionBuilder<T>> {
   /**
    * Sets the payment amount for the transaction.
    */
-  public payment(paymentAmount: number): T {
+  public payment(paymentAmount: number, gasPriceTolerance = 1): T {
     const pricingMode = new PricingMode();
     const paymentLimited = new PaymentLimitedMode();
     paymentLimited.standardPayment = true;
     paymentLimited.paymentAmount = paymentAmount;
-    paymentLimited.gasPriceTolerance = 1;
+    paymentLimited.gasPriceTolerance = gasPriceTolerance;
 
     pricingMode.paymentLimited = paymentLimited;
     this._pricingMode = pricingMode;
