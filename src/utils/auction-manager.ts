@@ -141,7 +141,6 @@ export const makeAuctionManagerDeploy = ({
 interface IMakeAuctionManagerTransactionParams
   extends IMakeAuctionManagerDeployParams {
   casperNetworkApiVersion: string;
-  gasPrice?: number;
 }
 
 export const makeAuctionManagerTransaction = ({

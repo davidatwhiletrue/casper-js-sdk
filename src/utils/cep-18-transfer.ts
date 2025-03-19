@@ -115,7 +115,6 @@ export const makeCep18TransferDeploy = ({
 interface IMakeCep18TransferTransactionParams
   extends IMakeCep18TransferDeployParams {
   casperNetworkApiVersion: string;
-  gasPrice?: number;
 }
 
 export const makeCep18TransferTransaction = ({

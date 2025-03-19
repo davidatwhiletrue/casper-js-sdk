@@ -115,7 +115,6 @@ export const makeNftTransferDeploy = ({
 interface IMakeNftTransferTransactionParams
   extends IMakeNftTransferDeployParams {
   casperNetworkApiVersion: string;
-  gasPrice?: number;
 }
 
 export const makeNftTransferTransaction = ({

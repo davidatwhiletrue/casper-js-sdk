@@ -21,6 +21,7 @@ export interface IMakeCsprTransferDeployParams {
   ttl?: number;
   timestamp?: string;
   gasPrice?: number;
+  paymentAmount?: string;
 }
 
 /**
@@ -67,7 +68,8 @@ export const makeCsprTransferDeploy = ({
   memo,
   ttl = DEFAULT_DEPLOY_TTL,
   timestamp,
-  gasPrice = 1
+  gasPrice = 1,
+  paymentAmount = '100000000'
 }: IMakeCsprTransferDeployParams) => {
   const recipientKey = PublicKey.newPublicKey(recipientPublicKeyHex);
   const senderKey = PublicKey.newPublicKey(senderPublicKeyHex);
@@ -98,7 +100,6 @@ export const makeCsprTransferDeploy = ({
 interface IMakeCsprTransferTransactionParams
   extends IMakeCsprTransferDeployParams {
   casperNetworkApiVersion: string;
-  gasPrice?: number;
 }
 
 export const makeCsprTransferTransaction = ({
@@ -110,7 +111,8 @@ export const makeCsprTransferTransaction = ({
   ttl = DEFAULT_DEPLOY_TTL,
   timestamp,
   casperNetworkApiVersion,
-  gasPrice = 1
+  gasPrice = 1,
+  paymentAmount = '100000000'
 }: IMakeCsprTransferTransactionParams): Transaction => {
   if (casperNetworkApiVersion.startsWith('2')) {
     let txBuilder = new NativeTransferBuilder()
@@ -118,7 +120,7 @@ export const makeCsprTransferTransaction = ({
       .target(PublicKey.fromHex(recipientPublicKeyHex))
       .amount(transferAmount)
       .chainName(chainName)
-      .payment(100000000, gasPrice)
+      .payment(Number(paymentAmount), gasPrice)
       .ttl(ttl);
 
     if (timestamp) {
