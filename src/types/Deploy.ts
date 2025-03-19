@@ -421,7 +421,7 @@ export class Deploy {
 
     const pricingMode = new PricingMode();
     const paymentLimitedMode = new PaymentLimitedMode();
-    paymentLimitedMode.gasPriceTolerance = 1;
+    paymentLimitedMode.gasPriceTolerance = deploy.header.gasPrice ?? 1;
     paymentLimitedMode.paymentAmount = paymentAmount;
     paymentLimitedMode.standardPayment = standardPayment;
     pricingMode.paymentLimited = paymentLimitedMode;
