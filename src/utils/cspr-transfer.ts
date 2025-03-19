@@ -82,7 +82,7 @@ export const makeCsprTransferDeploy = ({
     memo
   );
 
-  const payment = ExecutableDeployItem.standardPayment('100000000');
+  const payment = ExecutableDeployItem.standardPayment(paymentAmount);
 
   const deployHeader = DeployHeader.default();
   deployHeader.account = senderKey;
