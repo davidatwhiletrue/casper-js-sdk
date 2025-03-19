@@ -26,6 +26,7 @@ export interface IMakeCep18TransferDeployParams {
   chainName?: string;
   ttl?: number;
   timestamp?: string;
+  gasPrice?: number;
 }
 
 /**
@@ -74,7 +75,8 @@ export const makeCep18TransferDeploy = ({
   paymentAmount,
   chainName = CasperNetworkName.Mainnet,
   ttl = DEFAULT_DEPLOY_TTL,
-  timestamp
+  timestamp,
+  gasPrice = 1
 }: IMakeCep18TransferDeployParams): Deploy => {
   const senderPublicKey = PublicKey.newPublicKey(senderPublicKeyHex);
   const recipientPublicKey = PublicKey.newPublicKey(recipientPublicKeyHex);
@@ -101,6 +103,7 @@ export const makeCep18TransferDeploy = ({
   deployHeader.account = senderPublicKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+  deployHeader.gasPrice = gasPrice;
 
   if (timestamp) {
     deployHeader.timestamp = Timestamp.fromJSON(timestamp);
@@ -112,6 +115,7 @@ export const makeCep18TransferDeploy = ({
 interface IMakeCep18TransferTransactionParams
   extends IMakeCep18TransferDeployParams {
   casperNetworkApiVersion: string;
+  gasPrice?: number;
 }
 
 export const makeCep18TransferTransaction = ({
@@ -123,7 +127,8 @@ export const makeCep18TransferTransaction = ({
   chainName = CasperNetworkName.Mainnet,
   ttl = DEFAULT_DEPLOY_TTL,
   timestamp,
-  casperNetworkApiVersion
+  casperNetworkApiVersion,
+  gasPrice = 1
 }: IMakeCep18TransferTransactionParams): Transaction => {
   if (casperNetworkApiVersion.startsWith('2.')) {
     let txBuilder = new ContractCallBuilder()
@@ -131,7 +136,7 @@ export const makeCep18TransferTransaction = ({
       .entryPoint('transfer')
       .from(PublicKey.fromHex(senderPublicKeyHex))
       .chainName(chainName)
-      .payment(Number(paymentAmount))
+      .payment(Number(paymentAmount), gasPrice)
       .ttl(ttl)
       .runtimeArgs(
         Args.fromMap({

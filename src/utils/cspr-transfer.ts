@@ -20,6 +20,7 @@ export interface IMakeCsprTransferDeployParams {
   memo?: string;
   ttl?: number;
   timestamp?: string;
+  gasPrice?: number;
 }
 
 /**
@@ -65,7 +66,8 @@ export const makeCsprTransferDeploy = ({
   chainName = CasperNetworkName.Mainnet,
   memo,
   ttl = DEFAULT_DEPLOY_TTL,
-  timestamp
+  timestamp,
+  gasPrice = 1
 }: IMakeCsprTransferDeployParams) => {
   const recipientKey = PublicKey.newPublicKey(recipientPublicKeyHex);
   const senderKey = PublicKey.newPublicKey(senderPublicKeyHex);
@@ -84,6 +86,7 @@ export const makeCsprTransferDeploy = ({
   deployHeader.account = senderKey;
   deployHeader.chainName = chainName;
   deployHeader.ttl = new Duration(ttl);
+  deployHeader.gasPrice = gasPrice;
 
   if (timestamp) {
     deployHeader.timestamp = Timestamp.fromJSON(timestamp);
@@ -95,6 +98,7 @@ export const makeCsprTransferDeploy = ({
 interface IMakeCsprTransferTransactionParams
   extends IMakeCsprTransferDeployParams {
   casperNetworkApiVersion: string;
+  gasPrice?: number;
 }
 
 export const makeCsprTransferTransaction = ({
@@ -105,7 +109,8 @@ export const makeCsprTransferTransaction = ({
   memo,
   ttl = DEFAULT_DEPLOY_TTL,
   timestamp,
-  casperNetworkApiVersion
+  casperNetworkApiVersion,
+  gasPrice = 1
 }: IMakeCsprTransferTransactionParams): Transaction => {
   if (casperNetworkApiVersion.startsWith('2')) {
     let txBuilder = new NativeTransferBuilder()
@@ -113,7 +118,7 @@ export const makeCsprTransferTransaction = ({
       .target(PublicKey.fromHex(recipientPublicKeyHex))
       .amount(transferAmount)
       .chainName(chainName)
-      .payment(100000000)
+      .payment(100000000, gasPrice)
       .ttl(ttl);
 
     if (timestamp) {
