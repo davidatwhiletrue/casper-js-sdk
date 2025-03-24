@@ -42,6 +42,20 @@ export class UnbondEra {
     serializer: value => value.toJSON()
   })
   bondingPurse: URef;
+
+  /**
+   * The validator public key to re-delegate to.
+   */
+  @jsonMember({
+    name: 'new_validator',
+    constructor: PublicKey,
+    deserializer: json => {
+      if (!json) return;
+      return PublicKey.fromJSON(json);
+    },
+    serializer: value => value.toJSON()
+  })
+  newValidator: PublicKey;
 }
 
 /**
