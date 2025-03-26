@@ -306,26 +306,30 @@ export class PublicKey {
    */
   static fromBytes(source: Uint8Array): IResultWithBytes<PublicKey> {
     const alg = source[0];
-    const keyData = source.slice(1);
     let key: PublicKeyInternal | null = null;
     let expectedPublicKeySize;
 
     switch (alg) {
       case KeyAlgorithm.ED25519:
-        key = new Ed25519PublicKey(keyData);
         expectedPublicKeySize = 32;
+        key = new Ed25519PublicKey(
+          source.subarray(1, expectedPublicKeySize + 1)
+        );
         break;
       case KeyAlgorithm.SECP256K1:
-        key = new Secp256k1PublicKey(keyData);
         expectedPublicKeySize = 33;
+        key = new Secp256k1PublicKey(
+          source.subarray(1, expectedPublicKeySize + 1)
+        );
         break;
       default:
         throw ErrInvalidPublicKeyAlgo;
     }
 
-    const bytes = source.subarray(1, expectedPublicKeySize + 1);
-
-    return { result: new PublicKey(alg, key), bytes };
+    return {
+      result: new PublicKey(alg, key),
+      bytes: source.subarray(expectedPublicKeySize + 1)
+    };
   }
 
   /**
