@@ -13,6 +13,292 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.11-beta2] - 2025-02-24
+
+### Changed
+
+- Updated `cost` / `consumed` for executions result V1 by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/517
+
+### Fixed
+
+- Fixed `toInfoGetTransactionResult` method to parse V1 deploy result by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/518
+- Fixed construction of Uref and EraID for Transaction Session builder by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/516
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.10-beta2...5.0.11-beta2
+
+### [5.0.10-beta2] - 2025-02-20
+
+### Fixed
+
+- Fixed issue with importing of `KeyTypeID`
+- Fixed vulnerability in the elliptic package by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/514
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.9-beta2...5.0.10-beta2
+
+### [5.0.9-beta2] - 2025-02-12
+
+### Added
+
+- `transferId` to `transaction / deploy` builders
+
+### Changed
+
+- For `HttpHandler` added a possibility to set referer header and choose between axios / fetch
+
+### [5.0.8-beta2] - 2025-02-05
+
+### Added
+
+- Parsing of contract entry points between `Casper 1.5`.x and `Casper 2.0`
+- New get auction info v2 method support
+- [Transaction utils](src/utils)
+
+### Fixed
+
+- Seigniorage allocations structure from `Delegator` to `DelegatorKind`
+- Parsing write account for `Transform`
+- `info_get_status` response parsing
+
+### Changed
+
+- Renamed `RpcAddressableEntity` to `AddressableEntity` to improve naming clarity and consistency.
+
+### [5.0.7-beta2] - 2025-01-31
+
+### Fixed
+
+- Un/re-delegate flow with `payment` property
+
+### [5.0.6-beta2] - 2025-01-30
+
+### Added
+
+- Extended `BidAddr`.
+
+### Fixed
+
+- Issue with `BlockTransaction` serialization.
+- Corrected the `rewardedSignatures` type to ensure accuracy.
+
+### Changed
+
+- Moved `newCL` methods into the `CLValue` class for a more streamlined `CLValue` creation process.
+- Added the ability to set a contract hash for the transaction builder, enhancing flexibility.
+- Updated migration guide from v2 to v5 for a smoother transition.
+
+### [5.0.5-beta2] - 2025-01-22
+
+### Added
+
+- `CasperNetwork` abstraction that helps to easily handle Casper 1.5 and 2.0 versions
+
+### Fixed
+
+- Issue with `Conversions.motesToCSPR` and `Conversions.csprToMotes` Update `makeCep18TransferDeploy`
+- Issue with `CLValueMap.fromBytes`
+
+### [5.0.4-beta2] - 2025-01-16
+
+### Added
+
+- Ability to build `Deploy` with `TransactionBuilder` `buildFor1_5` method
+- Update `makeCep18TransferDeploy` to use `contractPackageHash` instead of `contractHash`
+- New auction contract hash for integration-test network, fixed deserialization of CES schema, Update contract package parsing compatible 1.x, added unit tests to cover mentioned bugs / features
+
+### Fixed
+
+- Issue with PEM file creation and parsing
+- Issue with typo in transaction scheduling creation
+- Issue with compatible transforms parsing
+- Issues with `@jsonArrayMember`
+
+### [5.0.3-beta2] - 2024-01-25
+
+### Added
+
+- Transform parsing functions
+- `fromJSON` method for `InfoGetTransactionResultV1Compatible`
+
+### Fixed
+
+- Issue with TransactionEntryPoint deserialization
+
+### [5.0.2-beta2] - 2024-12-24
+
+### Fixed
+
+- CLValueMap deserialization from bytes
+- Deserialization of Deploy from RPC
+
+### [5.0.1-beta2] - 2024-12-24
+
+### Fixed
+
+- `TransactionEntryPoint` serialization in https://github.com/casper-ecosystem/casper-js-sdk/pull/482
+
+### Added
+
+- `parseAsWriteAccount` method / getter for `TransformKind` data, unit tests for different scenarios of parsing `TransformKind` data
+- `RawWriteAccount` class for parsing `WriteAccount` data
+
+### Changed
+
+- `RawWriteCLValue` / `WriteCLValue` values from `Args` to `CLValue`
+
+### [5.0.0-beta2] - 2024-12-23
+
+### Added
+
+- Check for `WriteCLValue` to `TransformKind`, added `executionResultsV1` to `InfoGetDeployResult` by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/481
+
+### Fixed
+
+- `Tuple3` constructor inconsistency, aligned Numerics `CLValue` by value type by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/476
+- Offset is outside the bounds of the `DataView` issue for `TransactionV1` by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/479
+
+### Changed
+
+- Aligned casing for `fromJSON` and `toJSON`, updated type for chain name for utils by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/477
+- Feat sync keys and fixes by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/480
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.0-beta1...5.0.0-beta2
+
+### [5.0.0-beta1] - 2024-12-20
+
+### Added
+
+- Feat utils and fixes by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/464 and https://github.com/casper-ecosystem/casper-js-sdk/pull/467
+- Added `toJSON` method for each `CLValue` representation by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/470
+- Added `transaction` builders by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/473
+
+### Changed
+
+- Updated `TransactionRuntime` / `TransactionTarget` serialization by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/466
+- Updated `MessageTopic` serialization, `MessageAddr` key parsing by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/472
+
+### Fixed
+
+- Transform Raw serialization, removed message topics from `AddressableEntity`, `EntryPointPayment` change by @alexmyshchyshyn in https://github.com/casper-ecosystem/casper-js-sdk/pull/468
+- Map and List `fromBytes` methods by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/469
+- Derializers by @Comp0te in https://github.com/casper-ecosystem/casper-js-sdk/pull/471
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.0-rc8...5.0.0-beta1
+
+## [5.0.0-rc8] - 2024-12-16
+
+### Added
+
+- `makeCep18TransferDeploy` and `makeNftTransferDeploy` utils
+- `PrivateKey.toBytes` method
+- Rename Key's TypeID to KeyTypeID
+- Add initial list values to `CLValueList.newCLList`
+- `Args.getByName` getter
+- Remove unused `Effects` class
+- Improvements for `TransformKind` transformation parsing
+
+### Fixed
+
+- Issue with `ed25519` private key length
+
+## [5.0.0-rc7] - 2024-12-13
+
+### Added
+
+- Checksummed `PublicKey` hex
+- Improvements in `Transaction` creation from JSON
+- Ability to send `Deploy` with the `RPC.putTransaction` method
+- Renamed `StoredValue.prepaid` to `StoredValue.prepayment`
+- Improvements in RPC client error processing
+
+### Fixed
+
+- Issue with implicit `axios` dependency
+- Issue with `secp256k1` bytes
+- Issue with `StepPayload.executionEffects` annotations
+- Issue with `ExecutionResult` parsing from JSON
+
+## [5.0.0-rc6] - 2024-12-08
+
+### Added
+
+- Basic documentation for Casper 2.0
+- **Enhanced `CLValue.newCLOption` Method**:
+  - Automatic resolution of the option type from `inner` when provided.
+  - Optional `clType` parameter when `inner` is present.
+  - Defaults to `CLTypeAny` if `inner` is `null` and `clType` is not specified.
+- **New Method**:
+  - **`ExecutionResult.toJSON(executionResult: ExecutionResult): object`**
+    - Converts an `ExecutionResult` instance to a plain JSON object using the `TypedJSON` serializer.
+
+### Fixed
+
+- Issue with parsing in RPC `getDictionaryItem` method
+
+## [5.0.0-rc5] - 2024-12-01
+
+### Added
+
+- DelegatorKind support fot Bid
+- Calltable serialization for `TransactionV1` - [Reference of changes](https://github.com/casper-network/casper-node/pull/4823)
+- Custom ttl for `makeCsprTransferDeploy` and `makeAuctionManagerDeploy`
+
+### Changed
+
+- `TransactionV1` structure. From now on a TransactionV1 consists of `hash`, `payload` and `approvals`. `payload` is a merge of `header` and `body` concepts from before.
+- Updated documentation
+
+## [5.0.0-rc4] - 2024-11-25
+
+### Added
+
+- `makeCsprTransferDeploy` and `makeAuctionManagerDeploy` utils
+- **README.md**: Introduced a comprehensive README file, including detailed information about the SDK, setup instructions, and usage examples.
+- **Migration Guide**: Added a basic migration guide to assist developers in transitioning to the new SDK version with updated types and RPC.
+- `getDeploySizeInBytes` static method for Deploy
+
+### Removed
+
+- DeployParams class due to deprecation, renamed `fromHeaderAndItems` function to the `makeDeploy` due to consistency with previous methods names
+
+### Changed
+
+- Made `id` optional in TransferDeployItem.newTransfer
+
+## [5.0.0-rc3] - 2024-11-19
+
+### Added
+
+- Deserializer function for InfoGetDeployResultV1Compatible - `fromJSON`
+- Annotate RPC request params
+
+### Fixed
+
+- Args and CLType / CLValue parsers
+- RPC serialization
+- Updated names for RPC response/request
+- Deserializer for Transform class
+- Removed unnecessary object declaration for deploy/transaction during serialization
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.0-rc2...5.0.0-rc3
+
+## [5.0.0-rc1] - 2024-11-12
+
+### Added
+
+- **Caution!** This release contains rewritten classes/CLValue/CLType from scratch, there are some breaking changes so consider it before upgrading.
+
+### Changed
+
+- We’ve entirely rewritten the casper-js-sdk from the ground up to provide a more efficient, flexible, and developer-friendly experience. This major release includes significant changes to the SDK’s architecture, type system, and API methods, introducing new types and RPC capabilities to support the latest Casper blockchain features.
+- Updated Type System:
+
+  - Refined and expanded CLType and CLValue implementations for stronger type-checking and better type safety.
+  - Introduced new types to support complex data structures and improved encoding/decoding of values for compatibility with the latest Casper updates.
+
+- Enhanced RPC Methods:
+  - New RPC methods provide richer interaction capabilities, supporting advanced transactions, streamlined data retrieval, and improved error handling.
+  - Added support for more granular transaction controls, allowing for better customizations of gas fees, transaction targets, and entry points.
+
 ## [2.15.6] - 2024-04-18
 
 ### Fixed
