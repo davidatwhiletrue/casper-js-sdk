@@ -13,6 +13,64 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   ### Removed
  -->
 
+### [5.0.0] - 2025-03-27
+
+This version is identical to `5.0.16-beta2`. Please review the changes in the previous beta releases, and refer to the [Migration guide](https://github.com/make-software/casper-net-sdk/blob/master/Docs/Articles/Casper20MigrationGuide.md) if you’re updating a project from `v2.x`.
+
+### [5.0.16-beta2] - 2025-03-19
+
+### Changed
+
+- Handle message keys contract prefixes in https://github.com/casper-ecosystem/casper-js-sdk/pull/534
+- Update gas price for utils in https://github.com/casper-ecosystem/casper-js-sdk/pull/538
+
+### Added
+
+- Refund and Current Gas Price fields parsing for execution results in https://github.com/casper-ecosystem/casper-js-sdk/pull/533
+- Methods to wait for transaction / deploy in https://github.com/casper-ecosystem/casper-js-sdk/pull/535
+- Provide possibility to specify the gas price tolerance when creating Transactions and Deploys in https://github.com/casper-ecosystem/casper-js-sdk/pull/536
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.15-beta2...5.0.16-beta2
+
+### [5.0.15-beta2] - 2025-03-15
+
+### Fixed
+
+- Issue with parsing Transaction with EraId Key in https://github.com/casper-ecosystem/casper-js-sdk/pull/530
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.14-beta2...5.0.15-beta2
+
+### [5.0.14-beta2] - 2025-03-10
+
+### Fixed
+
+- Issue with parsing deploy in https://github.com/casper-ecosystem/casper-js-sdk/pull/528
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.13-beta2...5.0.14-beta2
+
+### [5.0.13-beta2] - 2025-03-07
+
+### Fixed
+
+- Issue with serialization for ParamBlockIdentifier instance in https://github.com/casper-ecosystem/casper-js-sdk/pull/523
+- Issue with parsing add_reservation Transaction with Any type in https://github.com/casper-ecosystem/casper-js-sdk/pull/526
+
+### Added
+
+- Possibility to export/import `public key` from/in PEM in https://github.com/casper-ecosystem/casper-js-sdk/pull/524
+- `addArgToDeploy` method to be able to modify `Deploy's session` arguments in https://github.com/casper-ecosystem/casper-js-sdk/pull/525
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.12-beta2...5.0.13-beta2
+
+### [5.0.12-beta2] - 2025-02-27
+
+### Fixed
+
+- Parsing clvalues and cltypes in https://github.com/casper-ecosystem/casper-js-sdk/pull/520
+- Rewrite and fix the existing SSE Client implementation in https://github.com/casper-ecosystem/casper-js-sdk/pull/521
+
+**Full Changelog**: https://github.com/casper-ecosystem/casper-js-sdk/compare/5.0.11-beta2...5.0.12-beta2
+
 ### [5.0.11-beta2] - 2025-02-24
 
 ### Changed
