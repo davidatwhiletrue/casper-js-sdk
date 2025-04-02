@@ -245,16 +245,20 @@ export const getRuntimeArgsForCep78Transfer = ({
   });
 
   if (tokenId) {
-    runtimeArgs.insert(
-      'is_hash_identifier_mode',
-      CLValue.newCLValueBool(false)
-    );
-    runtimeArgs.insert('token_id', CLValue.newCLUint64(tokenId));
+    try {
+      runtimeArgs.insert(
+        'is_hash_identifier_mode',
+        CLValue.newCLValueBool(false)
+      );
+      runtimeArgs.insert('token_id', CLValue.newCLUint64(tokenId));
+    } catch {
+      throw new Error('Invalid "tokenId" value. It should be uint64. Consider to use "tokenHash" param')
+    }
   }
 
   if (tokenHash) {
     runtimeArgs.insert('is_hash_identifier_mode', CLValue.newCLValueBool(true));
-    runtimeArgs.insert('token_id', CLValue.newCLUint64(tokenHash));
+    runtimeArgs.insert('token_hash', CLValue.newCLString(tokenHash));
   }
 
   return runtimeArgs;
