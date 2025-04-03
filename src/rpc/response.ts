@@ -8,35 +8,35 @@ import {
 import { IDValue } from './id_value';
 import { RpcError } from './error';
 import {
-  AuctionState,
   Account,
-  EntryPointValue,
+  AddressableEntity,
+  AuctionState,
+  AuctionStateV1,
+  AuctionStateV2,
   Block,
   BlockHeader,
   BlockHeaderV1,
   BlockV1,
   BlockWithSignatures,
-  Transfer,
-  EraSummary,
+  CLValueUInt512,
   Deploy,
   DeployExecutionInfo,
   DeployExecutionResult,
+  EntryPointValue,
+  EraSummary,
   ExecutionInfo,
   ExecutionResult,
+  Hash,
+  InitiatorAddr,
+  MinimalBlockInfo,
+  NamedKey,
+  PublicKey,
+  StoredValue,
+  Timestamp,
   Transaction,
   TransactionHash,
   TransactionWrapper,
-  InitiatorAddr,
-  Timestamp,
-  MinimalBlockInfo,
-  NamedKey,
-  StoredValue,
-  Hash,
-  PublicKey,
-  CLValueUInt512,
-  AuctionStateV1,
-  AuctionStateV2,
-  AddressableEntity
+  Transfer
 } from '../types';
 
 @jsonObject
@@ -256,7 +256,10 @@ export class InfoGetDeployResult {
   executionInfo?: DeployExecutionInfo;
 
   // Legacy execution results V1
-  @jsonArrayMember(DeployExecutionResult, { name: 'execution_results' })
+  @jsonArrayMember(DeployExecutionResult, {
+    name: 'execution_results',
+    preserveNull: true
+  })
   executionResultsV1?: DeployExecutionResult[];
 
   rawJSON: any;
@@ -267,18 +270,23 @@ export class InfoGetDeployResult {
    * otherwise falls back to legacy execution results.
    */
   toInfoGetTransactionResult(): InfoGetTransactionResult {
-    let executionInfo: ExecutionInfo;
+    const isApiV2 = this.apiVersion.startsWith('2.');
+    let executionInfo: ExecutionInfo | undefined;
 
-    if (this.executionInfo) {
+    if (isApiV2 && this.executionInfo) {
       executionInfo = new ExecutionInfo(
         this.executionInfo.blockHash,
         this.executionInfo.blockHeight,
         this.executionInfo.executionResult
       );
-    } else if (this.executionResultsV1 && this.executionResultsV1.length > 0) {
-      executionInfo = ExecutionInfo.fromV1(this.executionResultsV1);
+    } else if (!isApiV2) {
+      const haveExecutionResults =
+        this?.executionResultsV1 && this?.executionResultsV1?.length > 0;
+      executionInfo = haveExecutionResults
+        ? ExecutionInfo.fromV1(this.executionResultsV1!)
+        : undefined;
     } else {
-      throw new Error('Invalid Execution Info');
+      throw new Error('Invalid Transaction');
     }
 
     return new InfoGetTransactionResult(
@@ -304,7 +312,11 @@ export class InfoGetTransactionResult {
   })
   transaction: Transaction;
 
-  @jsonMember({ name: 'execution_info', constructor: ExecutionInfo })
+  @jsonMember({
+    name: 'execution_info',
+    constructor: ExecutionInfo,
+    preserveNull: true
+  })
   executionInfo?: ExecutionInfo;
 
   public rawJSON: any;
@@ -326,11 +338,10 @@ export class InfoGetTransactionResult {
     const temp = serializer.parse(json);
 
     if (temp) {
-      const result = InfoGetTransactionResultV1Compatible.newInfoGetTransactionResultFromV1Compatible(
+      return InfoGetTransactionResultV1Compatible.newInfoGetTransactionResultFromV1Compatible(
         temp,
         json
       );
-      return result;
     }
 
     const transactionResultSerializer = new TypedJSON(InfoGetTransactionResult);

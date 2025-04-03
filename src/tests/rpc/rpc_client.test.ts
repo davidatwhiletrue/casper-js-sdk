@@ -16,7 +16,8 @@ import {
   infoGetTransactionResultV1Json,
   addReservationTransactionJson,
   infoGetDeployJson,
-  transactionWithEraJson
+  transactionWithEraJson,
+  getDeployWithNullExecutionResults
 } from '../data';
 
 describe('RPC Client', () => {
@@ -195,5 +196,20 @@ describe('RPC Client', () => {
         .getByName('key_uref_name')
         ?.key?.toPrefixedString()
     ).to.deep.equal('era-42');
+  });
+
+  it('should correctly parse deploy result with null execution result', () => {
+    const deployResult = new TypedJSON(InfoGetDeployResult).parse(
+      getDeployWithNullExecutionResults.result
+    );
+    const transactionResult = deployResult?.toInfoGetTransactionResult();
+
+    expect(transactionResult).to.be.not.undefined;
+    expect(transactionResult).to.be.not.empty;
+
+    expect(transactionResult?.transaction?.hash.toHex()).to.deep.equal(
+      getDeployWithNullExecutionResults.result.deploy.hash
+    );
+    expect(transactionResult?.executionInfo).to.be.undefined;
   });
 });

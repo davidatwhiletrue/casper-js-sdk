@@ -41,8 +41,6 @@ describe('Key', () => {
     msgKeyStr = `message-${hashAddr}-${topicStr}-${indexStr}`;
     const messageAddr = MessageAddr.fromString(msgKeyStr);
 
-    console.log(messageAddr.messageIndex);
-
     expect(messageAddr.entityAddr.toPrefixedString()).to.equal(hashAddr);
     expect(messageAddr.topicNameHash.toHex()).to.equal(topicStr);
     expect(messageAddr.messageIndex).to.equal(15);
