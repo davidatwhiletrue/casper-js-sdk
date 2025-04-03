@@ -124,7 +124,7 @@ abstract class TransactionBuilder<T extends TransactionBuilder<T>> {
   }
 
   protected _getStandardPayment(): ExecutableDeployItem {
-    if (!this._pricingMode.paymentLimited?.paymentAmount) {
+    if (!this._pricingMode?.paymentLimited?.paymentAmount) {
       throw new Error('PaymentAmount is not specified');
     }
 
@@ -240,7 +240,16 @@ export class NativeTransferBuilder extends TransactionBuilder<
       this._idTransfer
     );
 
-    const payment = ExecutableDeployItem.standardPayment('100000000');
+    let payment: ExecutableDeployItem;
+    try {
+      payment = this._getStandardPayment();
+    } catch (error) {
+      if (error.message === 'PaymentAmount is not specified') {
+        payment = ExecutableDeployItem.standardPayment('100000000'); // Assign default payment value
+      } else {
+        throw error;
+      }
+    }
 
     const deploy = Deploy.makeDeploy(
       this._getDefaultDeployHeader(),
