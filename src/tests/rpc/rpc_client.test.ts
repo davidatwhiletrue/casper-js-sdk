@@ -214,7 +214,7 @@ describe('RPC Client', () => {
     expect(transactionResult?.executionInfo).to.be.undefined;
   });
 
-  it('should correctly parse deploy result with null execution result', () => {
+  it('should correctly parse transaction result with null execution result', () => {
     const transactionResult = InfoGetTransactionResult.fromJSON(
       getTransactionWithNullExecutionResults.result
     );
