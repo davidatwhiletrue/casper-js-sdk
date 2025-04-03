@@ -1,7 +1,7 @@
 import { jsonObject, jsonMember, jsonArrayMember, TypedJSON } from 'typedjson';
 
 import { Hash } from './key';
-import { Deploy } from './Deploy';
+import { Deploy, serializeApprovals } from './Deploy';
 import { Duration, Timestamp } from './Time';
 import { InitiatorAddr } from './InitiatorAddr';
 import { PricingMode } from './PricingMode';
@@ -14,6 +14,8 @@ import { Args } from './Args';
 import { deserializeArgs, serializeArgs } from './SerializationUtils';
 import { byteHash } from './ByteConverters';
 import { TransactionV1Payload } from './TransactionV1Payload';
+import { CalltableSerialization } from './CalltableSerialization';
+import { concat } from '@ethersproject/bytes';
 
 /**
  * Custom error class for handling transaction-related errors.
@@ -178,6 +180,22 @@ export class TransactionV1 {
     }
 
     this.approvals.push(new Approval(keys.publicKey, signature));
+  }
+
+  private static readonly  HASH_FIELD_INDEX = 0;
+  private static readonly  PAYLOAD_FIELD_INDEX = 1;
+  private static readonly  APPROVALS_FIELD_INDEX = 2;
+
+  /**
+   * Converts the TransactionV1 to a byte array for transmission or storage.
+   * @returns A `Uint8Array` representing the TransactionV1 instance in byte format.
+   */
+  public toBytes(): Uint8Array {
+    return new CalltableSerialization()
+      .addField(TransactionV1.HASH_FIELD_INDEX, this.hash.toBytes())
+      .addField(TransactionV1.PAYLOAD_FIELD_INDEX, this.payload.toBytes())
+      .addField(TransactionV1.APPROVALS_FIELD_INDEX, serializeApprovals(this.approvals))
+      .toBytes();
   }
 
   /**
@@ -509,6 +527,26 @@ export class Transaction {
       this.originTransactionV1.approvals.push(approval);
     } else if (this.originDeployV1) {
       this.originDeployV1.approvals.push(approval);
+    } else {
+      throw new Error('Incorrect Transaction instance. Missing origin value');
+    }
+  }
+
+  /**
+   * Converts the Transaction to a byte array for transmission or storage.
+   * @returns A `Uint8Array` representing the Transaction instance in byte format.
+   */
+  public toBytes(): Uint8Array {
+    if(this.originDeployV1) {
+      return concat([
+        Uint8Array.of(0x00),
+        this.originDeployV1.toBytes()
+      ]);
+    } else if(this.originTransactionV1) {
+      return concat([
+        Uint8Array.of(0x01),
+        this.originTransactionV1.toBytes()
+      ]);
     } else {
       throw new Error('Incorrect Transaction instance. Missing origin value');
     }

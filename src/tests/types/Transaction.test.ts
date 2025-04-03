@@ -116,6 +116,9 @@ describe('Test Transaction', () => {
     assert.deepEqual(transaction.approvals[0].signer, sender.publicKey);
     assert.deepEqual(parseInt(transactionPaymentAmount, 10), 25000000000);
     expect(transactionV1.payload.chainName).to.deep.equal('casper-net-1');
+
+    const txBytes = transaction.toBytes();
+    assert.deepEqual(txBytes[0], 0x01);
   });
 
   it('should parse deploy json', async () => {
@@ -195,5 +198,8 @@ describe('Test Transaction', () => {
     expect(tx.hash.toHex()).to.equal(
       '076e77de17de7f262c5531017c214afd664d9702d4b5b771996ae4dcaf9c01f9'
     );
+
+    const txBytes = tx.toBytes();
+    assert.deepEqual(txBytes[0], 0x00);
   });
 });
