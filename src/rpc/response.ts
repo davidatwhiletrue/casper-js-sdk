@@ -270,23 +270,16 @@ export class InfoGetDeployResult {
    * otherwise falls back to legacy execution results.
    */
   toInfoGetTransactionResult(): InfoGetTransactionResult {
-    const isApiV2 = this.apiVersion.startsWith('2.');
-    let executionInfo: ExecutionInfo | undefined;
+    let executionInfo: ExecutionInfo | undefined = undefined;
 
-    if (isApiV2 && this.executionInfo) {
+    if (this.executionInfo) {
       executionInfo = new ExecutionInfo(
         this.executionInfo.blockHash,
         this.executionInfo.blockHeight,
         this.executionInfo.executionResult
       );
-    } else if (!isApiV2) {
-      const haveExecutionResults =
-        this?.executionResultsV1 && this?.executionResultsV1?.length > 0;
-      executionInfo = haveExecutionResults
-        ? ExecutionInfo.fromV1(this.executionResultsV1!)
-        : undefined;
-    } else {
-      throw new Error('Invalid Transaction');
+    } else if (this?.executionResultsV1?.length) {
+      executionInfo = ExecutionInfo.fromV1(this.executionResultsV1)
     }
 
     return new InfoGetTransactionResult(

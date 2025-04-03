@@ -70,10 +70,6 @@
         ]
       }
     },
-    "execution_info": {
-      "block_hash": "795527df3ecc3f803f9bd9fa1d46f10bfee65b603fee0a2017fd08b7b0e9c38a",
-      "block_height": 4753861,
-      "execution_result": null
-    }
+    "execution_info": null
   }
 }
