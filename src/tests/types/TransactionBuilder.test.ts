@@ -32,7 +32,7 @@ describe('Test TransactionBuilder', () => {
       )
       .amount('25000000000')
       .chainName('casper')
-      .payment(100_000_000)
+      .payment(100_500_000)
       .buildFor1_5();
 
     const deploy = makeCsprTransferDeploy({
@@ -44,6 +44,13 @@ describe('Test TransactionBuilder', () => {
       transferAmount: '25000000000'
     });
 
+    expect(
+      tx
+        .getDeploy()
+        ?.payment.getArgs()
+        .getByName('amount')
+        ?.ui512?.toNumber()
+    ).to.be.deep.equal(100_500_000);
     expect(deploy.session.bytes().toString()).to.be.equal(
       tx
         .getDeploy()
